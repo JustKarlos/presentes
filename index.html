@@ -32,7 +32,6 @@ html {
   min-height: 60vh;
   cursor: url('assets/Cursors.png')16 16, auto;
 }
-
 /* Cursor tipo "pointer" para elementos interactivos */
 a, button, [role="button"], input[type="submit"] {
   cursor: url('assets/pointer.png')16 16, pointer;
@@ -61,6 +60,9 @@ header{padding:1.2rem 0 0;display:grid;grid-template-columns:1fr minmax(0,620px)
 .pstage>img{display:block;width:100%;height:auto;filter:drop-shadow(0 8px 8px rgba(0,0,0,.5))}
 .pod{position:absolute;transform:translateX(-50%);width:32%;display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
 /* Ajusta aquí la posición de cada puesto: left = centro horizontal, bottom = altura sobre el bloque */
+.podium{padding-top:10.5rem}
+.pod.p1 :is(.fr-bones,.fr-pumpkin,.fr-twigs){margin-bottom:26px}
+.pod.p2 :is(.fr-bones,.fr-pumpkin,.fr-twigs),.pod.p3 :is(.fr-bones,.fr-pumpkin,.fr-twigs){margin-bottom:20px}
 .p1{left:48%;bottom:95%}.p2{left:20.5%;bottom:78%}.p3{left:77%;bottom:65%}
 .pod .nm{font-family:var(--display);font-weight:700;font-size:1.1rem;line-height:1.15;color:#fff;text-shadow:var(--ol);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:.05rem .55rem;background:rgba(15,8,3,.78);border:2px solid #150a03;border-radius:6px}
 .pod .pts{font-family:var(--display);font-weight:700;font-size:.95rem;color:var(--gold);text-shadow:var(--ol);margin-bottom:.35rem}
@@ -168,38 +170,49 @@ header{padding:1.2rem 0 0;display:grid;grid-template-columns:1fr minmax(0,620px)
 @keyframes toastout{to{transform:translateX(120%);opacity:0}}
 @media (prefers-reduced-motion:reduce){.xpbar i{transition:none}.toast,.toast.out{animation:none}}
 
-/* Cosméticos: marcos de avatar */
-.frame{display:inline-grid;border-radius:50%;flex:none}
+/* Cosméticos: marcos de avatar — sprites pixel-art de assets/frames (cada cuadro de la animación es un fotograma) */
+.frame{display:inline-grid;position:relative;border-radius:50%;flex:none}
 .frame .av{box-shadow:none!important}
-.fr-wood{box-shadow:0 0 0 2px #150a03,0 0 0 5px #8a552a,0 0 0 7px #150a03}
-.fr-moss{box-shadow:0 0 0 2px #150a03,0 0 0 5px #3fd01f,0 0 0 7px #150a03,0 0 10px 7px rgba(63,208,31,.35)}
-.fr-gem{box-shadow:0 0 0 2px #150a03,0 0 0 5px #35d0ff,0 0 0 7px #150a03;animation:gempulse 1.8s steps(6,end) infinite}
-@keyframes gempulse{50%{box-shadow:0 0 0 2px #150a03,0 0 0 5px #9be9ff,0 0 0 7px #150a03,0 0 14px 8px rgba(53,208,255,.55)}}
-.fr-gold{box-shadow:0 0 0 2px #150a03,0 0 0 5px #ffc21a,0 0 0 7px #150a03,0 0 12px 7px rgba(255,194,26,.5);animation:goldshine 2.4s steps(8,end) infinite}
-@keyframes goldshine{50%{box-shadow:0 0 0 2px #150a03,0 0 0 5px #fff1a8,0 0 0 7px #150a03,0 0 16px 9px rgba(255,194,26,.75)}}
-.fr-fire{box-shadow:0 0 0 2px #150a03,0 0 0 5px #ff6a1a,0 0 0 7px #150a03,0 0 14px 8px rgba(255,90,20,.6);animation:fireflick .9s steps(3,end) infinite}
-@keyframes fireflick{33%{box-shadow:0 0 0 2px #150a03,0 0 0 5px #ffb81c,0 0 0 7px #150a03,0 0 18px 10px rgba(255,140,20,.7)}66%{box-shadow:0 0 0 2px #150a03,0 0 0 5px #e0452c,0 0 0 7px #150a03,0 0 12px 7px rgba(224,69,44,.6)}}
-.fr-rainbow{box-shadow:0 0 0 2px #150a03,0 0 0 5px #ff4d4d,0 0 0 7px #150a03;animation:rbframe 3s steps(8,end) infinite}
-@keyframes rbframe{25%{box-shadow:0 0 0 2px #150a03,0 0 0 5px #ffc21a,0 0 0 7px #150a03}50%{box-shadow:0 0 0 2px #150a03,0 0 0 5px #3fd01f,0 0 0 7px #150a03}75%{box-shadow:0 0 0 2px #150a03,0 0 0 5px #35d0ff,0 0 0 7px #150a03}}
+.frame::after{content:"";position:absolute;inset:-20%;pointer-events:none;background:no-repeat 0 0/100% 100%;image-rendering:pixelated}
+.fr-wood::after{background-image:url("assets/frames/wood.png")}
+.fr-moss::after{background-image:url("assets/frames/moss.png");background-size:200% 100%;animation:frm2 1.6s steps(1) infinite}
+.fr-gem::after{background-image:url("assets/frames/gem.png");background-size:400% 100%;animation:frm4 1.6s steps(1) infinite}
+.fr-gold::after{background-image:url("assets/frames/gold.png");background-size:400% 100%;animation:frm4 2s steps(1) infinite}
+.fr-fire::after{inset:-30%;background-image:url("assets/frames/fire.png");background-size:400% 100%;animation:frm4 .64s steps(1) infinite}
+.fr-rainbow::after{background-image:url("assets/frames/rainbow.png");background-size:600% 100%;animation:frm6 1.2s steps(1) infinite}
+/* Edición Halloween: arte propio de 576 px, el hueco para el avatar mide 337 px */
+.fr-bones::after,.fr-pumpkin::after,.fr-twigs::after{inset:-33%}
+.fr-bones::after{background-image:url("assets/frames/bones.png")}
+.fr-pumpkin::after{background-image:url("assets/frames/pumpkin.png")}
+.fr-twigs::after{background-image:url("assets/frames/twigs.png")}
+.frame.sm.fr-bones::after,.frame.sm.fr-pumpkin::after,.frame.sm.fr-twigs::after{image-rendering:auto}
+@keyframes frm2{0%{background-position:0 0}50%{background-position:100% 0}}
+@keyframes frm4{0%{background-position:0 0}25%{background-position:33.3333% 0}50%{background-position:66.6667% 0}75%{background-position:100% 0}}
+@keyframes frm6{0%{background-position:0 0}16.66%{background-position:20% 0}33.33%{background-position:40% 0}50%{background-position:60% 0}66.66%{background-position:80% 0}83.33%{background-position:100% 0}}
 
-/* Cosméticos: efectos de nombre */
-.ne{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
-.ne-neon{color:#eaffe2;text-shadow:0 0 4px #53fc18,0 0 10px #53fc18,0 0 20px #2fb80f;animation:neon 2s ease-in-out infinite}
-@keyframes neon{50%{text-shadow:0 0 2px #53fc18,0 0 6px #53fc18,0 0 12px #2fb80f}}
-.ne-ice{color:#dff6ff;text-shadow:0 0 4px #35d0ff,0 0 12px #35d0ff}
-.ne-gold,.ne-fire,.ne-rainbow{color:transparent;-webkit-background-clip:text;background-clip:text;text-shadow:none;background-size:200% 100%;animation:grad 3s linear infinite;filter:drop-shadow(1px 1px 0 #150a03)}
-.ne-gold{background-image:linear-gradient(90deg,#ffd75a,#fff6c2,#ffb81c,#ffd75a)}
-.ne-fire{background-image:linear-gradient(90deg,#ff3b1a,#ff9a1f,#ffd84a,#ff9a1f,#ff3b1a);animation-duration:1.4s}
-.ne-rainbow{background-image:linear-gradient(90deg,#ff4d4d,#ffc21a,#3fd01f,#35d0ff,#b46bff,#ff4d4d)}
-@keyframes grad{to{background-position:200% 0}}
+/* Cosméticos: efectos de nombre — bandas duras, extrusión de 1 px y destellos por saltos */
+.ne{display:inline-block;max-width:calc(100% + .44em);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom;padding:.16em .22em;margin:-.16em -.22em}
+.ne-ice,.ne-gold,.ne-fire,.ne-rainbow{color:transparent;-webkit-background-clip:text;background-clip:text;text-shadow:none;background-repeat:no-repeat}
+.ne-neon{color:#f2ffee;text-shadow:0 0 1px #fff,0 0 4px #53fc18,0 0 9px #2fb80f,0 0 16px rgba(47,184,15,.65),1px 1px 0 #0a2a05;animation:neon 4s steps(1) infinite}
+@keyframes neon{0%{opacity:1}92%{opacity:.62}93%{opacity:1}96%{opacity:.78}97%{opacity:1}}
+.ne-ice{background-image:linear-gradient(105deg,transparent 0 42%,rgba(255,255,255,.95) 46% 54%,transparent 58% 100%),linear-gradient(180deg,#fff 0 26%,#c4f3ff 26% 52%,#63d9ff 52% 78%,#2a9fd6 78% 100%);background-size:260% 100%,100% 100%;background-position:100% 0,0 0;filter:drop-shadow(1px 1px 0 #0b3550) drop-shadow(0 0 4px rgba(99,217,255,.75));animation:sweep 3.2s steps(14) infinite}
+.ne-gold{background-image:linear-gradient(105deg,transparent 0 42%,rgba(255,255,255,.9) 46% 54%,transparent 58% 100%),linear-gradient(180deg,#fff6c2 0 24%,#ffd84a 24% 50%,#ffb81c 50% 74%,#c98a0b 74% 100%);background-size:260% 100%,100% 100%;background-position:100% 0,0 0;filter:drop-shadow(1px 1px 0 #7a4a05) drop-shadow(2px 2px 0 #3a1b08);animation:sweep 3.6s steps(14) infinite}
+@keyframes sweep{0%{background-position:100% 0,0 0}45%{background-position:0% 0,0 0}100%{background-position:0% 0,0 0}}
+.ne-fire{background-image:linear-gradient(0deg,#c02a0c 0 20%,#ee4a1a 20% 42%,#ff9a1f 42% 62%,#ffe27a 62% 78%,#ff9a1f 78% 90%,#c02a0c 90% 100%);background-size:100% 50%;background-repeat:repeat-y;filter:drop-shadow(1px 1px 0 #3a0a05) drop-shadow(0 0 5px rgba(255,106,26,.7));animation:flames .9s steps(6) infinite}
+@keyframes flames{from{background-position:0 0}to{background-position:0 -100%}}
+.ne-rainbow{background-image:linear-gradient(180deg,rgba(255,255,255,.38) 0 28%,transparent 28% 72%,rgba(0,0,0,.28) 72% 100%),linear-gradient(90deg,#ff4d4d 0 16.66%,#ff9a1f 16.66% 33.33%,#ffd84a 33.33% 50%,#3fd01f 50% 66.66%,#35d0ff 66.66% 83.33%,#b46bff 83.33% 100%);background-size:100% 100%,50% 100%;background-repeat:no-repeat,repeat-x;filter:drop-shadow(1px 1px 0 #150a03) drop-shadow(-1px -1px 0 #150a03);animation:bands 1.2s steps(6) infinite}
+@keyframes bands{from{background-position:0 0,0 0}to{background-position:0 0,100% 0}}
 
-/* Cosméticos: fondos de perfil (también sirven de muestra en la tienda) */
+/* Cosméticos: fondos de perfil — ilustraciones pixel-art de assets/backgrounds (la misma clase sirve de muestra en la tienda) */
 .swatch{width:100%;height:64px;border:2px solid #150a03;border-radius:8px;background:#2b2d2a}
-.pb-jungle{background-image:linear-gradient(rgba(10,30,14,.5),rgba(10,30,14,.75)),repeating-linear-gradient(90deg,#1f4d27 0 6px,#2a6a34 6px 12px);background-clip:padding-box}
-.pb-night{background-image:radial-gradient(circle at 20% 30%,#fff 0 1px,transparent 2px),radial-gradient(circle at 70% 20%,#fff 0 1px,transparent 2px),radial-gradient(circle at 50% 70%,#bfe 0 1px,transparent 2px),linear-gradient(#0b1230,#1a1f4a);background-size:90px 90px,120px 120px,70px 70px,auto;background-clip:padding-box}
-.pb-temple{background-image:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 2px,transparent 2px 28px),repeating-linear-gradient(90deg,rgba(0,0,0,.28) 0 2px,transparent 2px 44px),linear-gradient(#4a5246,#353a33);background-clip:padding-box}
-.pb-lava{background-image:linear-gradient(rgba(20,0,0,.68),rgba(45,8,0,.82)),repeating-radial-gradient(circle at 30% 120%,#ff5a14 0 8px,#b82a0a 8px 18px,#4a0f05 18px 30px);background-clip:padding-box}
-.pb-gems{background-image:linear-gradient(45deg,rgba(53,208,255,.2) 25%,transparent 25%),linear-gradient(-45deg,rgba(255,80,200,.16) 25%,transparent 25%),linear-gradient(#1a1235,#0f0b22);background-size:36px 36px,36px 36px,auto;background-clip:padding-box}
+.pb-jungle{--art:url("assets/backgrounds/jungle.png")}.pb-gems{--art:url("assets/backgrounds/gems.png")}
+.pb-lava{--art:url("assets/backgrounds/lava.png")}.pb-night{--art:url("assets/backgrounds/night.png")}
+.pb-temple{--art:url("assets/backgrounds/temple.png")}.pb-graveyard{--art:url("assets/backgrounds/graveyard.png")}
+.pb-haunted{--art:url("assets/backgrounds/haunted.png");background-color:#d4f1e9}   /* sus zonas transparentes son rayos de luz */
+.pb-pumpkin{--art:url("assets/backgrounds/pumpkin.png")}
+.swatch[class*="pb-"]{background-image:var(--art);background-size:cover;background-position:center 62%;image-rendering:pixelated}
+.card[class*="pb-"] .pair,.card[class*="pb-"] .quest{background:rgba(12,14,12,.58)}
+.card[class*="pb-"]{background-image:linear-gradient(rgba(8,8,10,.2),rgba(8,8,10,.46)),var(--art);background-size:cover;background-position:center top;background-repeat:no-repeat;background-clip:padding-box;image-rendering:pixelated}
 
 /* Tienda */
 .shopbtn{border:12px solid transparent;border-image:url("assets/tab.png") 14 fill/12px stretch;padding:0 .5rem;font-family:var(--display);font-weight:700;font-size:1.1rem;line-height:1.1;color:#fff;text-shadow:var(--ol);white-space:nowrap;filter:drop-shadow(0 4px 4px rgba(0,0,0,.45));image-rendering:pixelated}
@@ -224,12 +237,12 @@ a.btn{display:inline-block;text-decoration:none}
 .cost{font-family:var(--display);font-weight:700;color:var(--gold)}
 .badge-eq{font-size:.7rem;font-weight:800;color:#0f2a08;background:#7fe044;border-radius:5px;padding:0 .4rem}
 @media (max-width:700px){.hright{justify-self:center;order:3}}
-@media (prefers-reduced-motion:reduce){.fr-gem,.fr-gold,.fr-fire,.fr-rainbow,.ne-neon,.ne-gold,.ne-fire,.ne-rainbow{animation:none}}
+@media (prefers-reduced-motion:reduce){.frame::after,.ne-neon,.ne-ice,.ne-gold,.ne-fire,.ne-rainbow{animation:none}}
 .flash{animation:flash 1.6s ease-out}
 @keyframes flash{from{background:rgba(83,252,24,.28)}to{background:transparent}}
 @media (prefers-reduced-motion:reduce){.flash,.live{animation:none}}
 @media (max-width:900px){.layout{grid-template-columns:1fr}.feed{position:static}.stats{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:700px){header{grid-template-columns:1fr;justify-items:center}.status{justify-self:center;order:2}.hspace{display:none}.banner{padding:1.1rem 2.6rem}.banner p{font-size:1rem}.podium{padding-top:8rem}}
+@media (max-width:700px){header{grid-template-columns:1fr;justify-items:center}.status{justify-self:center;order:2}.hspace{display:none}.banner{padding:1.1rem 2.6rem}.banner p{font-size:1rem}.podium{padding-top:9.5rem}}
 @media (max-width:480px){.stat b{font-size:2rem}.p1 .av{width:68px!important;height:68px!important}.p2 .av,.p3 .av{width:52px!important;height:52px!important}.pod{width:36%}.pod .nm{font-size:.9rem;padding:.05rem .35rem}.pod .pts{font-size:.74rem;white-space:nowrap}.panel,.feed,.card{border-width:16px;border-image-width:16px}.stat{border-width:16px;border-image-width:16px}}
 </style>
 </head>
@@ -439,7 +452,7 @@ const frameOf = (u) => cosClass(u.frame_id ?? u.equipped_frame_id);
 const nameFxOf = (u) => cosClass(u.name_id ?? u.equipped_name_effect_id);
 function avatarF(u, size){
   const f = frameOf(u);
-  return f ? `<span class="frame ${f}">${avatar(u, size)}</span>` : avatar(u, size);
+  return f ? `<span class="frame ${f}${size < 60 ? ' sm' : ''}">${avatar(u, size)}</span>` : avatar(u, size);
 }
 const nameHtml = (u) => `<span class="ne ${nameFxOf(u)}">${esc(u.display_name)}</span>`;
 
@@ -682,7 +695,7 @@ const MSG = { insufficient:'No te alcanza la XP.', already_owned:'Ya tienes este
 
 function previewHtml(c){
   const me = wallet || { username:'tu', display_name:'Tu nombre', avatar_url:null };
-  if(c.type === 'frame') return `<span class="frame ${c.css}">${avatar(me, 52)}</span>`;
+  if(c.type === 'frame') return `<span class="frame ${c.css} sm">${avatar(me, 52)}</span>`;
   if(c.type === 'name_effect') return `<span class="ne ${c.css}" style="font-size:1.35rem;font-family:var(--display);font-weight:700">${esc(me.display_name)}</span>`;
   const st2 = c.url ? ` style="background-size:cover;background-image:url('${esc(c.url)}')"` : '';
   return `<div class="swatch ${c.css}"${st2}></div>`;
