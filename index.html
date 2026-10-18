@@ -61,10 +61,10 @@ header{padding:1.2rem 0 0;display:grid;grid-template-columns:1fr minmax(0,620px)
 .pod{position:absolute;transform:translateX(-50%);width:32%;display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
 /* Ajusta aquí la posición de cada puesto: left = centro horizontal, bottom = altura sobre el bloque */
 .podium{padding-top:10.5rem}
-.pod.p1 :is(.fr-bones,.fr-pumpkin,.fr-twigs){margin-bottom:26px}
-.pod.p2 :is(.fr-bones,.fr-pumpkin,.fr-twigs),.pod.p3 :is(.fr-bones,.fr-pumpkin,.fr-twigs){margin-bottom:20px}
+.pod.p1 .frame{margin-bottom:30px}
+.pod.p2 .frame,.pod.p3 .frame{margin-bottom:23px}
 .p1{left:48%;bottom:95%}.p2{left:20.5%;bottom:78%}.p3{left:77%;bottom:65%}
-.pod .nm{font-family:var(--display);font-weight:700;font-size:1.1rem;line-height:1.15;color:#fff;text-shadow:var(--ol);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:.05rem .55rem;background:rgba(15,8,3,.78);border:2px solid #150a03;border-radius:6px}
+.pod .nm{font-family:var(--display);font-weight:700;font-size:1.1rem;line-height:1.15;color:#fff;text-shadow:var(--ol);max-width:100%;white-space:nowrap;overflow:visible;filter:drop-shadow(1px 0 0 #150a03) drop-shadow(-1px 0 0 #150a03) drop-shadow(0 1px 0 #150a03) drop-shadow(0 -1px 0 #150a03) drop-shadow(0 0 3px rgba(0,0,0,.85))}
 .pod .pts{font-family:var(--display);font-weight:700;font-size:.95rem;color:var(--gold);text-shadow:var(--ol);margin-bottom:.35rem}
 .p1 .av{box-shadow:0 0 0 3px #150a03,0 0 0 6px var(--gold),0 0 22px rgba(255,194,26,.5)}
 .p2 .av,.p3 .av{box-shadow:0 0 0 3px #150a03,0 0 0 5px #8a8f86}
@@ -237,13 +237,14 @@ a.btn{display:inline-block;text-decoration:none}
 .cost{font-family:var(--display);font-weight:700;color:var(--gold)}
 .badge-eq{font-size:.7rem;font-weight:800;color:#0f2a08;background:#7fe044;border-radius:5px;padding:0 .4rem}
 @media (max-width:700px){.hright{justify-self:center;order:3}}
-@media (prefers-reduced-motion:reduce){.frame::after,.ne-neon,.ne-ice,.ne-gold,.ne-fire,.ne-rainbow{animation:none}}
+@media (prefers-reduced-motion:reduce){.ne-neon,.ne-ice,.ne-gold,.ne-fire,.ne-rainbow{animation:none}
+.fr-moss::after,.fr-gem::after{animation-duration:3.2s}.fr-gold::after{animation-duration:4s}.fr-fire::after{animation-duration:1.6s}.fr-rainbow::after{animation-duration:3s}}
 .flash{animation:flash 1.6s ease-out}
 @keyframes flash{from{background:rgba(83,252,24,.28)}to{background:transparent}}
 @media (prefers-reduced-motion:reduce){.flash,.live{animation:none}}
 @media (max-width:900px){.layout{grid-template-columns:1fr}.feed{position:static}.stats{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:700px){header{grid-template-columns:1fr;justify-items:center}.status{justify-self:center;order:2}.hspace{display:none}.banner{padding:1.1rem 2.6rem}.banner p{font-size:1rem}.podium{padding-top:9.5rem}}
-@media (max-width:480px){.stat b{font-size:2rem}.p1 .av{width:68px!important;height:68px!important}.p2 .av,.p3 .av{width:52px!important;height:52px!important}.pod{width:36%}.pod .nm{font-size:.9rem;padding:.05rem .35rem}.pod .pts{font-size:.74rem;white-space:nowrap}.panel,.feed,.card{border-width:16px;border-image-width:16px}.stat{border-width:16px;border-image-width:16px}}
+@media (max-width:480px){.stat b{font-size:2rem}.p1 .av{width:68px!important;height:68px!important}.p2 .av,.p3 .av{width:52px!important;height:52px!important}.pod{width:36%}.pod.p1 .frame{margin-bottom:24px}.pod.p2 .frame,.pod.p3 .frame{margin-bottom:18px}.pod .nm{font-size:.9rem}.pod .pts{font-size:.74rem;white-space:nowrap}.panel,.feed,.card{border-width:16px;border-image-width:16px}.stat{border-width:16px;border-image-width:16px}}
 </style>
 </head>
 <body>
