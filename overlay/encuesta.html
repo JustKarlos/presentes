@@ -1,0 +1,87 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Widget: encuesta (!voto)</title>
+<link rel="stylesheet" href="common.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script><script src="common.js"></script>
+<style>
+#hud{position:fixed;width:var(--w,28vw);padding:.8vh 1vw 1.2vh;opacity:0;transition:opacity .5s,transform .6s steps(10,end)}
+#hud.pos-bl{left:2vw;bottom:3vh;transform:translateX(-120%)}#hud.pos-br{right:2vw;bottom:3vh;transform:translateX(120%)}
+#hud.pos-tl{left:2vw;top:3vh;transform:translateX(-120%)}#hud.pos-tr{right:2vw;top:3vh;transform:translateX(120%)}
+#hud.on{opacity:1;transform:none}
+.tag{display:flex;justify-content:space-between;font-size:2.1vh;color:var(--leaf)}
+.tag #st.closed{color:var(--tan)}
+#q{font-size:3.6vh;line-height:1.1;color:#fff;margin:.3vh 0 .8vh;overflow-wrap:anywhere}
+.o{margin:.7vh 0}
+.top{display:flex;justify-content:space-between;gap:1vw;font-size:2.7vh;line-height:1.15}
+.top .l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.top .l i{font-style:normal;color:var(--gold);margin-right:.5vw}
+.top .n{color:var(--gold);white-space:nowrap}
+.bar{height:2.2vh;margin:.3vh 0;background:#161816;border:.3vh solid #150a03;border-radius:.6vh;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(90deg,#7fe044 0 .6vh,#5fc02e .6vh 1.2vh);box-shadow:inset 0 .3vh 0 rgba(255,255,255,.35);transition:width .6s steps(12,end)}
+.o.win .bar i{background:repeating-linear-gradient(90deg,#ffd84a 0 .6vh,#ffb81c .6vh 1.2vh)}
+.o.win .l{color:var(--gold)}
+.avs{display:flex;gap:.3vw;height:3.4vh;overflow:hidden}
+.avs .av{width:3.4vh;height:3.4vh;font-size:1.4vh;margin:0}
+#how{margin-top:.8vh;font-size:2.1vh;color:var(--tan)}#how b{color:var(--gold)}
+@media (prefers-reduced-motion:reduce){#hud{transition:opacity .01s}.bar i{transition:none}}
+</style></head><body>
+<div id="hud" class="panel"><div class="tag"><span>📊 Encuesta</span><span id="st"></span></div><div id="q"></div><div id="opts"></div><div id="how"></div></div>
+<script>
+/* Parámetros: ?pos=bl|br|tl|tr  &w=28 (ancho en vw)  &hold=20 (segundos que queda el resultado final; 0 = hasta la próxima)  &avatars=0 (avatares de votantes por opción, máx. 10)   (no necesita key) */
+const { P, num, esc, db, initials, clockOffset } = OV;
+const hud = document.getElementById('hud'), HOLD = num('hold', 20), AV = Math.max(0, Math.min(10, num('avatars', 0)));
+hud.className = 'panel pos-' + (P.get('pos') || 'bl');
+document.documentElement.style.setProperty('--w', num('w', 28) + 'vw');
+let poll = null, votes = [], off = 0, shownKey = '';
+
+const avHtml = (v) => v.avatar_url && /^https:\/\//.test(v.avatar_url)
+  ? `<img class="av" src="${esc(v.avatar_url)}" alt="" referrerpolicy="no-referrer">` : `<span class="av">${initials(v.display_name)}</span>`;
+
+function visible(){
+  if(!poll) return false;
+  if(poll.status === 'open') return true;
+  if(HOLD <= 0) return true;
+  return poll.closed_at && (Date.now() + off - new Date(poll.closed_at)) < HOLD * 1000;
+}
+function build(){                                          // estructura fija: así las barras se animan en vez de reiniciarse
+  document.getElementById('q').textContent = poll.question;
+  document.getElementById('opts').innerHTML = poll.options.map((l, i) =>
+    `<div class="o" id="o${i}"><div class="top"><span class="l"><i>${i + 1}</i>${esc(l)}</span><span class="n"></span></div><div class="bar"><i></i></div>${AV ? '<div class="avs"></div>' : ''}</div>`).join('');
+}
+function draw(){
+  const show = visible();
+  if(!show){ hud.classList.remove('on'); return; }
+  const key = poll.id + '|' + poll.options.join('\u0001');
+  if(key !== shownKey){ shownKey = key; build(); }
+  const open = poll.status === 'open', total = votes.length;
+  const counts = poll.options.map((_, i) => votes.filter(v => v.option_idx === i).length), max = Math.max(...counts);
+  const st = document.getElementById('st'); st.textContent = open ? 'Votación abierta' : 'Resultado final'; st.className = open ? '' : 'closed';
+  poll.options.forEach((_, i) => {
+    const el = document.getElementById('o' + i), pct = total ? Math.round(counts[i] / total * 100) : 0;
+    el.querySelector('.n').textContent = `${counts[i]} · ${pct}%`;
+    el.querySelector('.bar i').style.width = pct + '%';
+    el.classList.toggle('win', !open && max > 0 && counts[i] === max);
+    if(AV) el.querySelector('.avs').innerHTML = votes.filter(v => v.option_idx === i).slice(-AV).map(avHtml).join('');
+  });
+  document.getElementById('how').innerHTML = open ? `Escribe <b>!voto 1</b> a <b>!voto ${poll.options.length}</b> en el chat · ${total} ${total === 1 ? 'voto' : 'votos'}` : `${total} ${total === 1 ? 'voto' : 'votos'} en total`;
+  hud.classList.add('on');
+}
+async function load(){
+  const { data } = await db.from('polls').select('*').order('id', { ascending: false }).limit(1);
+  poll = data && data[0] || null;
+  if(poll && visible()){
+    const r = await db.from('poll_votes').select('option_idx,display_name,avatar_url,voted_at').eq('poll_id', poll.id).order('voted_at');
+    votes = r.data || [];
+  } else votes = [];
+  draw();
+}
+(async () => {
+  off = await clockOffset();
+  await load();
+  let t; const soon = () => { clearTimeout(t); t = setTimeout(load, 400); };
+  db.channel('poll-widget')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'poll_votes' }, soon)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'polls' }, soon).subscribe();
+  setInterval(load, 15000);
+  setInterval(draw, 1000);                                 // oculta el resultado final cuando se acaba el tiempo
+})();
+</script></body></html>
