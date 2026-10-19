@@ -148,6 +148,3 @@ const CONFIG = {
 | El paso 5 devuelve un error de cuenta | Mostrará los scopes y las respuestas de Kick. Iniciá sesión con la cuenta del streamer y revisá los scopes de la app. |
 | El ranking no se actualiza solo | Verificá que `schema.sql` se ejecutó completo (incluye `alter publication supabase_realtime ...`). Igual hay refresco automático cada 60 s. |
 | No llegan webhooks | Revisá que los webhooks estén activados en la app de Kick y que la URL sea exacta. Kick desuscribe la app tras fallos repetidos: repetí el paso 5. |
-## Licencia
-
-MIT, o la que prefieras. Agregá un archivo `LICENSE` al repo.
