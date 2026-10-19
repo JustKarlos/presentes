@@ -94,6 +94,9 @@ const W={
   C('who','Mostrar "Pedido por…"',true,'',true)]},
  music:{f:'music.html',n:'Música (!sr)',d:'Cola de canciones con tarjeta "Sonando ahora".',key:1,sound:1,p:[
   R('volume','Volumen',0,100,50,1,' %'),S('pos','Posición',POS4,'bl'),R('w','Ancho',15,50,30,1,' vw')]},
+ encuesta:{f:'encuesta.html',n:'Encuesta (!voto)',d:'Encuesta en pantalla con barras en vivo. No necesita clave.',key:0,p:[
+  S('pos','Posición',POS4,'bl'),R('w','Ancho',15,50,28,1,' vw'),R('hold','Resultado final en pantalla',0,120,20,1,' s','0 = se queda hasta la próxima encuesta.'),
+  R('avatars','Avatares de votantes por opción',0,10,0,1,'','0 = no mostrar.')]},
 };
 const $=id=>document.getElementById(id);
 let cur=localStorage.getItem('ajustesTab')||'chat'; if(!W[cur]&&cur!=='cmd')cur='chat';
