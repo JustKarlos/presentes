@@ -1,0 +1,162 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Encuestas</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<style>
+:root{--cream:#f3e7c4;--tan:#cdb98a;--gold:#ffc21a;--leaf:#53fc18;--rim:#50564f;--display:"Barlow Condensed",sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:#0d2013;color:var(--cream);font-family:Nunito,system-ui,sans-serif;font-weight:600;line-height:1.5;padding:1.2rem}
+main{max-width:900px;margin:0 auto}
+h1{font-family:var(--display);font-size:2.4rem;color:var(--gold);margin:0}
+.lead{color:var(--tan);margin:0 0 1rem}
+input,select,textarea{width:100%;padding:.5rem .7rem;border-radius:8px;border:2px solid var(--rim);background:#1a1c1a;color:var(--cream);font:inherit}
+button{font:inherit;cursor:pointer}
+.btn{padding:.4rem .9rem;border-radius:8px;border:2px solid #1d4a0f;background:linear-gradient(#7fe044,#3f9a1d);color:#0f2a08;font-weight:800;white-space:nowrap}
+.btn.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}
+.btn.bad{background:transparent;color:#ffb4a8;border-color:#7a3a30}
+.card{background:#262826;border:2px solid var(--rim);border-radius:12px;padding:1rem;margin-bottom:1rem}
+.card h2{font-family:var(--display);font-size:1.6rem;margin:0 0 .5rem;color:#fff}
+.row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.opt{display:flex;gap:.4rem;margin:.35rem 0}.opt b{font-family:var(--display);width:1.6rem;align-self:center;color:var(--gold);font-size:1.2rem}
+label.chk{display:flex;gap:.5rem;align-items:center;margin:.6rem 0;font-weight:800;cursor:pointer}label.chk input{width:auto;accent-color:#53fc18;transform:scale(1.3)}
+.msg{min-height:1.3rem;font-weight:800;margin-top:.5rem}.msg.ok{color:var(--leaf)}.msg.bad{color:#ffb4a8}
+.badge{font-family:var(--display);font-weight:700;padding:0 .6rem;border-radius:6px;border:2px solid #150a03;font-size:1rem}
+.badge.open{background:#7fe044;color:#0f2a08}.badge.closed{background:#3a2413;color:var(--tan)}
+.q{font-family:var(--display);font-size:2rem;line-height:1.1;color:#fff;margin:.3rem 0}
+.how{color:var(--tan);font-size:.92rem}.how code{color:var(--gold)}
+.o{margin:.9rem 0}
+.otop{display:flex;justify-content:space-between;gap:.6rem;font-weight:800}
+.otop span:last-child{font-family:var(--display);font-size:1.2rem;color:var(--gold);white-space:nowrap}
+.bar{height:22px;border:3px solid #150a03;border-radius:6px;background:#161816;overflow:hidden;margin:.25rem 0}
+.bar i{display:block;height:100%;background:repeating-linear-gradient(90deg,#7fe044 0 8px,#5fc02e 8px 16px);box-shadow:inset 0 3px 0 rgba(255,255,255,.3);transition:width .6s}
+.o.lead .bar i{background:repeating-linear-gradient(90deg,#ffd84a 0 8px,#ffb81c 8px 16px)}
+.voters{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.3rem}
+.v{display:inline-flex;align-items:center;gap:.35rem;padding:.1rem .6rem .1rem .15rem;border:2px solid var(--rim);border-radius:999px;background:#1a1c1a;font-size:.85rem}
+.v.hit{border-color:var(--leaf)}
+.av{width:22px;height:22px;border-radius:50%;object-fit:cover;display:inline-grid;place-items:center;font-size:.6rem;font-weight:800;background:#3a2413;flex:none}
+.none{color:#9a9a8a;font-size:.85rem}
+.empty{padding:1.5rem;text-align:center;color:var(--tan)}
+</style></head><body><main>
+<h1>Encuestas</h1>
+<p class="lead">El chat vota con <b>!voto &lt;número&gt;</b> y acá se ve en vivo cuánto tiene cada opción y quién votó.</p>
+
+<section class="card" id="admin" hidden>
+  <h2>Nueva encuesta</h2>
+  <input id="nq" maxlength="200" placeholder="Pregunta (por ejemplo: ¿Qué jugamos hoy?)">
+  <div id="nopts"></div>
+  <div class="row"><button class="btn ghost" id="addOpt">+ Opción</button></div>
+  <label class="chk"><input type="checkbox" id="nchg" checked>Permitir cambiar el voto</label>
+  <div class="row"><button class="btn" id="create">Crear y abrir</button><span class="how">Al crear una nueva se cierra la que esté abierta.</span></div>
+  <div class="msg" id="amsg" role="status"></div>
+</section>
+
+<section class="card">
+  <div class="row" style="margin-bottom:.6rem">
+    <select id="sel" style="flex:1;min-width:200px" aria-label="Elegir encuesta"></select>
+    <input id="find" type="search" placeholder="Buscar votante…" style="flex:1;min-width:160px" autocomplete="off">
+  </div>
+  <div id="res"></div>
+</section>
+
+<section class="card">
+  <label class="chk" style="margin:0">Clave de widgets (solo para crear y cerrar encuestas)</label>
+  <input id="key" placeholder="OVERLAY_KEY" autocomplete="off" style="margin-top:.3rem">
+  <p class="how" style="margin:.4rem 0 0">Ver resultados y votantes no necesita clave.</p>
+</section>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const C=window.OVERLAY_CONFIG||{};
+const db=supabase.createClient(C.SUPABASE_URL,C.SUPABASE_ANON_KEY);
+const FN=C.SUPABASE_URL+'/functions/v1/kick-webhook/overlay/poll';
+let polls=[],sel=null,votes=[],q='';
+$('key').value=localStorage.getItem('overlayKey')||'';
+const hasKey=()=>!!$('key').value.trim();
+
+/* ---------- administración ---------- */
+const amsg=(t,ok)=>{$('amsg').textContent=t;$('amsg').className='msg '+(ok?'ok':'bad')};
+async function admin(body){
+  try{
+    const r=await fetch(FN,{method:'POST',headers:{'x-overlay-key':$('key').value.trim(),'content-type':'application/json'},body:JSON.stringify(body)});
+    const j=await r.json().catch(()=>({}));
+    if(r.status===403){amsg('La clave no coincide con OVERLAY_KEY.',false);return null}
+    if(!j.ok){amsg(j.reason==='invalid'?'Revisa la pregunta y que haya al menos 2 opciones.':'No se pudo. ¿Subiste la función nueva y ejecutaste polls.sql?',false);return null}
+    return j;
+  }catch{amsg('No pude conectar con el servidor.',false);return null}
+}
+function optInputs(vals){
+  $('nopts').innerHTML=vals.map((v,i)=>`<div class="opt"><b>${i+1}</b><input class="oi" maxlength="80" value="${esc(v)}" placeholder="Opción ${i+1}">${vals.length>2?`<button class="btn ghost" data-rm="${i}" aria-label="Quitar">✕</button>`:''}</div>`).join('');
+  $('addOpt').hidden=vals.length>=8;
+}
+const curOpts=()=>[...document.querySelectorAll('.oi')].map(i=>i.value);
+$('addOpt').onclick=()=>optInputs([...curOpts(),'']);
+$('nopts').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(!b)return;const v=curOpts();v.splice(Number(b.dataset.rm),1);optInputs(v)});
+$('create').onclick=async()=>{
+  const j=await admin({action:'create',question:$('nq').value,options:curOpts(),allow_change:$('nchg').checked});
+  if(!j)return;
+  $('nq').value='';optInputs(['','']);amsg('¡Encuesta abierta! El chat ya puede votar con !voto.',true);
+  sel=j.id;await loadPolls();
+};
+async function pollAct(action){
+  if(action==='delete'&&!confirm('¿Eliminar esta encuesta y todos sus votos?'))return;
+  const j=await admin({action,id:sel});if(!j)return;
+  if(action==='delete')sel=null;
+  await loadPolls();
+}
+function showAdmin(){$('admin').hidden=!hasKey();render()}
+$('key').addEventListener('input',()=>{localStorage.setItem('overlayKey',$('key').value.trim());showAdmin()});
+
+/* ---------- datos ---------- */
+async function loadPolls(){
+  const{data,error}=await db.from('polls').select('*').order('id',{ascending:false}).limit(50);
+  if(error){console.error(error);$('res').innerHTML='<p class="empty">No se pudieron cargar las encuestas. ¿Ejecutaste polls.sql?</p>';return}
+  polls=data;
+  if(!polls.some(p=>p.id===sel))sel=(polls.find(p=>p.status==='open')||polls[0]||{}).id??null;
+  $('sel').innerHTML=polls.map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${p.status==='open'?'● ':''}${esc(p.question)}</option>`).join('')||'<option>Sin encuestas</option>';
+  await loadVotes();
+}
+async function loadVotes(){
+  if(sel===null){votes=[];return render()}
+  const{data,error}=await db.from('poll_votes').select('*').eq('poll_id',sel).order('voted_at');
+  if(error)console.error(error);
+  votes=data||[];render();
+}
+$('sel').onchange=()=>{sel=Number($('sel').value);loadVotes()};
+$('find').addEventListener('input',()=>{q=$('find').value.trim().toLowerCase();render()});
+
+/* ---------- vista ---------- */
+const ini=v=>esc((v.display_name||v.username).slice(0,2).toUpperCase());
+const avatar=v=>v.avatar_url&&/^https:\/\//.test(v.avatar_url)
+  ?`<img class="av" src="${esc(v.avatar_url)}" alt="" loading="lazy" referrerpolicy="no-referrer" data-i="${ini(v)}">`:`<span class="av">${ini(v)}</span>`;
+document.addEventListener('error',e=>{const t=e.target;if(t.tagName==='IMG'&&t.classList.contains('av')){const s=document.createElement('span');s.className='av';s.textContent=t.dataset.i;t.replaceWith(s)}},true);
+const hora=iso=>new Date(iso).toLocaleString('es-AR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+
+function render(){
+  const p=polls.find(x=>x.id===sel);
+  if(!p){$('res').innerHTML='<p class="empty">Todavía no hay encuestas.</p>';return}
+  const n=p.options.length,counts=p.options.map((_,i)=>votes.filter(v=>v.option_idx===i).length),total=votes.length,max=Math.max(...counts);
+  const open=p.status==='open';
+  const ctl=hasKey()?`<div class="row" style="margin-top:.8rem">${open?'<button class="btn ghost" data-a="close">Cerrar votación</button>':'<button class="btn ghost" data-a="reopen">Reabrir</button>'}<button class="btn bad" data-a="delete">Eliminar</button></div>`:'';
+  $('res').innerHTML=`<div class="row"><span class="badge ${p.status}">${open?'Abierta':'Cerrada'}</span><span class="how">${total} ${total===1?'voto':'votos'}${p.allow_change?' · se puede cambiar el voto':''}</span></div>
+  <div class="q">${esc(p.question)}</div>
+  ${open?`<p class="how">Escribe <code>!voto 1</code> a <code>!voto ${n}</code> en el chat.</p>`:''}`+
+  p.options.map((label,i)=>{
+    const c=counts[i],pct=total?Math.round(c/total*100):0;
+    const vs=votes.filter(v=>v.option_idx===i&&(!q||v.username.includes(q)||v.display_name.toLowerCase().includes(q)));
+    return `<div class="o ${max>0&&c===max?'lead':''}"><div class="otop"><span>${i+1}. ${esc(label)}</span><span>${c} · ${pct}%</span></div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="voters">${vs.map(v=>`<span class="v ${q?'hit':''}" title="${esc(hora(v.updated_at))}">${avatar(v)}${esc(v.display_name)}</span>`).join('')||`<span class="none">${q?'Nadie coincide.':'Nadie todavía.'}</span>`}</div></div>`;
+  }).join('')+ctl;
+}
+$('res').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b)pollAct(b.dataset.a)});
+
+/* ---------- tiempo real ---------- */
+let t;const soon=()=>{clearTimeout(t);t=setTimeout(()=>{loadPolls()},400)};
+db.channel('polls-live')
+  .on('postgres_changes',{event:'*',schema:'public',table:'poll_votes'},soon)
+  .on('postgres_changes',{event:'*',schema:'public',table:'polls'},soon).subscribe();
+setInterval(loadPolls,20000);
+optInputs(['','']);showAdmin();loadPolls();
+</script></main></body></html>
