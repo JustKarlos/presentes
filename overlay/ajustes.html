@@ -38,6 +38,12 @@ button{font:inherit;cursor:pointer}
 .pv .ph{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:1rem;color:var(--tan)}
 .warn{color:#ffb4a8;font-size:.85rem;margin:.5rem 0 0}
 @media (max-width:820px){.grid{grid-template-columns:1fr}}
+.roles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.3rem .8rem;margin-top:.3rem}
+.roles label{display:flex;align-items:center;gap:.5rem;font-weight:700;cursor:pointer}
+.roles input{width:auto;accent-color:#53fc18}
+.f textarea{width:100%;padding:.5rem .7rem;border-radius:8px;border:2px solid var(--rim);background:#1a1c1a;color:var(--cream);font:inherit;min-height:60px}
+.msg{min-height:1.3rem;font-weight:800;margin-top:.6rem}.msg.ok{color:var(--leaf)}.msg.bad{color:#ffb4a8}
+.sec{font-family:var(--display);font-size:1.3rem;color:var(--gold);margin:1.2rem 0 0;border-bottom:1px solid var(--rim)}
 </style></head><body><main>
 <h1>Ajustes de widgets</h1>
 <p class="lead">Mueve los controles, copia la URL y pégala como <b>Fuente de navegador</b> en OBS (1920×1080). Tus ajustes quedan guardados en este navegador.</p>
@@ -46,7 +52,8 @@ button{font:inherit;cursor:pointer}
 <input id="key" placeholder="una-clave-larga-y-secreta" autocomplete="off"></div>
 
 <div class="tabs" id="tabs"></div>
-<div class="grid">
+<section class="card" id="cmd" hidden style="max-width:720px"><h2>Comandos del chat</h2><p>Estos ajustes se guardan en el servidor y se aplican en unos segundos, sin tocar los Secrets. Los comandos son <b>!video</b>, <b>!sr</b>, <b>!skip</b>, <b>!timer</b> y <b>!presente</b>.</p><div id="cmdForm"></div><div class="acts"><button class="btn" id="cmdSave">Guardar cambios</button><button class="btn ghost" id="cmdReset">Volver a los valores por defecto</button></div><div class="msg" id="cmdMsg" role="status"></div></section>
+<div class="grid" id="mainGrid">
   <section class="card"><h2 id="wt"></h2><p id="wd"></p><div id="form"></div>
     <div class="acts"><button class="btn ghost" id="reset">Restablecer valores</button></div></section>
   <section class="card"><h2>URL para OBS</h2>
@@ -58,6 +65,7 @@ button{font:inherit;cursor:pointer}
   </section>
 </div>
 
+<script src="config.js"></script>
 <script>
 const POS4=[['bl','Abajo izquierda'],['br','Abajo derecha'],['tl','Arriba izquierda'],['tr','Arriba derecha']];
 const R=(k,l,min,max,d,step=1,u='',h='')=>({k,l,t:'range',min,max,d,step,u,h});
@@ -88,13 +96,13 @@ const W={
   R('volume','Volumen',0,100,50,1,' %'),S('pos','Posición',POS4,'bl'),R('w','Ancho',15,50,30,1,' vw')]},
 };
 const $=id=>document.getElementById(id);
-let cur=localStorage.getItem('ajustesTab')||'chat'; if(!W[cur])cur='chat';
+let cur=localStorage.getItem('ajustesTab')||'chat'; if(!W[cur]&&cur!=='cmd')cur='chat';
 const load=id=>{try{return JSON.parse(localStorage.getItem('ajustes_'+id)||'{}')}catch{return{}}};
 const save=(id,v)=>localStorage.setItem('ajustes_'+id,JSON.stringify(v));
 let vals={};
 $('key').value=localStorage.getItem('overlayKey')||'';
 
-function tabs(){$('tabs').innerHTML=Object.entries(W).map(([id,w])=>`<button class="tab ${id===cur?'on':''}" data-id="${id}">${w.n.replace(/ \(.*/,'')}</button>`).join('')}
+function tabs(){$('tabs').innerHTML=Object.entries(W).map(([id,w])=>`<button class="tab ${id===cur?'on':''}" data-id="${id}">${w.n.replace(/ \(.*/,'')}</button>`).join('')+`<button class="tab ${cur==='cmd'?'on':''}" data-id="cmd">Comandos</button>`}
 function form(){
   const w=W[cur];vals={...Object.fromEntries(w.p.map(p=>[p.k,p.d])),...load(cur)};
   $('wt').textContent=w.n;$('wd').textContent=w.d;
@@ -130,7 +138,7 @@ function preview(force){
   $('pvnote').textContent=cur==='chat'||cur==='emotes'?'Escribe en el chat de Kick para ver mensajes y emotes aquí.':'';
 }
 addEventListener('resize',fit);
-$('tabs').onclick=e=>{const b=e.target.closest('.tab');if(!b)return;cur=b.dataset.id;localStorage.setItem('ajustesTab',cur);tabs();form()};
+$('tabs').onclick=e=>{const b=e.target.closest('.tab');if(!b)return;cur=b.dataset.id;localStorage.setItem('ajustesTab',cur);show()};
 $('form').addEventListener('input',e=>{
   const el=e.target,k=el.dataset.k;if(!k)return;const p=W[cur].p.find(x=>x.k===k);
   vals[k]=p.t==='check'?el.checked:p.t==='range'?Number(el.value):el.value;
@@ -141,5 +149,58 @@ $('key').addEventListener('input',()=>{localStorage.setItem('overlayKey',$('key'
 $('reset').onclick=()=>{localStorage.removeItem('ajustes_'+cur);form()};
 $('reload').onclick=()=>preview(true);
 $('copy').onclick=()=>{$('url').select();navigator.clipboard.writeText($('url').value).then(()=>{$('copy').textContent='¡Copiado!';setTimeout(()=>$('copy').textContent='Copiar',1200)})};
-tabs();form();
+
+/* ---------- ajustes de comandos (se guardan en el servidor) ---------- */
+const ROLES=[['everyone','Todos'],['broadcaster','Streamer'],['moderator','Moderadores'],['vip','VIP'],['subscriber','Suscriptores'],['og','OG'],['founder','Fundadores'],['verified','Verificados']];
+const CMD=[
+ ['!video',[['VIDEO_ROLES','roles','Quién puede pedir videos'],['MAX_QUEUE','int','Máximo de elementos en cada cola',1,50,'Aplica a !video y !sr.'],['MAX_PER_USER','int','Pedidos por persona en la cola',1,20,'Los moderadores no tienen límite.']]],
+ ['!sr',[['SR_ROLES','roles','Quién puede pedir canciones']]],
+ ['!timer y !presente',[['TIMER_PRESENTE_SEC','int','Segundos que suma cada !presente al temporizador',0,3600,'0 = no suma nada.'],['MOD_USERS','list','Moderadores extra (para !timer y !skip)','','','Usuarios separados por coma. Útil si Kick no envía la insignia.']]],
+ ['Respuestas del bot',[['CHAT_REPLIES','bool','El bot escribe en el chat'],['REPLY_ON_COOLDOWN','bool','Avisar cuánto falta si repiten !presente antes de tiempo'],['ANNOUNCE_XP','bool','Anunciar subidas de nivel y XP'],['IGNORED_USERS','list','Cuentas a ignorar (bots)','','','Usuarios separados por coma.']]],
+];
+const FNU=(window.OVERLAY_CONFIG||{}).SUPABASE_URL+'/functions/v1/kick-webhook/overlay/settings';
+let cmdVals={};
+const say=(t,ok)=>{const m=$('cmdMsg');m.textContent=t;m.className='msg '+(ok?'ok':'bad')};
+async function cmdApi(body){
+  const key=$('key').value.trim();
+  if(!key){say('Escribe tu clave de widgets arriba.',false);return null}
+  try{
+    const r=await fetch(FNU,{method:body?'POST':'GET',headers:{'x-overlay-key':key,...(body?{'content-type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
+    const j=await r.json().catch(()=>({}));
+    if(r.status===403){say('La clave no coincide con OVERLAY_KEY.',false);return null}
+    if(!j.ok){say(j.reason==='invalid_value'?'Valor no válido en '+j.key+'.':'No se pudo conectar. ¿Subiste la función nueva y ejecutaste settings.sql?',false);return null}
+    return j.settings;
+  }catch{say('No pude conectar con el servidor.',false);return null}
+}
+function drawCmd(){
+  $('cmdForm').innerHTML=CMD.map(([h,fs])=>`<div class="sec">${h}</div>`+fs.map(([k,t,l,min,max,hint])=>{
+    const v=cmdVals[k]?.value??'',help=hint?`<small>${hint}</small>`:'';
+    if(t==='roles'){const on=v.split(',');return `<div class="f"><div class="top"><span>${l}</span></div><div class="roles" data-k="${k}" data-t="roles">${ROLES.map(r=>`<label><input type="checkbox" value="${r[0]}" ${on.includes(r[0])?'checked':''}>${r[1]}</label>`).join('')}</div></div>`}
+    if(t==='bool')return `<div class="f chk"><label><input type="checkbox" data-k="${k}" data-t="bool" ${v==='true'?'checked':''}>${l}</label></div>`;
+    if(t==='int')return `<div class="f"><div class="top"><span>${l}</span><output>${v}</output></div><input type="range" data-k="${k}" data-t="int" min="${min}" max="${max}" value="${v||min}">${help}</div>`;
+    return `<div class="f"><div class="top"><span>${l}</span></div><textarea data-k="${k}" data-t="list" placeholder="usuario1, usuario2">${v.replace(/,/g,', ')}</textarea>${help}</div>`;
+  }).join('')).join('');
+}
+async function loadCmd(){say('Cargando…',true);const s=await cmdApi();if(s){cmdVals=s;drawCmd();say('',true)}else drawCmd()}
+$('cmdForm').addEventListener('input',e=>{if(e.target.type==='range'){e.target.previousElementSibling.querySelector('output').textContent=e.target.value}});
+$('cmdSave').onclick=async()=>{
+  const values={};
+  $('cmdForm').querySelectorAll('[data-k]').forEach(el=>{
+    const k=el.dataset.k,t=el.dataset.t;
+    values[k]=t==='roles'?[...el.querySelectorAll('input:checked')].map(i=>i.value).join(','):t==='bool'?String(el.checked):el.value;
+  });
+  for(const k of ['VIDEO_ROLES','SR_ROLES'])if(!values[k]){say('Elige al menos un grupo en los permisos.',false);return}
+  const s=await cmdApi({values});if(s){cmdVals=s;say('¡Guardado! Se aplica en unos segundos.',true)}
+};
+$('cmdReset').onclick=async()=>{
+  if(!confirm('¿Volver todos los ajustes de comandos a sus valores por defecto?'))return;
+  const values=Object.fromEntries(CMD.flatMap(g=>g[1]).map(f=>[f[0],null]));
+  const s=await cmdApi({values});if(s){cmdVals=s;drawCmd();say('Valores por defecto restaurados.',true)}
+};
+function show(){
+  tabs();const c=cur==='cmd';
+  $('cmd').hidden=!c;$('mainGrid').hidden=c;
+  if(c)loadCmd();else form();
+}
+show();
 </script></main></body></html>
