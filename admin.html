@@ -25,11 +25,13 @@ button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}but
 .bar button{padding:.15rem .6rem;font-size:.8rem}.tools{display:flex;gap:.5rem;margin-bottom:.6rem}.tools>*{flex:1}
 #toast{position:fixed;right:1rem;bottom:1rem;background:#2b2d2a;border:2px solid var(--gold);border-radius:10px;padding:.6rem 1rem;display:none;max-width:90vw;z-index:9}
 </style></head><body><main>
-<script>const CFG = {SUPABASE_URL: "https://nlgkpoomhgehuabrkwhp.supabase.co"};</script>
+<script>const CFG = {SUPABASE_URL: "https://nlgkpoomhgehuabrkwhp.supabase.co",
+  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sZ2twb29taGdlaHVhYnJrd2hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE3NjE3NzAsImV4cCI6MjEwNzMzNzc3MH0.DM1cUzclLbu8ej8m7PAQEja6X20gBadNiuqMEzbk-_g"};   // clave pública (la misma de index.html)</script>
 <h1>Admin · Cosméticos</h1>
 <section id="login" class="panel" style="max-width:420px">
   <label>Clave de admin (el secret <code>ADMIN_KEY</code>)<input id="key" type="password" autocomplete="off"></label>
   <button id="go">Entrar</button> <span id="lm" style="color:#ff8a6a"></span>
+  <p style="margin-top:.7rem;font-size:.8rem;color:var(--tan)">¿No conecta? Abrí <a id="tl" target="_blank" rel="noopener" style="color:var(--gold)">este enlace</a>: si todo está bien verás <code>{"ok":false,"reason":"unauthorized"}</code>.</p>
 </section>
 <section id="app" hidden>
   <div class="drop" id="bulk">Arrastrá varias imágenes acá para crear borradores rápido (cuadradas = marcos, el resto = fondos). Quedan desactivadas para que las revises.</div>
@@ -61,11 +63,16 @@ const slug = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCa
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(t) { const e = $('toast'); e.textContent = t; e.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => e.style.display = 'none', 4500); }
 async function api(p, o = {}) {
-  try { const r = await fetch(FN + p, {method: o.json || o.body ? 'POST' : 'GET', headers: {'x-admin-key': KEY, ...(o.json ? {'content-type': 'application/json'} : {})}, body: o.json ? JSON.stringify(o.json) : o.body});
-    return await r.json(); } catch { return {ok: false, reason: 'No pude conectar con la función admin-cosmetics'}; }
+  try { const r = await fetch(FN + p, {method: o.json || o.body ? 'POST' : 'GET', headers: {'x-admin-key': KEY, apikey: CFG.SUPABASE_ANON_KEY, ...(o.json ? {'content-type': 'application/json'} : {})}, body: o.json ? JSON.stringify(o.json) : o.body});
+    return await r.json(); } catch { return {ok: false, reason: await diag()}; }
+}
+async function diag() {   // distingue "no hay nadie" de "respondió pero el navegador la bloqueó (CORS)"
+  try { await fetch(FN + '/ping', {mode: 'no-cors'}); return 'La función respondió, pero sin permiso CORS. Casi seguro está desplegada con "Verify JWT" activado, o no existe con el nombre exacto admin-cosmetics.'; }
+  catch { return 'No hay respuesta de ' + FN + ' . Revisá tu conexión y que la función esté desplegada.'; }
 }
 async function enter() {
-  KEY = $('key').value.trim() || KEY; const r = await api('/ping');
+  KEY = $('key').value.trim() || KEY; if (!KEY) { $('lm').textContent = 'Escribí tu ADMIN_KEY'; return; }
+  $('lm').textContent = 'Conectando…'; const r = await api('/ping');
   if (!r.ok) { $('lm').textContent = r.reason === 'unauthorized' ? 'Clave incorrecta' : (r.reason || 'Error'); return; }
   localStorage.setItem('adminKey', KEY); $('login').hidden = true; $('app').hidden = false; load();
 }
@@ -126,5 +133,6 @@ async function doBulk(files) {
   }
   toast(`${n} objeto(s) creados como borrador (desactivados)`); load();
 }
+$('tl').href = FN + '/ping';
 if (KEY) { $('key').value = KEY; enter(); }
 </script></main></body></html>
