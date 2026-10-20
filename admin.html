@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Admin · Tienda</title>
+<style>
+:root{--cream:#f3e7c4;--gold:#ffc21a;--leaf:#3fd01f;--tan:#cdb98a;--rim:#50564f}
+*{box-sizing:border-box;margin:0}body{background:#0d2013;color:var(--cream);font:600 15px/1.45 Nunito,system-ui,sans-serif;padding:1rem}
+main{max-width:1200px;margin:0 auto}h1{font-size:1.8rem;color:var(--gold);margin-bottom:.8rem}h2{font-size:1.1rem;margin-bottom:.5rem}
+.panel{background:#262826;border:2px solid var(--rim);border-radius:12px;padding:.9rem}
+.cols{display:grid;grid-template-columns:380px minmax(0,1fr);gap:1rem;align-items:start}@media(max-width:860px){.cols{grid-template-columns:1fr}}
+label{display:grid;gap:.15rem;font-size:.8rem;color:var(--tan);margin-bottom:.5rem}
+input,select,textarea,button{font:inherit}input:not([type=checkbox]):not([type=range]),select,textarea{background:#181a18;border:2px solid var(--rim);border-radius:8px;color:var(--cream);padding:.4rem .6rem;width:100%}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}.chk{display:flex;gap:.5rem;align-items:center;flex-direction:row;color:var(--cream)}
+button{padding:.45rem 1rem;border-radius:8px;border:2px solid #1d4a0f;background:linear-gradient(#7fe044,#3f9a1d);color:#0f2a08;font-weight:800;cursor:pointer}
+button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}button.del{background:#7a2a1a;border-color:#4a1408;color:#ffd8cc}
+.acts{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.drop{border:2px dashed var(--rim);border-radius:10px;padding:.8rem;text-align:center;color:var(--tan);margin-bottom:.8rem;cursor:pointer}.drop.on{border-color:var(--leaf);color:var(--leaf)}
+#pv{min-height:150px;display:grid;place-items:center;background:#161816;border-radius:10px;margin-bottom:.6rem;overflow:hidden;padding:.5rem}
+.fa{position:relative;width:96px;height:96px;margin:58px}.fa i{display:block;width:100%;height:100%;border-radius:50%;background:#6a5a48}
+.fa::after{content:"";position:absolute;inset:var(--fin,-35.7%);background:var(--fi) center/100% 100% no-repeat;image-rendering:pixelated}
+.bgp{width:100%;height:230px;border-radius:8px;background:#0a0a12 center bottom/cover no-repeat;image-rendering:pixelated;padding:.8rem;font-size:1.3rem;font-weight:800;text-shadow:1px 1px 0 #000}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:.6rem}
+.it{background:#1a1c1a;border:2px solid var(--rim);border-radius:10px;padding:.5rem;display:grid;gap:.3rem}.it.off{opacity:.55}.it.sel{border-color:var(--gold)}
+.th{height:92px;border-radius:8px;background:#161816 center/contain no-repeat;display:grid;place-items:center;color:var(--tan);font-size:.75rem;image-rendering:pixelated}
+.it small{color:var(--tan)}.it b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.it .bar{display:flex;gap:.3rem;align-items:center;justify-content:space-between}
+.bar button{padding:.15rem .6rem;font-size:.8rem}.tools{display:flex;gap:.5rem;margin-bottom:.6rem}.tools>*{flex:1}
+#toast{position:fixed;right:1rem;bottom:1rem;background:#2b2d2a;border:2px solid var(--gold);border-radius:10px;padding:.6rem 1rem;display:none;max-width:90vw;z-index:9}
+</style></head><body><main>
+<script>const CFG = {SUPABASE_URL: "https://nlgkpoomhgehuabrkwhp.supabase.co"};</script>
+<h1>Admin · Cosméticos</h1>
+<section id="login" class="panel" style="max-width:420px">
+  <label>Clave de admin (el secret <code>ADMIN_KEY</code>)<input id="key" type="password" autocomplete="off"></label>
+  <button id="go">Entrar</button> <span id="lm" style="color:#ff8a6a"></span>
+</section>
+<section id="app" hidden>
+  <div class="drop" id="bulk">Arrastrá varias imágenes acá para crear borradores rápido (cuadradas = marcos, el resto = fondos). Quedan desactivadas para que las revises.</div>
+  <div class="cols">
+    <form id="f" class="panel">
+      <h2 id="ft">Nuevo objeto</h2>
+      <div id="pv"><small style="color:var(--tan)">Elegí una imagen para ver cómo queda</small></div>
+      <label>Imagen (PNG, WEBP, JPG o GIF · máx. 4 MB)<input id="file" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label>
+      <div class="row"><label>Tipo<select id="type"><option value="frame">Marco de avatar</option><option value="background">Fondo de perfil</option><option value="name_effect">Efecto de nombre (solo clase CSS)</option></select></label>
+        <label>Nombre<input id="name" required maxlength="60"></label></div>
+      <label>Descripción<input id="desc" maxlength="200"></label>
+      <div class="row"><label>Precio (XP)<input id="cost" type="number" min="0" value="3000"></label><label>Orden<input id="sort" type="number" value="100"></label></div>
+      <div class="row"><label>Colección (opcional)<input id="coll" maxlength="30" placeholder="Halloween"></label><label>Clase CSS (opcional)<input id="css" maxlength="40" placeholder="fr-pumpkin"></label></div>
+      <label id="lInset">Tamaño del marco: <span id="vInset">-35.7</span> % (-35.7 = marcos de este set)<input id="inset" type="range" min="-60" max="-15" step=".1" value="-35.7"></label>
+      <div id="lDim"><label>Oscurecer fondo: <span id="vDim">0.15</span><input id="dim" type="range" min="0" max=".6" step=".05" value=".15"></label><label class="chk"><input id="border" type="checkbox"> La imagen ya trae su propio borde</label></div>
+      <label class="chk"><input id="active" type="checkbox" checked> Activo en la tienda</label><label class="chk"><input id="isnew" type="checkbox"> Marcar como “Nuevo”</label>
+      <input id="id" type="hidden">
+      <div class="acts"><button type="submit">Guardar</button><button type="button" class="ghost" id="reset">Nuevo</button><button type="button" class="del" id="del" hidden>Eliminar</button></div>
+    </form>
+    <div class="panel"><h2>Objetos</h2>
+      <div class="tools"><select id="fType"><option value="">Todos</option><option value="frame">Marcos</option><option value="background">Fondos</option><option value="name_effect">Nombres</option></select><input id="fQ" type="search" placeholder="Buscar…"></div>
+      <div id="list" class="grid"></div></div>
+  </div>
+</section><div id="toast"></div>
+<script>
+const $ = (id) => document.getElementById(id), FN = CFG.SUPABASE_URL + '/functions/v1/admin-cosmetics';
+let KEY = localStorage.getItem('adminKey') || '', ITEMS = [], pending = null, pendUrl = '';
+const slug = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(t) { const e = $('toast'); e.textContent = t; e.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => e.style.display = 'none', 4500); }
+async function api(p, o = {}) {
+  try { const r = await fetch(FN + p, {method: o.json || o.body ? 'POST' : 'GET', headers: {'x-admin-key': KEY, ...(o.json ? {'content-type': 'application/json'} : {})}, body: o.json ? JSON.stringify(o.json) : o.body});
+    return await r.json(); } catch { return {ok: false, reason: 'No pude conectar con la función admin-cosmetics'}; }
+}
+async function enter() {
+  KEY = $('key').value.trim() || KEY; const r = await api('/ping');
+  if (!r.ok) { $('lm').textContent = r.reason === 'unauthorized' ? 'Clave incorrecta' : (r.reason || 'Error'); return; }
+  localStorage.setItem('adminKey', KEY); $('login').hidden = true; $('app').hidden = false; load();
+}
+async function load() { const r = await api('/list'); if (!r.ok) return toast(r.reason); ITEMS = r.items; renderList(); }
+function renderList() {
+  const t = $('fType').value, q = $('fQ').value.toLowerCase();
+  $('list').innerHTML = ITEMS.filter(c => (!t || c.type === t) && (c.name + ' ' + (c.css_class || '')).toLowerCase().includes(q)).map(c => `
+    <div class="it ${c.active ? '' : 'off'} ${$('id').value === c.id ? 'sel' : ''}"><div class="th" style="${c.asset_url ? `background-image:url('${esc(c.asset_url)}')` : ''}">${c.asset_url ? '' : esc(c.css_class || '—')}</div>
+      <b title="${esc(c.name)}">${esc(c.name)}</b><small>${{frame: 'Marco', background: 'Fondo', name_effect: 'Nombre'}[c.type]} · ${Number(c.cost).toLocaleString('es-AR')} XP${c.meta?.collection ? ' · ' + esc(c.meta.collection) : ''}</small>
+      <div class="bar"><label class="chk" style="margin:0"><input type="checkbox" data-tg="${esc(c.id)}" ${c.active ? 'checked' : ''}> Activo</label><button type="button" data-ed="${esc(c.id)}">Editar</button></div></div>`).join('') || '<p style="color:var(--tan)">Todavía no hay objetos.</p>';
+}
+function fill(c) {
+  $('id').value = c?.id || ''; $('ft').textContent = c ? 'Editar objeto' : 'Nuevo objeto'; $('del').hidden = !c; pending = null; pendUrl = c?.asset_url || ''; $('file').value = '';
+  $('type').value = c?.type || 'frame'; $('name').value = c?.name || ''; $('desc').value = c?.description || ''; $('cost').value = c?.cost ?? 3000; $('sort').value = c?.sort ?? Math.max(100, ...ITEMS.map(i => i.sort + 1 || 0));
+  $('coll').value = c?.meta?.collection || ''; $('css').value = c?.css_class || ''; $('inset').value = c?.meta?.inset ?? -35.7; $('dim').value = c?.meta?.dim ?? .15; $('border').checked = !!c?.meta?.border;
+  $('active').checked = c ? c.active : true; $('isnew').checked = !!c?.meta?.new; sync(); renderList();
+}
+function sync() {
+  const t = $('type').value; $('lInset').hidden = t !== 'frame'; $('lDim').hidden = t !== 'background'; $('vInset').textContent = $('inset').value; $('vDim').textContent = $('dim').value;
+  const u = pendUrl, pv = $('pv');
+  pv.innerHTML = !u ? '<small style="color:var(--tan)">Elegí una imagen para ver cómo queda</small>'
+    : t === 'frame' ? `<div class="fa" style="--fi:url('${u}');--fin:${$('inset').value}%"><i></i></div>`
+    : t === 'background' ? `<div class="bgp" style="background-image:linear-gradient(rgba(0,0,0,${$('dim').value}),rgba(0,0,0,${$('dim').value})),url('${u}')">${esc($('name').value || 'Nombre')}<br><small>XP total 12.345</small></div>` : '';
+}
+function pick(f) { if (!f) return; pending = f; if (pendUrl.startsWith('blob:')) URL.revokeObjectURL(pendUrl); pendUrl = URL.createObjectURL(f);
+  if (!$('name').value) $('name').value = f.name.replace(/\.[^.]+$/, '').replace(/^(frame|bg|fondo|marco)[_-]/i, '').replace(/[_-]+/g, ' '); 
+  const im = new Image(); im.onload = () => { $('type').value = Math.abs(im.width / im.height - 1) < .08 ? 'frame' : 'background'; sync(); }; im.src = pendUrl; sync(); }
+async function upload(file, type, name) { const fd = new FormData(); fd.append('file', file); fd.append('folder', type === 'frame' ? 'frames' : 'backgrounds'); fd.append('name', name); return api('/upload', {body: fd}); }
+$('f').addEventListener('submit', async (e) => {
+  e.preventDefault(); const type = $('type').value, name = $('name').value.trim(); let url = pending ? '' : pendUrl;
+  if (pending) { const r = await upload(pending, type, name); if (!r.ok) return toast(r.reason || 'No se pudo subir la imagen'); url = r.url; }
+  if (type !== 'name_effect' && !url && !$('css').value) return toast('Falta la imagen (o una clase CSS)');
+  const r = await api('/upsert', {json: {id: $('id').value || slug(name), type, name, description: $('desc').value, cost: +$('cost').value, css_class: $('css').value.trim(), asset_url: url, sort: +$('sort').value, active: $('active').checked,
+    meta: {inset: +$('inset').value, dim: +$('dim').value, border: $('border').checked, collection: $('coll').value.trim(), new: $('isnew').checked}}});
+  if (!r.ok) return toast(r.reason || 'Error al guardar'); toast('Guardado ✔'); await load(); fill(r.item);
+});
+$('list').addEventListener('click', async (e) => {
+  const ed = e.target.closest('[data-ed]'), tg = e.target.closest('[data-tg]');
+  if (ed) fill(ITEMS.find(i => i.id === ed.dataset.ed));
+  if (tg) { const c = ITEMS.find(i => i.id === tg.dataset.tg), r = await api('/upsert', {json: {...c, active: tg.checked}}); toast(r.ok ? (tg.checked ? 'Activado' : 'Desactivado') : r.reason); load(); }
+});
+$('del').onclick = async () => { if (!confirm('¿Eliminar este objeto? Si alguien ya lo compró, mejor desactivalo.')) return;
+  const r = await api('/delete', {json: {id: $('id').value}}); toast(r.ok ? 'Eliminado' : r.reason === 'in_use' ? 'Ya lo tienen usuarios: desactivalo en vez de eliminarlo' : r.reason); if (r.ok) { await load(); fill(null); } };
+$('reset').onclick = () => fill(null);
+['type', 'inset', 'dim', 'name'].forEach(i => $(i).addEventListener('input', sync)); $('file').onchange = () => pick($('file').files[0]);
+$('fType').onchange = $('fQ').oninput = renderList; $('go').onclick = enter; $('key').onkeydown = (e) => e.key === 'Enter' && enter();
+const bulk = $('bulk'); ['dragover', 'dragenter'].forEach(ev => bulk.addEventListener(ev, (e) => { e.preventDefault(); bulk.classList.add('on'); })); ['dragleave', 'drop'].forEach(ev => bulk.addEventListener(ev, () => bulk.classList.remove('on')));
+bulk.addEventListener('click', () => { const i = document.createElement('input'); i.type = 'file'; i.multiple = true; i.accept = 'image/*'; i.onchange = () => doBulk([...i.files]); i.click(); });
+bulk.addEventListener('drop', (e) => { e.preventDefault(); doBulk([...e.dataTransfer.files].filter(f => f.type.startsWith('image/'))); });
+async function doBulk(files) {
+  let n = 0, s = Math.max(100, ...ITEMS.map(i => i.sort + 1 || 0));
+  for (const f of files) {
+    const url = URL.createObjectURL(f), dims = await new Promise(res => { const im = new Image(); im.onload = () => res([im.width, im.height]); im.onerror = () => res([1, 1]); im.src = url; });
+    const type = Math.abs(dims[0] / dims[1] - 1) < .08 ? 'frame' : 'background', name = f.name.replace(/\.[^.]+$/, '').replace(/^(frame|bg|fondo|marco)[_-]/i, '').replace(/[_-]+/g, ' ') || 'Nuevo';
+    const u = await upload(f, type, name); if (!u.ok) { toast(`${f.name}: ${u.reason}`); continue; }
+    const r = await api('/upsert', {json: {id: slug(name), type, name, description: '', cost: type === 'frame' ? 3000 : 4000, asset_url: u.url, sort: s++, active: false, meta: type === 'frame' ? {inset: -35.7} : {dim: .15, border: true}}});
+    if (r.ok) n++; else toast(`${f.name}: ${r.reason}`);
+  }
+  toast(`${n} objeto(s) creados como borrador (desactivados)`); load();
+}
+if (KEY) { $('key').value = KEY; enter(); }
+</script></main></body></html>
