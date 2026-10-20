@@ -12,7 +12,7 @@
   root.classList.add('sp');
   root.innerHTML = `
     <button id="shopClose" class="close" aria-label="Cerrar">&times;</button>
-    <h2 id="shopTitle" class="shoptitle">Tienda de cosméticos</h2>
+    <h2 id="shopTitle" class="shoptitle">Tienda de cosméticos <small style="font-size:.9rem;color:var(--tan)">v2</small></h2>
     <div id="shopWallet"></div><div id="spEq" class="sp-eq"></div>
     <div class="sp-tools">
       <div class="chips" id="spTabs"><button class="chip" data-t="all">Todos</button><button class="chip" data-t="frame">Marcos</button><button class="chip" data-t="name_effect">Nombres</button><button class="chip" data-t="background">Fondos</button></div>
@@ -87,13 +87,20 @@
   async function act(a, id, type) {
     if (ST.busy) return;
     if (a === 'login') { location.href = FN_URL + '/login/start'; return; }
-    if (a === 'buy') { ST.sel = id; ST.confirm = id; return render(); }
     if (a === 'cancel') { ST.confirm = null; return render(); }
-    ST.busy = true;
-    const res = a === 'confirm' ? await shopApi('/shop/buy', {cosmetic_id: id}) : a === 'equip' ? await shopApi('/shop/equip', {cosmetic_id: id}) : await shopApi('/shop/unequip', {type});
+    if (a === 'buy') {                                         // confirmación nativa: imposible de pasar por alto
+      const c = COS.get(id); if (!c || !wallet) return; ST.sel = id;
+      if (!confirm(`¿Comprar "${c.name}" por ${nf(c.cost)} XP?\nTe quedarán ${nf(wallet.balance - c.cost)} XP.`)) return render();
+      a = 'confirm';
+    }
+    ST.busy = true; let res;
+    try { res = a === 'confirm' ? await shopApi('/shop/buy', {cosmetic_id: id}) : a === 'equip' ? await shopApi('/shop/equip', {cosmetic_id: id}) : await shopApi('/shop/unequip', {type}); }
+    catch (err) { console.error('[tienda v2]', err); res = {ok: false, reason: 'error'}; }
     ST.busy = false; ST.confirm = null;
-    msg(res.ok ? (a === 'confirm' ? '¡Compra realizada! Ya podés equiparlo.' : a === 'equip' ? 'Objeto equipado.' : 'Objeto quitado.') : (MSG[res.reason] || MSG.error), !!res.ok);
-    await loadWallet(); render(); if (res.ok) { loadBoard(); loadFeed(); }
+    if (!res.ok) console.warn('[tienda v2] el servidor respondió:', res);
+    msg(res.ok ? (a === 'confirm' ? '¡Compra realizada! Ya podés equiparlo.' : a === 'equip' ? 'Objeto equipado.' : 'Objeto quitado.') : (MSG[res.reason] || `No se pudo completar (${res.reason || res.error || res.message || 'error'}).`), !!res.ok);
+    try { await loadWallet(); } catch (err) { console.error(err); }
+    render(); if (res.ok) { loadBoard(); loadFeed(); }
   }
   root.addEventListener('click', e => {
     const a = e.target.closest('[data-act]'), t = e.target.closest('#spTabs .chip'), it = e.target.closest('[data-sel]');
