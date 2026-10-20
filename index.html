@@ -246,6 +246,7 @@ a.btn{display:inline-block;text-decoration:none}
 @media (max-width:700px){header{grid-template-columns:1fr;justify-items:center}.status{justify-self:center;order:2}.hspace{display:none}.banner{padding:1.1rem 2.6rem}.banner p{font-size:1rem}.podium{padding-top:9.5rem}}
 @media (max-width:480px){.stat b{font-size:2rem}.p1 .av{width:68px!important;height:68px!important}.p2 .av,.p3 .av{width:52px!important;height:52px!important}.pod{width:36%}.pod.p1 .frame{margin-bottom:24px}.pod.p2 .frame,.pod.p3 .frame{margin-bottom:18px}.pod .nm{font-size:.9rem}.pod .pts{font-size:.74rem;white-space:nowrap}.panel,.feed,.card{border-width:16px;border-image-width:16px}.stat{border-width:16px;border-image-width:16px}}
 </style>
+<link rel="stylesheet" href="tienda-admin/shop-plus.css">
 </head>
 <body>
 
@@ -785,5 +786,6 @@ setInterval(() => { loadSummary(); loadBoard(); loadFeed(); if(!$('questView').h
 
 loadCosmetics().finally(() => { loadSummary(); loadBoard(); loadFeed(); if(openShopAfterBoot) openShop(); });
 </script>
+<script src="tienda-admin/shop-plus.js"></script>
 </body>
 </html>
