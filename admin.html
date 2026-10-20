@@ -118,7 +118,7 @@ $('del').onclick = async () => { if (!confirm('¿Eliminar este objeto? Si alguie
   const r = await api('/delete', {json: {id: $('id').value}}); toast(r.ok ? 'Eliminado' : r.reason === 'in_use' ? 'Ya lo tienen usuarios: desactivalo en vez de eliminarlo' : r.reason); if (r.ok) { await load(); fill(null); } };
 $('reset').onclick = () => fill(null);
 ['type', 'inset', 'dim', 'name'].forEach(i => $(i).addEventListener('input', sync)); $('file').onchange = () => pick($('file').files[0]);
-$('fType').onchange = $('fQ').oninput = renderList; $('go').onclick = enter; $('key').onkeydown = (e) => e.key === 'Enter' && enter();
+$('fType').onchange = $('fQ').oninput = renderList; $('go').onclick = enter; $('key').addEventListener('keydown', (e) => { if (e.key === 'Enter') enter(); });
 const bulk = $('bulk'); ['dragover', 'dragenter'].forEach(ev => bulk.addEventListener(ev, (e) => { e.preventDefault(); bulk.classList.add('on'); })); ['dragleave', 'drop'].forEach(ev => bulk.addEventListener(ev, () => bulk.classList.remove('on')));
 bulk.addEventListener('click', () => { const i = document.createElement('input'); i.type = 'file'; i.multiple = true; i.accept = 'image/*'; i.onchange = () => doBulk([...i.files]); i.click(); });
 bulk.addEventListener('drop', (e) => { e.preventDefault(); doBulk([...e.dataTransfer.files].filter(f => f.type.startsWith('image/'))); });
