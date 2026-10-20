@@ -3,6 +3,10 @@
    <script src="tienda-admin/shop-plus.js"></script>          (antes de </body>)
    Reemplaza el modal de la tienda y suma: marcos/fondos con imagen, búsqueda, orden, filtros, vista previa en tu perfil y confirmación de compra. */
 (() => {
+  // carga sola el CSS que está junto a este script (si no lo pusiste a mano) y deja una marca para comprobar que se cargó
+  const me_ = document.currentScript;
+  if (me_ && !document.querySelector('link[href*="shop-plus.css"]')) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = me_.src.replace(/\.js(\?.*)?$/, '.css$1'); document.head.append(l); }
+  document.documentElement.dataset.shopPlus = '2'; console.info('[tienda v2] activa');
   const ST = {type: 'all', q: '', sort: 'new', mine: false, afford: false, sel: null, confirm: null, busy: false};
   const root = document.querySelector('#shopModal .card');
   root.classList.add('sp');
