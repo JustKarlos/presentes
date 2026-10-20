@@ -28,3 +28,5 @@
 @media (max-width:760px){.sp-body{grid-template-columns:1fr}.sp-eq{grid-template-columns:1fr}
   .sp-prev{position:fixed;left:.5rem;right:.5rem;bottom:.5rem;z-index:70;max-height:56vh;overflow:auto;box-shadow:0 0 30px #000}.sp-prev.empty{display:none}}
 @media (prefers-reduced-motion:reduce){.sp-sk{animation:none}.sp-item{transition:none}}
+
+.sp-item .prev{overflow:visible;min-height:120px}
