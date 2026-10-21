@@ -8,7 +8,7 @@
 .frame.fr-img::after{inset:var(--fin,-35.7%);background-image:var(--fi);background-size:100% 100%;animation:none}
 .modal .card.pb-img{border-color:transparent;image-rendering:pixelated;background-color:#0a0a12;background-size:cover;background-position:center bottom;background-repeat:no-repeat;
   background-image:linear-gradient(rgba(0,0,0,var(--pbdim,.15)),rgba(0,0,0,var(--pbdim,.15))),var(--pbimg)}
-.modal .card.pb-img.pb-own{border-image:none;background-clip:border-box}
+.modal .card.pb-img.pb-own{border-image:none;background-clip:border-box;background-origin:border-box}
 .shopcard.sp{max-width:1040px}
 .sp-eq{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem;margin-bottom:.4rem}
 .sp-slot{display:flex;align-items:center;gap:.4rem;padding:.3rem .6rem;background:#1a1c1a;border:2px solid var(--rim);border-radius:10px;min-width:0}
