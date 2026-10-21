@@ -36,6 +36,7 @@
 @media (prefers-reduced-motion:reduce){.sp-sk{animation:none}.sp-item{transition:none}}
 
 .sp-item .prev{overflow:visible;min-height:120px}
+.sp-new.sp-ret{background:#8a7650;color:#fff}
 `; document.head.append(st); }
   document.documentElement.dataset.shopPlus = '2'; console.info('[tienda v2] activa');
   const ST = {type: 'all', q: '', sort: 'new', mine: false, afford: false, sel: null, confirm: null, busy: false};
@@ -55,7 +56,8 @@
     <div class="sp-body"><div id="shopGrid" class="shopgrid"></div><aside id="spPrev" class="sp-prev"></aside></div>`;
 
   const me = () => wallet ? {username: wallet.username, display_name: wallet.display_name, avatar_url: wallet.avatar_url} : {username: 'tu', display_name: 'Tu nombre', avatar_url: null};
-  const cat = () => [...COS.values()].filter(c => c.active);
+  const cat = () => [...COS.values()].filter(c => c.active);                       // a la venta
+  const visible = () => [...COS.values()].filter(c => c.active || own(c));        // a la venta + los tuyos aunque ya no se vendan
   const own = c => !!wallet?.owned?.includes(c.id), eqd = c => !!wallet && wallet.equipped?.[c.type] === c.id;
   const isNew = c => c.meta?.new || (c.created_at && Date.now() - new Date(c.created_at) < 10 * 864e5);
   const RL = ['Común', 'Raro', 'Épico', 'Legendario'];
@@ -82,7 +84,7 @@
     return s > 0 ? `<button class="btn" disabled>Faltan ${nf(s)} XP</button>` : btn('buy', 'Comprar', c);
   }
   function list() {
-    let l = cat(); const q = ST.q.trim().toLowerCase();
+    let l = visible(); const q = ST.q.trim().toLowerCase();
     if (ST.type !== 'all') l = l.filter(c => c.type === ST.type);
     if (q) l = l.filter(c => `${c.name} ${c.description || ''} ${c.meta?.collection || ''}`.toLowerCase().includes(q));
     if (ST.mine) l = l.filter(own);
@@ -93,7 +95,7 @@
   function renderGrid() {
     const t = tiers(), u = me();
     $('shopGrid').innerHTML = !COS.size ? '<div class="item sp-sk"></div>'.repeat(6)
-      : list().map(c => `<div class="item sp-item r${rar(c, t)}${eqd(c) ? ' eq' : ''}${ST.sel === c.id ? ' sel' : ''}" data-sel="${esc(c.id)}">${isNew(c) ? '<span class="sp-new">Nuevo</span>' : ''}
+      : list().map(c => `<div class="item sp-item r${rar(c, t)}${eqd(c) ? ' eq' : ''}${ST.sel === c.id ? ' sel' : ''}" data-sel="${esc(c.id)}">${!c.active ? '<span class="sp-new sp-ret">Retirado</span>' : isNew(c) ? '<span class="sp-new">Nuevo</span>' : ''}
           <div class="prev">${tile(c, u)}</div><b class="in">${esc(c.name)}</b><small>${esc(c.description || '')}</small>
           <div class="ibot"><span class="cost">${own(c) ? (eqd(c) ? '<span class="badge-eq">Equipado</span>' : 'Tuyo') : nf(c.cost) + ' XP'}</span>${primary(c)}</div></div>`).join('')
         || '<p class="empty" style="grid-column:1/-1">No hay objetos con esos filtros.</p>';
