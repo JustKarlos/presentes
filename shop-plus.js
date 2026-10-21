@@ -3,9 +3,40 @@
    <script src="tienda-admin/shop-plus.js"></script>          (antes de </body>)
    Reemplaza el modal de la tienda y suma: marcos/fondos con imagen, búsqueda, orden, filtros, vista previa en tu perfil y confirmación de compra. */
 (() => {
-  // carga sola el CSS que está junto a este script (si no lo pusiste a mano) y deja una marca para comprobar que se cargó
-  const me_ = document.currentScript;
-  if (me_ && !document.querySelector('link[href*="shop-plus.css"]')) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = me_.src.replace(/\.js(\?.*)?$/, '.css$1'); document.head.append(l); }
+  // el CSS viaja dentro de este archivo y se agrega al final del <head>, así siempre gana a las reglas de index.html
+  if (!document.getElementById('sp-css')) { const st = document.createElement('style'); st.id = 'sp-css'; st.textContent = `/* Tienda v2 + soporte de marcos y fondos con imagen. Cargalo DESPUÉS del <style> de index.html. */
+.frame.fr-img::after{inset:var(--fin,-35.7%);background-image:var(--fi);background-size:100% 100%;animation:none}
+.modal .card.pb-img{border-color:transparent;image-rendering:pixelated;background-color:#0a0a12;background-size:cover;background-position:center bottom;background-repeat:no-repeat;
+  background-image:linear-gradient(rgba(0,0,0,var(--pbdim,.15)),rgba(0,0,0,var(--pbdim,.15))),var(--pbimg)}
+.modal .card.pb-img.pb-own{border-image:none;background-clip:border-box}
+.shopcard.sp{max-width:1040px}
+.sp-eq{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem;margin-bottom:.4rem}
+.sp-slot{display:flex;align-items:center;gap:.4rem;padding:.3rem .6rem;background:#1a1c1a;border:2px solid var(--rim);border-radius:10px;min-width:0}
+.sp-slot>div{min-width:0}.sp-slot small{display:block;color:var(--tan);font-size:.7rem;line-height:1}
+.sp-slot b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.9rem}
+.sp-slot button{margin-left:auto;font-size:1.3rem;line-height:1;color:var(--tan)}.sp-slot button:hover{color:#fff}
+.sp-tools{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.5rem 0}
+.sp-tools .search{min-width:150px}
+.sp-sel{background:#1a1c1a;border:2px solid var(--rim);border-radius:999px;color:var(--cream);padding:.3rem .8rem;font:inherit;text-shadow:none}
+.sp-body{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:.8rem;align-items:start}
+.sp-prev{position:sticky;top:0;display:grid;gap:.5rem;padding:.6rem;background:#1a1c1a;border:2px solid var(--rim);border-radius:12px}
+.sp-prev .sp-mini{max-width:none;min-height:150px}
+.sp-hint{color:var(--tan);font-size:.8rem}
+.sp-item{position:relative;cursor:pointer;transition:transform .15s}.sp-item:hover{transform:translateY(-2px)}
+.sp-item.sel{outline:3px solid var(--gold);outline-offset:1px}
+.sp-item.r1{border-color:#4aa0e0}.sp-item.r2{border-color:#b46bff}.sp-item.r3{border-color:var(--gold)}
+.sp-rar{font-size:.7rem;padding:0 .4rem;border-radius:5px;background:#353934;color:var(--tan)}
+.sp-rar.r1{background:#1d4a7a;color:#bfe3ff}.sp-rar.r2{background:#4a2a7a;color:#e0ccff}.sp-rar.r3{background:#7a5a0a;color:#fff0a0}
+.sp-new{position:absolute;top:.35rem;right:.35rem;z-index:2;font-size:.65rem;font-weight:800;color:#0f2a08;background:#7fe044;border-radius:5px;padding:0 .4rem}
+.sp-sk{min-height:190px;background:linear-gradient(100deg,#1a1c1a 30%,#262926 50%,#1a1c1a 70%) 0 0/200% 100%;animation:spsk 1.2s linear infinite}
+@keyframes spsk{to{background-position:-200% 0}}
+.sp-conf p{font-size:.85rem;margin-bottom:.4rem}.sp-conf .acts{display:flex;gap:.4rem}
+@media (max-width:760px){.sp-body{grid-template-columns:1fr}.sp-eq{grid-template-columns:1fr}
+  .sp-prev{position:fixed;left:.5rem;right:.5rem;bottom:.5rem;z-index:70;max-height:56vh;overflow:auto;box-shadow:0 0 30px #000}.sp-prev.empty{display:none}}
+@media (prefers-reduced-motion:reduce){.sp-sk{animation:none}.sp-item{transition:none}}
+
+.sp-item .prev{overflow:visible;min-height:120px}
+`; document.head.append(st); }
   document.documentElement.dataset.shopPlus = '2'; console.info('[tienda v2] activa');
   const ST = {type: 'all', q: '', sort: 'new', mine: false, afford: false, sel: null, confirm: null, busy: false};
   const root = document.querySelector('#shopModal .card');
@@ -133,7 +164,7 @@
   };
   window.renderShop = render;
   window.openShop = async () => {
-    $('shopModal').classList.add('open'); $('shopClose').focus(); msg(''); ST.sel = null; ST.confirm = null; render();
+    typeof modalOn === 'function' ? modalOn($('shopModal')) : $('shopModal').classList.add('open'); $('shopClose').focus(); msg(''); ST.sel = null; ST.confirm = null; render();
     await loadCosmetics(); if (sess) { const ok = await shopApi('/shop/session'); if (ok.ok) await loadWallet(); }
     render();
   };
