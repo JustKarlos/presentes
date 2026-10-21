@@ -245,7 +245,7 @@ git push -u origin main
 
 1. Ponete en directo (o poné `REQUIRE_LIVE=false` en los Secrets).
 2. Escribí `!presente` en tu chat.
-3. Mirá el ranking: tu usuario debería aparecer con 1 presencia.
+3. Mirá el ranking: tu usuario debería aparecer con 1 presente.
 4. Si no pasa nada, revisá **Edge Functions → kick-webhook → Logs**.
 
 ## Solución de problemas
