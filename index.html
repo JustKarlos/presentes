@@ -4,7 +4,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ranking de presentes</title>
-<link rel="icon" type="images/png" href="assets/pointer2.png">
+<meta name="description" content="Ranking de presentes de la comunidad: escribe !presente en el chat durante el directo y sube de nivel, completa misiones y consigue marcos, efectos de nombre y fondos para tu perfil de Kick.">
+<link rel="canonical" href="https://presentescoci.vercel.app/">
+<meta name="theme-color" content="#0d2013">
+<meta name="color-scheme" content="dark">
+<link rel="icon" type="image/png" href="assets/pointer2.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ranking de presentes">
+<meta property="og:locale" content="es_LA">
+<meta property="og:url" content="https://presentescoci.vercel.app/">
+<meta property="og:title" content="Ranking de presentes">
+<meta property="og:description" content="Escribe !presente en el chat durante el directo, suma XP, sube de nivel y consigue cosméticos para tu perfil.">
+<meta property="og:image" content="https://presentescoci.vercel.app/assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Cartel del ranking de presentes con el podio de la comunidad sobre un fondo de selva">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Ranking de presentes">
+<meta name="twitter:description" content="Escribe !presente en el chat durante el directo, suma XP, sube de nivel y consigue cosméticos para tu perfil.">
+<meta name="twitter:image" content="https://presentescoci.vercel.app/assets/og.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Ranking de presentes","url":"https://presentescoci.vercel.app/","inLanguage":"es","description":"Ranking de la comunidad de un canal de Kick: presentes, mensajes, rachas, XP, niveles, misiones y tienda de cosméticos."}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
@@ -24,7 +43,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-a
 .wrap{max-width:1080px;margin:0 auto;padding:0 1rem 3rem}
 [hidden]{display:none!important}
 .sr{position:absolute;left:-9999px}
-img,.stat,.panel,.feed,.card,.tab{image-rendering:pixelated}
+img,.stat,.panel,.feed,.card,.tab,.about{image-rendering:pixelated}
 *{scrollbar-width:thin;scrollbar-color:#9a6334 #1b1d1b}
 @supports not (scrollbar-color:auto){::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:#1b1d1b;border-radius:8px}::-webkit-scrollbar-thumb{background:#9a6334;border:1px solid #24140a;border-radius:8px}}
 /* Cursor por defecto para toda la página */
@@ -37,6 +56,7 @@ html {
 a, button, [role="button"], input[type="submit"] {
   cursor: url('assets/pointer.png')16 16, pointer;
 }
+
 /* Cabecera */
 header{padding:1.2rem 0 0;display:grid;grid-template-columns:1fr minmax(0,620px) 1fr;gap:1rem;align-items:start}
 .sign img{display:block;width:100%;height:auto;filter:drop-shadow(0 8px 10px rgba(0,0,0,.55));image-rendering:auto}
@@ -52,7 +72,7 @@ header{padding:1.2rem 0 0;display:grid;grid-template-columns:1fr minmax(0,620px)
 .stat .lb{display:flex;align-items:center;gap:.4rem;font-family:var(--display);font-weight:700;font-size:1.1rem;line-height:1.1;color:#fff;text-shadow:var(--ol)}
 .stat .lb svg{color:var(--leaf);flex:none}
 .stat b{display:block;font-family:var(--display);font-weight:700;font-size:2.5rem;line-height:1.05;margin-top:.15rem;color:var(--gold);text-shadow:var(--ol);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.stat small{font-family:var(--display);font-weight:700;font-size:1.05rem;color:var(--leaf);display:flex;align-items:center;gap:.4rem;min-height:1.4rem;text-shadow:1px 1px 0 #150a03}
+.stat small{font-family:var(--display);font-weight:700;font-size:1.05rem;color:#8dff6a;display:flex;align-items:center;gap:.4rem;min-height:1.4rem;text-shadow:1px 1px 0 #150a03}
 .stat small i{font-style:normal}
 
 /* Podio (imagen + avatares encima) */
@@ -73,13 +93,13 @@ header{padding:1.2rem 0 0;display:grid;grid-template-columns:1fr minmax(0,620px)
 
 /* Paneles con marco */
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:1rem;align-items:start;margin-top:1rem}
-.panel,.feed,.card{border:22px solid transparent;border-image:url("assets/frame.png") 56/22px stretch;background:linear-gradient(#2b2d2a,#222421) padding-box;padding:.1rem .4rem .5rem}
+.panel,.feed,.card,.about{border:22px solid transparent;border-image:url("assets/frame.png") 56/22px stretch;background:linear-gradient(#2b2d2a,#222421) padding-box;padding:.1rem .4rem .5rem}
 .ptitle{font-family:var(--display);font-weight:700;font-size:1.6rem;text-align:center;color:#fff;text-shadow:var(--ol);margin:-.9rem 0 .6rem}
 .tabs{display:flex;gap:.25rem;overflow-x:auto;padding-bottom:2px}
 .tab{flex:1 1 auto;white-space:nowrap;text-align:center;font-family:var(--display);font-weight:700;font-size:1.05rem;color:#fff;text-shadow:var(--ol);
   border:12px solid transparent;border-image:url("assets/tab.png") 14 fill/12px stretch;padding:0 .15rem;line-height:1.1}
 .tab:hover{filter:brightness(1.15)}
-.tab.on{border-image-source:url("assets/tab-on.png");color:#fff36a}
+.tab.on{border-image-source:url("assets/tab-on.png");color:#0f2a08;text-shadow:0 1px 0 rgba(255,255,255,.3)}
 .bar{display:flex;gap:.45rem;flex-wrap:wrap;margin:.7rem 0;align-items:center}
 .chips{display:flex;gap:.35rem;flex-wrap:wrap}
 .off{opacity:.35;pointer-events:none}
@@ -97,7 +117,7 @@ header{padding:1.2rem 0 0;display:grid;grid-template-columns:1fr minmax(0,620px)
 .search svg{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:var(--tan)}
 .search input{width:100%;padding:.35rem 1rem .35rem 2.3rem;background:#1a1c1a;border:2px solid var(--rim);border-radius:999px;color:var(--cream);font:inherit;outline:none}
 .search input:focus{border-color:var(--leaf)}
-.search input::placeholder{color:#7d8077}
+.search input::placeholder{color:#9a9d94}
 .listhead{display:flex;justify-content:space-between;color:var(--tan);font-size:.85rem;margin:.2rem .2rem .35rem}
 .list{list-style:none;padding:0}
 .row{width:100%;display:flex;align-items:center;gap:.8rem;padding:.55rem .6rem;border-bottom:1px solid var(--line)}
@@ -218,7 +238,18 @@ header{padding:1.2rem 0 0;display:grid;grid-template-columns:1fr minmax(0,620px)
 /* Tienda */
 .shopbtn{border:12px solid transparent;border-image:url("assets/tab.png") 14 fill/12px stretch;padding:0 .5rem;font-family:var(--display);font-weight:700;font-size:1.1rem;line-height:1.1;color:#fff;text-shadow:var(--ol);white-space:nowrap;filter:drop-shadow(0 4px 4px rgba(0,0,0,.45));image-rendering:pixelated}
 .shopbtn:hover{filter:brightness(1.15) drop-shadow(0 4px 4px rgba(0,0,0,.45))}
-.hright{justify-self:end}
+.skip{position:absolute;left:-9999px;top:0}
+.skip:focus{left:1rem;top:1rem;z-index:100;padding:.55rem 1rem;background:var(--gold);color:#2a1608;border-radius:8px;text-shadow:none;font-weight:800;text-decoration:none}
+.nojs{margin:1rem;padding:1rem;background:#2b2d2a;border:2px solid var(--rim);border-radius:10px;text-align:center}
+.kicklink{border:12px solid transparent;border-image:url("assets/tab-on.png") 14 fill/12px stretch;padding:0 .5rem;font-family:var(--display);font-weight:700;font-size:1.1rem;line-height:1.1;color:#0f2a08;text-shadow:0 1px 0 rgba(255,255,255,.3);white-space:nowrap;text-decoration:none;filter:drop-shadow(0 4px 4px rgba(0,0,0,.45));image-rendering:pixelated}
+.kicklink:hover{filter:brightness(1.1) drop-shadow(0 4px 4px rgba(0,0,0,.45))}
+.about{margin-top:1rem}
+.about h2{font-family:var(--display);font-weight:700;font-size:1.6rem;text-align:center;color:#fff;text-shadow:var(--ol);margin:-.9rem 0 .5rem}
+.about details{border-top:1px solid var(--line);padding:.6rem .4rem}
+.about summary{cursor:pointer;font-weight:800;color:var(--cream)}
+.about details p{margin:.45rem 0 .1rem;color:#d6cfba;font-size:.95rem}
+.about code{font-family:var(--display);font-weight:700;color:var(--gold);font-size:1.05rem}
+.hright{justify-self:end;display:flex;gap:.5rem;align-items:center}
 a.btn{display:inline-block;text-decoration:none}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .shopcard{max-width:800px}
@@ -249,6 +280,8 @@ a.btn{display:inline-block;text-decoration:none}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<noscript><p class="nojs">Este ranking necesita JavaScript para mostrar los datos en vivo. Para participar, escribe !presente en el chat del canal mientras está en directo.</p></noscript>
 
 <script>
 /* ============== CONFIGURACIÓN: edita estos valores ============== */
@@ -256,6 +289,7 @@ const CONFIG = {
   SUPABASE_URL:      "https://nlgkpoomhgehuabrkwhp.supabase.co",
   SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sZ2twb29taGdlaHVhYnJrd2hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE3NjE3NzAsImV4cCI6MjEwNzMzNzc3MH0.DM1cUzclLbu8ej8m7PAQEja6X20gBadNiuqMEzbk-_g",
   CHANNEL_NAME:      "Juliococi",
+  KICK_CHANNEL:      "juliococi",   // tu usuario de Kick (ej.: "micanal"): activa el botón «Ir al chat»
   BACKGROUND_IMAGE:  "",   // opcional: URL de una imagen de fondo (selva, templo…)
 };
 /* ================================================================ */
@@ -264,8 +298,8 @@ const CONFIG = {
 <div class="wrap">
   <header>
     <div class="status" role="status"><span class="dot" id="dot"></span><span id="statusTxt">Conectando…</span></div>
-    <div class="sign"><img src="assets/sign.png" alt=""><h1 id="chan" class="sr"></h1></div>
-    <div class="hright"><button class="shopbtn" id="shopBtn" type="button">Tienda</button></div>
+    <div class="sign"><img src="assets/sign.png" alt="Ranking de presentes" width="1250" height="390" fetchpriority="high"><h1 id="chan" class="sr">Ranking de presentes</h1></div>
+    <div class="hright"><a class="kicklink" id="kickLink" href="#" target="_blank" rel="noopener" hidden>Ir al chat</a><button class="shopbtn" id="shopBtn" type="button">Tienda</button></div>
   </header>
   <div class="banner"><p>Escribe <code>!presente</code> en el chat durante el directo. Sumas 1 punto cada hora y tu racha crece por cada día seguido que participes.</p></div>
 
@@ -279,17 +313,17 @@ const CONFIG = {
   <section id="podium" class="podium" aria-label="Los tres primeros puestos"></section>
 
   <div class="layout">
-    <main class="panel">
+    <main class="panel" id="main" tabindex="-1">
       <h2 class="ptitle">Clasificación</h2>
       <div class="tabs" id="tabs" role="tablist">
-        <button class="tab on" role="tab" data-m="presentes">Presentes</button>
-        <button class="tab" role="tab" data-m="messages">Mensajes</button>
-        <button class="tab" role="tab" data-m="active">Tiempo activo</button>
-        <button class="tab" role="tab" data-m="streaks">Rachas</button>
-        <button class="tab" role="tab" data-m="xp">Nivel</button>
-        <button class="tab" role="tab" data-m="quests">Misiones</button>
+        <button class="tab on" role="tab" id="tab-presentes" aria-selected="true" aria-controls="rankView" tabindex="0" data-m="presentes">Presentes</button>
+        <button class="tab" role="tab" id="tab-messages" aria-selected="false" aria-controls="rankView" tabindex="-1" data-m="messages">Mensajes</button>
+        <button class="tab" role="tab" id="tab-active" aria-selected="false" aria-controls="rankView" tabindex="-1" data-m="active">Tiempo activo</button>
+        <button class="tab" role="tab" id="tab-streaks" aria-selected="false" aria-controls="rankView" tabindex="-1" data-m="streaks">Rachas</button>
+        <button class="tab" role="tab" id="tab-xp" aria-selected="false" aria-controls="rankView" tabindex="-1" data-m="xp">Nivel</button>
+        <button class="tab" role="tab" id="tab-quests" aria-selected="false" aria-controls="questView" tabindex="-1" data-m="quests">Misiones</button>
       </div>
-      <div id="rankView">
+      <div id="rankView" role="tabpanel" aria-labelledby="tab-presentes">
       <div class="bar">
         <div class="chips" id="chips">
           <button class="chip on" data-r="all">General</button>
@@ -318,7 +352,7 @@ const CONFIG = {
       <p id="empty" class="empty" hidden></p>
       <p class="note" id="note"></p>
       </div>
-      <div id="questView" hidden>
+      <div id="questView" role="tabpanel" aria-labelledby="tab-quests" hidden>
         <p class="qintro">Las misiones diarias se reinician a medianoche (hora de Buenos Aires) y las semanales cada lunes. Al completarlas ganas XP extra.</p>
         <div class="qbar"><label class="search"><span class="sr">Tu usuario de Kick</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -334,6 +368,15 @@ const CONFIG = {
       <ul id="feed"></ul>
     </aside>
   </div>
+  <section class="about" aria-labelledby="aboutTitle">
+    <h2 id="aboutTitle">¿Cómo funciona?</h2>
+    <details open><summary>¿Cómo sumo un presente?</summary><p>Escribe <code>!presente</code> en el chat del canal mientras está en directo. Cada presente suma 1 punto en el ranking y 100 XP, y puedes registrar uno por hora.</p></details>
+    <details><summary>¿Qué es la racha?</summary><p>La racha cuenta los días seguidos en los que registras al menos un presente. Si dejas pasar un día, vuelve a empezar.</p></details>
+    <details><summary>¿Qué son la XP, los niveles y los rangos?</summary><p>Ganas 100 XP por cada presente y 5 XP por cada mensaje (uno cada 30 segundos). Con la XP subes de nivel y de rango: Fruta Wumpa, Cazador de Gemas, Guardián Aku Aku, Rompe Cajas y Maestro del Tiempo.</p></details>
+    <details><summary>¿Qué son las misiones?</summary><p>Son objetivos diarios y semanales, como enviar mensajes, registrar presentes o mantener una racha. Al completarlos ganas XP extra.</p></details>
+    <details><summary>¿Qué puedo comprar en la tienda?</summary><p>Marcos de avatar, efectos de nombre y fondos de perfil. Se pagan con XP y gastarla no baja tu nivel. Para comprar inicias sesión con tu cuenta de Kick.</p></details>
+    <details><summary>¿Cuenta cuando el canal no está en directo?</summary><p>No. Los presentes, los mensajes y el tiempo activo solo se registran mientras el canal está en vivo.</p></details>
+  </section>
 </div>
 
 <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="mName">
@@ -426,10 +469,19 @@ document.addEventListener('error', (e) => {
   }
 }, true);
 
-$('chan').textContent = CONFIG.CHANNEL_NAME;
+$('chan').textContent = `Ranking de presentes de ${CONFIG.CHANNEL_NAME}`;
 document.querySelector('.sign img').alt = CONFIG.CHANNEL_NAME;
 if(CONFIG.BACKGROUND_IMAGE) document.body.style.setProperty('--bg-img', `url("${CONFIG.BACKGROUND_IMAGE}")`);
 document.title = `Ranking de presentes · ${CONFIG.CHANNEL_NAME}`;
+const KICK = String(CONFIG.KICK_CHANNEL || '').trim().replace(/^@/, '').replace(/[^\w-]/g, '');
+if(KICK){                                                        // botón al chat + datos estructurados del canal
+  const a = $('kickLink');
+  a.href = `https://kick.com/${KICK}`; a.hidden = false;
+  a.setAttribute('aria-label', `Ir al chat de ${CONFIG.CHANNEL_NAME} en Kick (se abre en otra pestaña)`);
+  const ld = document.createElement('script'); ld.type = 'application/ld+json';
+  ld.textContent = JSON.stringify({ '@context':'https://schema.org', '@type':'Person', name: CONFIG.CHANNEL_NAME, url: `https://kick.com/${KICK}`, sameAs: [`https://kick.com/${KICK}`] });
+  document.head.append(ld);
+}
 
 /* ---------- Supabase ---------- */
 const db = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
@@ -534,9 +586,10 @@ function render(notFound){
 /* ---------- pestañas, períodos y fecha ---------- */
 $('tabs').addEventListener('click', (e) => {
   const b = e.target.closest('.tab'); if(!b) return;
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t === b));
+  document.querySelectorAll('.tab').forEach(t => { t.classList.toggle('on', t === b); t.setAttribute('aria-selected', t === b); t.tabIndex = t === b ? 0 : -1; });
   const quests = b.dataset.m === 'quests';
   $('rankView').hidden = quests; $('questView').hidden = !quests;
+  $(quests ? 'questView' : 'rankView').setAttribute('aria-labelledby', b.id);
   if(quests){ loadQuests(); return; }
   st.metric = b.dataset.m;
   $('chips').classList.toggle('off', st.metric === 'streaks');
@@ -651,10 +704,10 @@ async function openProfile(raw){
     pair('Miembro desde', fmtDay(u.member_since), 'Último presente', ago(u.last_presente_at)),
   ].join('');
   $('mQuests').innerHTML = (qs || []).map(q => questCard(q, true)).join('');
-  $('modal').classList.add('open'); $('mClose').focus();
+  modalOn($('modal')); $('mClose').focus();
   return true;
 }
-const closeModal = () => $('modal').classList.remove('open');
+const closeModal = () => modalOff($('modal'));
 $('mClose').onclick = closeModal;
 $('modal').addEventListener('click', (e) => { if(e.target === $('modal')) closeModal(); });
 document.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ closeModal(); closeShop(); $('pop').hidden = true; } });
@@ -731,13 +784,13 @@ function renderShop(){
   $('shopGrid').innerHTML = items.map(itemCard).join('') || '<p class="empty">No hay objetos en esta categoría.</p>';
 }
 async function openShop(){
-  $('shopModal').classList.add('open'); $('shopClose').focus();
+  modalOn($('shopModal')); $('shopClose').focus();
   $('shopMsg').textContent = '';
   if(!COS.size) await loadCosmetics();
   if(sess){ const ok = await shopApi('/shop/session'); if(ok.ok) await loadWallet(); }
   renderShop();
 }
-const closeShop = () => $('shopModal').classList.remove('open');
+const closeShop = () => modalOff($('shopModal'));
 $('shopBtn').onclick = openShop;
 $('shopClose').onclick = closeShop;
 $('shopModal').addEventListener('click', (e) => { if(e.target === $('shopModal')) closeShop(); });
@@ -754,6 +807,32 @@ $('shopGrid').addEventListener('click', async (e) => {
   $('shopMsg').textContent = res.ok ? (act === 'buy' ? '¡Compra realizada!' : act === 'equip' ? 'Objeto equipado.' : 'Objeto quitado.') : (MSG[res.reason] || MSG.error);
   await loadWallet(); renderShop();
   if(res.ok){ loadBoard(); loadFeed(); }
+});
+
+/* ---------- accesibilidad: ventanas y pestañas con teclado ---------- */
+let lastFocus = null;
+function modalOn(el){ lastFocus = document.activeElement; el.classList.add('open'); document.querySelector('.wrap').inert = true; }
+function modalOff(el){
+  el.classList.remove('open');
+  if(!document.querySelector('.modal.open')){
+    document.querySelector('.wrap').inert = false;
+    if(lastFocus && lastFocus !== document.body && document.contains(lastFocus)) lastFocus.focus();
+  }
+}
+document.addEventListener('keydown', (e) => {                       // el foco no sale de la ventana abierta
+  if(e.key !== 'Tab') return;
+  const m = document.querySelector('.modal.open'); if(!m) return;
+  const f = [...m.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(x => x.offsetParent !== null);
+  if(!f.length) return;
+  const first = f[0], last = f[f.length - 1], inside = m.contains(document.activeElement);
+  if(e.shiftKey && (!inside || document.activeElement === first)){ last.focus(); e.preventDefault(); }
+  else if(!e.shiftKey && (!inside || document.activeElement === last)){ first.focus(); e.preventDefault(); }
+});
+$('tabs').addEventListener('keydown', (e) => {                      // flechas, Inicio y Fin entre pestañas
+  if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
+  const tabs = [...document.querySelectorAll('.tab')]; let i = tabs.indexOf(document.activeElement); if(i < 0) return;
+  i = e.key === 'ArrowRight' ? (i + 1) % tabs.length : e.key === 'ArrowLeft' ? (i - 1 + tabs.length) % tabs.length : e.key === 'Home' ? 0 : tabs.length - 1;
+  tabs[i].focus(); tabs[i].click(); e.preventDefault();
 });
 
 /* ---------- tiempo real (solo presentes) y refresco periódico ---------- */
