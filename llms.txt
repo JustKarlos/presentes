@@ -1,0 +1,20 @@
+# Ranking de presentes
+
+> Panel de la comunidad de un canal de Kick. Los espectadores escriben !presente en el chat durante el directo y suben en un ranking con puntos, rachas, XP, niveles, misiones y una tienda de cosméticos. La página está en español.
+
+La página muestra datos en vivo: los números del ranking se cargan al abrirla y cambian mientras el canal transmite.
+
+## Cómo participar
+- Escribe `!presente` en el chat del canal mientras está en directo. Cada presente suma 1 punto en el ranking y 100 XP; se puede sumar uno por hora.
+- La racha cuenta los días seguidos con al menos un presente.
+- Cada mensaje en el chat da 5 XP (uno cada 30 segundos). El nivel sube con la XP y define el rango: Fruta Wumpa, Cazador de Gemas, Guardián Aku Aku, Rompe Cajas y Maestro del Tiempo.
+- Las misiones diarias y semanales dan XP extra al completarse.
+- Con la XP se compran marcos de avatar, efectos de nombre y fondos de perfil en la tienda. Gastar XP no baja el nivel. Para comprar se inicia sesión con la cuenta de Kick.
+
+## Páginas
+- [Ranking en vivo](https://presentescoci.vercel.app/): clasificación por presentes, mensajes, tiempo activo, rachas y nivel; misiones; actividad reciente; tienda.
+- [Mapa del sitio](https://presentescoci.vercel.app/sitemap.xml)
+
+## Notas
+- Los widgets para OBS bajo /overlay/ son privados y no están pensados para lectores ni buscadores.
+- Solo se registran presentes y mensajes mientras el canal está en vivo.

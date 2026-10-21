@@ -1,0 +1,23 @@
+# Ranking de presentes
+User-agent: *
+Allow: /
+Disallow: /overlay/
+
+# Rastreadores de IA: pueden leer la página pública (no los widgets de OBS)
+User-agent: GPTBot
+Allow: /
+Disallow: /overlay/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /overlay/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /overlay/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /overlay/
+
+Sitemap: https://presentescoci.vercel.app/sitemap.xml
