@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cosméticos del ranking</title>
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+<main>
+  <header>
+    <img src="icons/icon-48.png" alt="" width="36" height="36">
+    <div><h1>Cosméticos del ranking</h1><p class="sub">Pinturas de nombre e insignias en el chat de Kick</p></div>
+  </header>
+
+  <section id="status" class="status" role="status" aria-live="polite">
+    <span class="dot" id="dot"></span><span id="statusText">Comprobando conexión…</span>
+  </section>
+
+  <section class="toggles" aria-label="Opciones">
+    <label class="row"><span>Activar en el chat de Kick</span>
+      <input type="checkbox" id="enabled" role="switch"><span class="track" aria-hidden="true"></span></label>
+    <label class="row sub-row"><span>Pinturas de nombre</span>
+      <input type="checkbox" id="paints" role="switch"><span class="track" aria-hidden="true"></span></label>
+    <label class="row sub-row"><span>Insignias de rango</span>
+      <input type="checkbox" id="badges" role="switch"><span class="track" aria-hidden="true"></span></label>
+  </section>
+
+  <a id="shop" class="btn" href="#" target="_blank" rel="noopener">Abrir la tienda de cosméticos</a>
+
+  <section class="diag" aria-live="polite">
+    <h2>En esta pestaña</h2>
+    <p id="diagText">Comprobando…</p>
+  </section>
+
+  <details>
+    <summary>Ajustes avanzados</summary>
+    <form id="adv" autocomplete="off">
+      <label>Dirección de Supabase<input id="supabaseUrl" type="url" required placeholder="https://xxxx.supabase.co"></label>
+      <label>Clave pública (anon)<input id="anonKey" type="text" required spellcheck="false"></label>
+      <label>Dirección de la web<input id="siteUrl" type="url" required placeholder="https://tu-sitio.vercel.app/"></label>
+      <label class="check"><input id="debug" type="checkbox"> Mensajes de depuración en la consola</label>
+      <div class="acts"><button type="submit" class="btn small">Guardar</button><button type="button" id="clear" class="btn small ghost">Borrar caché</button></div>
+      <p id="advMsg" class="msg" role="status"></p>
+    </form>
+  </details>
+</main>
+<script src="settings.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>

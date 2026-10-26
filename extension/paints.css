@@ -1,0 +1,81 @@
+/* =====================================================================
+   Cosméticos del ranking en el chat — pinturas de nombre e insignias
+   Todas las clases llevan el prefijo kcx- para no chocar con Kick.
+   Efectos: Neón verde · Hielo · Oro metálico · Fuego · Arcoíris
+   ===================================================================== */
+
+/* Insignia de rango (sprite pixel-art de 10×10 ampliado a 20 px) */
+.kcx-badge{
+  display:inline-block!important;width:18px!important;height:18px!important;min-width:18px;
+  margin:0 4px 0 0!important;vertical-align:-4px;image-rendering:pixelated;
+  flex:none;object-fit:contain;
+}
+
+/* Base común de las pinturas */
+.kcx-p{ font-weight:700; }
+
+/* ---- Neón verde: brillo escalonado con parpadeo ---- */
+.kcx-ne-neon{
+  color:#f2ffee!important;
+  text-shadow:0 0 1px #fff,0 0 4px #53fc18,0 0 9px #2fb80f,0 0 16px rgba(47,184,15,.65),1px 1px 0 #0a2a05!important;
+  animation:kcx-neon 4s steps(1) infinite;
+}
+@keyframes kcx-neon{0%{opacity:1}92%{opacity:.62}93%{opacity:1}96%{opacity:.78}97%{opacity:1}}
+
+/* ---- Pinturas con relleno degradado (el color de Kick se anula) ---- */
+.kcx-ne-ice,.kcx-ne-gold,.kcx-ne-fire,.kcx-ne-rainbow{
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  -webkit-background-clip:text!important;background-clip:text!important;
+  text-shadow:none!important;
+  background-repeat:no-repeat;
+}
+
+/* ---- Hielo: bandas azules con destello que cruza ---- */
+.kcx-ne-ice{
+  background-image:
+    linear-gradient(105deg,transparent 0 42%,rgba(255,255,255,.95) 46% 54%,transparent 58% 100%),
+    linear-gradient(180deg,#fff 0 26%,#c4f3ff 26% 52%,#63d9ff 52% 78%,#2a9fd6 78% 100%);
+  background-size:260% 100%,100% 100%;
+  background-position:100% 0,0 0;
+  filter:drop-shadow(1px 1px 0 #0b3550) drop-shadow(0 0 4px rgba(99,217,255,.75));
+  animation:kcx-sweep 3.2s steps(14) infinite;
+}
+
+/* ---- Oro metálico: bandas doradas, extrusión y destello ---- */
+.kcx-ne-gold{
+  background-image:
+    linear-gradient(105deg,transparent 0 42%,rgba(255,255,255,.9) 46% 54%,transparent 58% 100%),
+    linear-gradient(180deg,#fff6c2 0 24%,#ffd84a 24% 50%,#ffb81c 50% 74%,#c98a0b 74% 100%);
+  background-size:260% 100%,100% 100%;
+  background-position:100% 0,0 0;
+  filter:drop-shadow(1px 1px 0 #7a4a05) drop-shadow(2px 2px 0 #3a1b08);
+  animation:kcx-sweep 3.6s steps(14) infinite;
+}
+@keyframes kcx-sweep{0%{background-position:100% 0,0 0}45%{background-position:0% 0,0 0}100%{background-position:0% 0,0 0}}
+
+/* ---- Fuego: llamas que suben por bandas ---- */
+.kcx-ne-fire{
+  background-image:linear-gradient(0deg,#c02a0c 0 20%,#ee4a1a 20% 42%,#ff9a1f 42% 62%,#ffe27a 62% 78%,#ff9a1f 78% 90%,#c02a0c 90% 100%);
+  background-size:100% 50%;background-repeat:repeat-y;
+  filter:drop-shadow(1px 1px 0 #3a0a05) drop-shadow(0 0 5px rgba(255,106,26,.7));
+  animation:kcx-flames .9s steps(6) infinite;
+}
+@keyframes kcx-flames{from{background-position:0 0}to{background-position:0 -100%}}
+
+/* ---- Arcoíris: espectro en celdas que se desplaza ---- */
+.kcx-ne-rainbow{
+  background-image:
+    linear-gradient(180deg,rgba(255,255,255,.38) 0 28%,transparent 28% 72%,rgba(0,0,0,.28) 72% 100%),
+    linear-gradient(90deg,#ff4d4d 0 16.66%,#ff9a1f 16.66% 33.33%,#ffd84a 33.33% 50%,#3fd01f 50% 66.66%,#35d0ff 66.66% 83.33%,#b46bff 83.33% 100%);
+  background-size:100% 100%,50% 100%;
+  background-repeat:no-repeat,repeat-x;
+  filter:drop-shadow(1px 1px 0 #150a03) drop-shadow(-1px -1px 0 #150a03);
+  animation:kcx-bands 1.2s steps(6) infinite;
+}
+@keyframes kcx-bands{from{background-position:0 0,0 0}to{background-position:0 0,100% 0}}
+
+/* Respeta el ajuste "reducir movimiento" del sistema */
+@media (prefers-reduced-motion:reduce){
+  .kcx-ne-neon,.kcx-ne-ice,.kcx-ne-gold,.kcx-ne-fire,.kcx-ne-rainbow{animation:none}
+}
