@@ -67,7 +67,7 @@ button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}but
       <div class="row"><label>Precio (XP)<input id="cost" type="number" min="0" value="3000"></label><label>Orden<input id="sort" type="number" value="100"></label></div>
       <div class="row"><label>Colección (opcional)<input id="coll" maxlength="30" placeholder="Halloween"></label><label>Clase CSS (opcional)<input id="css" maxlength="40" placeholder="fr-pumpkin"></label></div>
       <label id="lInset">Tamaño del marco: <span id="vInset">-35.7</span> % (-35.7 = marcos de este set)<input id="inset" type="range" min="-60" max="-15" step=".1" value="-35.7"></label>
-      <div id="lDim"><label>Oscurecer fondo: <span id="vDim">0.15</span><input id="dim" type="range" min="0" max=".6" step=".05" value=".15"></label><label class="chk"><input id="border" type="checkbox"> La imagen ya trae su propio borde</label></div>
+      <div id="lDim"><label>Oscurecer fondo: <span id="vDim">0.15</span><input id="dim" type="range" min="0" max=".6" step=".05" value=".15"></label><label class="chk"><input id="border" type="checkbox"> La imagen ya trae su propio borde</label><label class="chk"><input id="wide" type="checkbox"> Fondo horizontal (el perfil se abre en vista ancha)</label></div>
       <label class="chk"><input id="active" type="checkbox" checked> Activo en la tienda</label><label class="chk"><input id="isnew" type="checkbox"> Marcar como “Nuevo”</label>
       <input id="id" type="hidden">
       <div class="acts"><button type="submit">Guardar</button><button type="button" class="ghost" id="reset">Nuevo</button><button type="button" class="del" id="del" hidden>Eliminar</button></div>
@@ -162,7 +162,7 @@ function renderList() {
 function fill(c) {
   $('id').value = c?.id || ''; $('ft').textContent = c ? 'Editar objeto' : 'Nuevo objeto'; $('del').hidden = !c; pending = null; pendUrl = c?.asset_url || ''; $('file').value = '';
   $('type').value = c?.type || 'frame'; $('name').value = c?.name || ''; $('desc').value = c?.description || ''; $('cost').value = c?.cost ?? 3000; $('sort').value = c?.sort ?? Math.max(100, ...ITEMS.map(i => i.sort + 1 || 0));
-  $('coll').value = c?.meta?.collection || ''; $('css').value = c?.css_class || ''; $('inset').value = c?.meta?.inset ?? -35.7; $('dim').value = c?.meta?.dim ?? .15; $('border').checked = !!c?.meta?.border;
+  $('coll').value = c?.meta?.collection || ''; $('css').value = c?.css_class || ''; $('inset').value = c?.meta?.inset ?? -35.7; $('dim').value = c?.meta?.dim ?? .15; $('border').checked = !!c?.meta?.border; $('wide').checked = !!c?.meta?.wide;
   $('active').checked = c ? c.active : true; $('isnew').checked = !!c?.meta?.new; sync(); renderList();
 }
 function sync() {
@@ -170,7 +170,7 @@ function sync() {
   const u = pendUrl, pv = $('pv');
   pv.innerHTML = !u ? '<small style="color:var(--tan)">Elegí una imagen para ver cómo queda</small>'
     : t === 'frame' ? `<div class="fa" style="--fi:url('${u}');--fin:${$('inset').value}%"><i></i></div>`
-    : t === 'background' ? `<div class="bgp" style="background-image:linear-gradient(rgba(0,0,0,${$('dim').value}),rgba(0,0,0,${$('dim').value})),url('${u}')">${esc($('name').value || 'Nombre')}<br><small>XP total 12.345</small></div>` : '';
+    : t === 'background' ? `<div class="bgp" style="${$('wide').checked ? 'height:150px;' : ''}background-image:linear-gradient(rgba(0,0,0,${$('dim').value}),rgba(0,0,0,${$('dim').value})),url('${u}')">${esc($('name').value || 'Nombre')}<br><small>XP total 12.345</small></div>` : '';
 }
 function pick(f) { if (!f) return; pending = f; if (pendUrl.startsWith('blob:')) URL.revokeObjectURL(pendUrl); pendUrl = URL.createObjectURL(f);
   if (!$('name').value) $('name').value = f.name.replace(/\.[^.]+$/, '').replace(/^(frame|bg|fondo|marco)[_-]/i, '').replace(/[_-]+/g, ' '); 
@@ -181,7 +181,7 @@ $('f').addEventListener('submit', async (e) => {
   if (pending) { const r = await upload(pending, type, name); if (!r.ok) return toast(r.reason || 'No se pudo subir la imagen'); url = r.url; }
   if (type !== 'name_effect' && !url && !$('css').value) return toast('Falta la imagen (o una clase CSS)');
   const r = await api('/upsert', {json: {id: $('id').value || slug(name), type, name, description: $('desc').value, cost: +$('cost').value, css_class: $('css').value.trim(), asset_url: url, sort: +$('sort').value, active: $('active').checked,
-    meta: {inset: +$('inset').value, dim: +$('dim').value, border: $('border').checked, collection: $('coll').value.trim(), new: $('isnew').checked}}});
+    meta: {inset: +$('inset').value, dim: +$('dim').value, border: $('border').checked, wide: $('wide').checked, collection: $('coll').value.trim(), new: $('isnew').checked}}});
   if (!r.ok) return toast(r.reason || 'Error al guardar'); toast('Guardado ✔'); await load(); fill(r.item);
 });
 $('list').addEventListener('click', async (e) => {
@@ -192,7 +192,7 @@ $('list').addEventListener('click', async (e) => {
 $('del').onclick = async () => { if (!confirm('¿Eliminar este objeto? Si alguien ya lo compró, mejor desactivalo.')) return;
   const r = await api('/delete', {json: {id: $('id').value}}); toast(r.ok ? 'Eliminado' : r.reason === 'in_use' ? 'Ya lo tienen usuarios: desactivalo en vez de eliminarlo' : r.reason); if (r.ok) { await load(); fill(null); } };
 $('reset').onclick = () => fill(null);
-['type', 'inset', 'dim', 'name'].forEach(i => $(i).addEventListener('input', sync)); $('file').onchange = () => pick($('file').files[0]);
+['type', 'inset', 'dim', 'name', 'wide'].forEach(i => $(i).addEventListener('input', sync)); $('file').onchange = () => pick($('file').files[0]);
 $('fType').onchange = $('fQ').oninput = renderList; $('go').onclick = enter; $('key').addEventListener('keydown', (e) => { if (e.key === 'Enter') enter(); });
 const bulk = $('bulk'); ['dragover', 'dragenter'].forEach(ev => bulk.addEventListener(ev, (e) => { e.preventDefault(); bulk.classList.add('on'); })); ['dragleave', 'drop'].forEach(ev => bulk.addEventListener(ev, () => bulk.classList.remove('on')));
 bulk.addEventListener('click', () => { const i = document.createElement('input'); i.type = 'file'; i.multiple = true; i.accept = 'image/*'; i.onchange = () => doBulk([...i.files]); i.click(); });
