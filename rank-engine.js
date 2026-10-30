@@ -102,9 +102,9 @@
   function readCache() { try { var c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); return c && Array.isArray(c.d) ? c : null; } catch (e) { return null; } }
   function init(db, onChange) {
     if (onChange) listeners.push(onChange);
-    var c = readCache(), fresh = c && Date.now() - c.t < TTL;
-    if (c) set(c.d);
-    if (fresh || !db) return Promise.resolve(false);
+    var c = readCache();
+    if (c) set(c.d);                                  // la caché solo sirve para pintar rápido: SIEMPRE se consulta la base (es una consulta liviana)
+    if (!db) return Promise.resolve(false);
     return Promise.resolve(db.rpc('get_rank_defs')).then(function (res) {
       if (!res || res.error || !Array.isArray(res.data)) return false;
       try { localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), d: res.data })); } catch (e) {}
