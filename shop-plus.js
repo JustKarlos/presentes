@@ -37,9 +37,26 @@
 
 .sp-item .prev{overflow:visible;min-height:120px}
 .sp-new.sp-ret{background:#8a7650;color:#fff}
+
+/* Visor de prueba */
+.sp-item.tried{box-shadow:inset 0 0 0 2px var(--leaf)}
+.sp-try{width:100%;font-size:.9rem}.sp-try[aria-pressed=true]{border-color:#4be01a;color:#7dff4a}
+.sp-prev{max-height:calc(100vh - 2rem);overflow:auto}
+.sp-vh{display:flex;flex-wrap:wrap;gap:.3rem;align-items:center}.sp-vt{display:flex;gap:.3rem}
+.sp-lv{display:grid;gap:.1rem;font-size:.8rem;color:var(--tan)}.sp-lv input{accent-color:#53fc18;width:100%}
+.sp-who input{width:100%;background:#181a18;border:2px solid var(--rim);border-radius:8px;color:var(--cream);padding:.3rem .6rem;font:inherit;text-shadow:none}
+.sp-tried,.sp-buys{display:grid;gap:.3rem}.sp-cost{font-size:.85rem}
+.sp-chat{background:#0b0e0f;border-radius:8px;padding:.6rem;display:grid;gap:.35rem;font-family:system-ui,sans-serif;font-size:.85rem;font-weight:700;text-shadow:none;color:#e6e6e6}
+.sp-chat .cl{display:flex;align-items:center;gap:.3rem;flex-wrap:wrap}.sp-chat small{color:#6b7370;font-weight:600}
+.sp-pod{display:grid;justify-items:center;gap:.2rem;padding:1.6rem 0 .6rem;background:#161816;border-radius:8px;margin-bottom:.4rem}
+.sp-det{border-top:1px solid var(--line);padding-top:.4rem;display:grid;gap:.3rem}
+.sp-paused,.sp-paused *,.sp-paused *::after{animation-play-state:paused!important}
+.sp-foldbtn{display:none}
+@media (max-width:760px){.sp-foldbtn{display:inline-flex}.sp-prev.fold>*:not(.sp-vh){display:none}.sp-prev{max-height:56vh}}
 `; document.head.append(st); }
   document.documentElement.dataset.shopPlus = '2'; console.info('[tienda v2] activa');
-  const ST = {type: 'all', q: '', sort: 'new', mine: false, afford: false, sel: null, confirm: null, busy: false};
+  const ST = {type: 'all', q: '', sort: 'new', mine: false, afford: false, sel: null, confirm: null, busy: false,
+    try: {frame: null, name_effect: null, background: null}, tryUser: null, view: 'profile', lvl: null, pause: false, fold: false};
   const root = document.querySelector('#shopModal .card');
   root.classList.add('sp');
   root.innerHTML = `
@@ -95,16 +112,65 @@
   function renderGrid() {
     const t = tiers(), u = me();
     $('shopGrid').innerHTML = !COS.size ? '<div class="item sp-sk"></div>'.repeat(6)
-      : list().map(c => `<div class="item sp-item r${rar(c, t)}${eqd(c) ? ' eq' : ''}${ST.sel === c.id ? ' sel' : ''}" data-sel="${esc(c.id)}">${!c.active ? '<span class="sp-new sp-ret">Retirado</span>' : isNew(c) ? '<span class="sp-new">Nuevo</span>' : ''}
+      : list().map(c => `<div class="item sp-item r${rar(c, t)}${eqd(c) ? ' eq' : ''}${ST.sel === c.id ? ' sel' : ''}${tried(c.id) ? ' tried' : ''}" data-sel="${esc(c.id)}">${!c.active ? '<span class="sp-new sp-ret">Retirado</span>' : isNew(c) ? '<span class="sp-new">Nuevo</span>' : ''}
           <div class="prev">${tile(c, u)}</div><b class="in">${esc(c.name)}</b><small>${esc(c.description || '')}</small>
+          <button type="button" class="btn ghost sp-try" data-try="${esc(c.id)}" aria-pressed="${tried(c.id)}">${tried(c.id) ? 'Probando' : 'Probar'}</button>
           <div class="ibot"><span class="cost">${own(c) ? (eqd(c) ? '<span class="badge-eq">Equipado</span>' : 'Tuyo') : nf(c.cost) + ' XP'}</span>${primary(c)}</div></div>`).join('')
         || '<p class="empty" style="grid-column:1/-1">No hay objetos con esos filtros.</p>';
   }
+  // ---- visor de prueba: 100 % cliente, no llama a /shop/* hasta confirmar una compra ----
+  const TL = {frame: 'Marco', name_effect: 'Nombre', background: 'Fondo'};
+  const lvOf = xp => Math.floor(Math.pow(Math.max(Number(xp) || 0, 0) / 100, 1 / 1.5));
+  const baseU = () => ST.tryUser || me();
+  const baseLv = () => ST.tryUser ? (Number(ST.tryUser.level) || 0) : wallet ? lvOf(wallet.xp) : 5;
+  const curLv = () => ST.lvl ?? baseLv();
+  const pickT = t => ST.try[t] || (ST.tryUser ? '' : wallet?.equipped?.[t] || '');
+  const tried = id => Object.values(ST.try).includes(id);
+  const triedList = () => ['frame', 'name_effect', 'background'].map(t => COS.get(ST.try[t])).filter(Boolean);
+  function stageHtml() {
+    const u = {...baseU(), frame_id: pickT('frame') || '', name_id: pickT('name_effect') || ''}, l = curLv(), title = rankOf(l)[1];
+    if (ST.view === 'chat') return `<div class="sp-chat" aria-label="Vista previa en el chat"><div class="cl"><small>12:34</small>${sprite(rankKey(l), 18)}<b>${nameHtml(u)}</b><span>:</span><span style="font-weight:600">¡Qué buen directo, vamos!</span></div><div class="cl"><small>12:34</small><b style="color:#7fb4ff">viewer123</b><span>:</span><span style="font-weight:600">jajaja GG</span></div></div>`;
+    const xp = ST.tryUser?.xp ?? wallet?.xp ?? 1234;
+    if (ST.view === 'rank') return `<div class="sp-pod" aria-label="Vista previa del podio">${avatarF(u, 72)}<span class="nm" style="font-family:var(--display);font-size:1.2rem">${nameHtml(u)}</span><span class="cost">${nf(xp)} XP</span></div>
+      <div class="row" style="padding:.4rem .2rem"><span class="rk">1</span>${avatarF(u, 40)}<span class="info"><b>${nameHtml(u)}<span class="lvl">Nv. ${l}</span></b><small class="rk2">${sprite(rankKey(l), 14)}<span>${esc(title)} · ahora mismo</span></small></span><span class="total">${nf(xp)} XP</span></div>`;
+    const bg = COS.get(pickT('background')), cls = bg ? bg.css + (bg.url ? ' pb-img' + (bg.meta?.border ? ' pb-own' : '') : '') : '', st = bg?.url ? ` style="--pbimg:url('${esc(bg.url)}');--pbdim:${bg.meta?.dim ?? .15}"` : '';
+    return `<div class="card sp-mini ${cls}"${st}><div class="mh">${avatarF(u, 64)}<div><h2>${nameHtml(u)}</h2><p>@${esc(u.username)} · Nv. ${l}</p></div></div><div class="rankrow">${sprite(rankKey(l), 28)}<b>${esc(title)}</b></div><div class="pair"><div><span>XP total</span><b>${nf(xp)}</b></div><div><span>Puesto en XP</span><b>#1</b></div></div></div>`;
+  }
+  const stage = () => { const e = $('spStage'); if (e) e.innerHTML = stageHtml(); };
   function renderPrev() {
-    const c = ST.sel && COS.get(ST.sel), t = tiers(), p = $('spPrev'); p.classList.toggle('empty', !c);
-    p.innerHTML = mini(c) + (!c ? '<small class="sp-hint">Elegí un objeto para verlo en tu perfil.</small>' : `<div><b class="in">${esc(c.name)}</b> <span class="sp-rar r${rar(c, t)}">${RL[rar(c, t)]}</span><small style="display:block;color:var(--tan)">${esc(c.description || '')}</small></div>`
-      + (ST.confirm === c.id && wallet ? `<div class="sp-conf"><p>¿Comprar <b>${esc(c.name)}</b> por ${nf(c.cost)} XP? Te quedarán ${nf(wallet.balance - c.cost)} XP.</p><div class="acts">${btn('confirm', 'Confirmar', c)}${btn('cancel', 'Cancelar', c, 'ghost')}</div></div>`
-        : `<div class="ibot"><span class="cost">${own(c) ? 'Tuyo' : nf(c.cost) + ' XP'}</span>${primary(c)}</div>`));
+    const p = $('spPrev'), sel = ST.sel && COS.get(ST.sel), t = tiers(), list = triedList(), buys = list.filter(c => !own(c)), total = buys.reduce((s, c) => s + c.cost, 0);
+    const a = document.activeElement, key = a && p.contains(a) ? (a.dataset.view ? `[data-view="${a.dataset.view}"]` : a.dataset.pv ? `[data-pv="${a.dataset.pv}"]${a.dataset.type ? `[data-type="${a.dataset.type}"]` : ''}` : '') : '';
+    p.classList.toggle('empty', !list.length && !sel && !ST.tryUser); p.classList.toggle('fold', ST.fold); p.classList.toggle('sp-paused', ST.pause);
+    p.innerHTML = `<div class="sp-vh"><div class="sp-vt" role="group" aria-label="Vista">${[['profile', 'Perfil'], ['chat', 'Chat'], ['rank', 'Ranking']].map(([v, l]) => `<button type="button" class="chip${ST.view === v ? ' on' : ''}" data-view="${v}" aria-pressed="${ST.view === v}">${l}</button>`).join('')}</div>
+        <button type="button" class="chip" data-pv="pause" aria-pressed="${ST.pause}">${ST.pause ? 'Reanudar animaciones' : 'Pausar animaciones'}</button>
+        <button type="button" class="chip sp-foldbtn" data-pv="fold" aria-expanded="${!ST.fold}">${ST.fold ? 'Mostrar visor' : 'Plegar'}</button></div>
+      <div id="spStage">${stageHtml()}</div>
+      <label class="sp-lv"><span>Nivel: <output id="spLvO">${curLv()}</output></span><input id="spLv" type="range" min="0" max="60" value="${curLv()}"></label>
+      <div class="sp-who"><label><span class="sr">Probar con otro usuario de Kick</span><input id="spWho" type="search" placeholder="Probar con otro usuario de Kick…" autocomplete="off"></label>${ST.tryUser ? `<small class="sp-hint">Probando con @${esc(ST.tryUser.username)} <button type="button" class="chip" data-pv="me">Usar el mío</button></small>` : ''}</div>
+      <div class="sp-tried">${['frame', 'name_effect', 'background'].map(k => { const c = COS.get(ST.try[k]); return `<div class="sp-slot"><div><small>${TL[k]} a probar</small><b>${c ? esc(c.name) : '—'}</b></div>${c ? `<button type="button" data-pv="rm" data-type="${k}" aria-label="Quitar prueba de ${TL[k]}">&times;</button>` : ''}</div>`; }).join('')}</div>
+      ${list.length ? `<div class="sp-cost"><b>Total de lo probado: ${nf(total)} XP</b>${wallet && total ? ` · te faltan ${nf(Math.max(0, total - wallet.balance))} XP` : ''}</div>
+        <div class="sp-buys">${buys.map(c => `<div class="ibot"><span>${esc(c.name)} · <span class="cost">${nf(c.cost)} XP</span></span>${primary(c)}</div>`).join('')}</div>
+        <button type="button" class="btn ghost" data-pv="clear">Limpiar todo</button>` : '<small class="sp-hint">Pulsa «Probar» en cualquier objeto para verlo con tu nombre y avatar en el perfil, el chat y el ranking.</small>'}
+      ${sel ? `<div class="sp-det"><div><b class="in">${esc(sel.name)}</b> <span class="sp-rar r${rar(sel, t)}">${RL[rar(sel, t)]}</span><small style="display:block;color:var(--tan)">${esc(sel.description || '')}</small></div><div class="ibot"><span class="cost">${own(sel) ? 'Tuyo' : nf(sel.cost) + ' XP'}</span>${primary(sel)}</div></div>` : ''}`;
+    if (key) p.querySelector(key)?.focus();
+  }
+  function markTry() {
+    document.querySelectorAll('#shopGrid .sp-item').forEach(el => { const on = tried(el.dataset.sel), b = el.querySelector('.sp-try'); el.classList.toggle('tried', on); if (b) { b.setAttribute('aria-pressed', on); b.textContent = on ? 'Probando' : 'Probar'; } });
+  }
+  function toggleTry(id) { const c = COS.get(id); if (!c || !(c.type in ST.try)) return; ST.try[c.type] = ST.try[c.type] === id ? null : id; markTry(); renderPrev(); }
+  function pvAct(a, type) {
+    if (a === 'pause') ST.pause = !ST.pause;
+    else if (a === 'fold') ST.fold = !ST.fold;
+    else if (a === 'rm') ST.try[type] = null;
+    else if (a === 'clear') ST.try = {frame: null, name_effect: null, background: null};
+    else if (a === 'me') { ST.tryUser = null; ST.lvl = null; }
+    markTry(); renderPrev();
+  }
+  async function setWho(raw) {
+    const name = normUser(raw); if (!name) return;
+    const u = await rpc('get_user_stats', {p_username: name});
+    if (!u) return msg(`No encontramos a «${raw.trim()}». Prueba con el nombre de usuario exacto.`, false);
+    ST.tryUser = u; ST.lvl = null; renderPrev();
   }
   function render() {
     $('shopWallet').innerHTML = !sess ? `<div class="wallet"><span>Inicia sesión con tu cuenta de Kick para comprar y equipar.</span><a class="btn" href="${FN_URL}/login/start">Iniciar sesión con Kick</a></div>`
@@ -138,13 +204,20 @@
   root.addEventListener('click', e => {
     const a = e.target.closest('[data-act]'), t = e.target.closest('#spTabs .chip'), it = e.target.closest('[data-sel]');
     if (e.target.id === 'logoutBtn') return logout(true);
+    const tr = e.target.closest('[data-try]'); if (tr) { e.stopPropagation(); return toggleTry(tr.dataset.try); }
+    const vw = e.target.closest('[data-view]'); if (vw) { ST.view = vw.dataset.view; return renderPrev(); }
+    const pv = e.target.closest('[data-pv]'); if (pv) return pvAct(pv.dataset.pv, pv.dataset.type);
     if (t) { ST.type = t.dataset.t; return render(); }
     if (e.target.id === 'spMine') { ST.mine = !ST.mine; return render(); }
     if (e.target.id === 'spAfford') { ST.afford = !ST.afford; return render(); }
     if (a) { e.stopPropagation(); return act(a.dataset.act, a.dataset.id, a.dataset.type); }
-    if (it) { ST.sel = it.dataset.sel; ST.confirm = null; render(); }
+    if (it) { ST.sel = it.dataset.sel; document.querySelectorAll('#shopGrid .sp-item').forEach(x => x.classList.toggle('sel', x.dataset.sel === ST.sel)); renderPrev(); }
   });
-  root.addEventListener('input', e => { if (e.target.id === 'spQ') { ST.q = e.target.value; renderGrid(); } });
+  root.addEventListener('input', e => {
+    if (e.target.id === 'spQ') { ST.q = e.target.value; renderGrid(); }
+    if (e.target.id === 'spLv') { ST.lvl = +e.target.value; $('spLvO').textContent = ST.lvl; stage(); }
+  });
+  root.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'spWho') { e.preventDefault(); setWho(e.target.value); } });
   root.addEventListener('change', e => { if (e.target.id === 'spSort') { ST.sort = e.target.value; render(); } });
 
   // ---- marcos con imagen (asset_url) en todo el sitio ----
@@ -166,7 +239,7 @@
   };
   window.renderShop = render;
   window.openShop = async () => {
-    typeof modalOn === 'function' ? modalOn($('shopModal')) : $('shopModal').classList.add('open'); $('shopClose').focus(); msg(''); ST.sel = null; ST.confirm = null; render();
+    typeof modalOn === 'function' ? modalOn($('shopModal')) : $('shopModal').classList.add('open'); $('shopClose').focus(); msg(''); ST.sel = null; ST.confirm = null; ST.try = {frame: null, name_effect: null, background: null}; ST.tryUser = null; ST.lvl = null; render();
     await loadCosmetics(); if (sess) { const ok = await shopApi('/shop/session'); if (ok.ok) await loadWallet(); }
     render();
   };
