@@ -437,11 +437,10 @@ const SPRITES={
   caja:["oooooooooo","oBBBBBBBBo","oBoBBBBoBo","oBBoBBoBBo","oBBBooBBBo","oBBBooBBBo","oBBoBBoBBo","oBoBBBBoBo","oBBBBBBBBo","oooooooooo"],
   tiempo:[".........." ,"..oooooo..",".oLLLLLLo.","oLLLLkLLLo","oLLLLkLLLo","oLLLLkkkLo","oLLLLLLLLo",".oLLLLLLo.","..oooooo..",".........."]
 };
-const RANKS=[[35,'Maestro del Tiempo','tiempo'],[20,'Rompe Cajas','caja'],[10,'Guardián Aku Aku','mascara'],[5,'Cazador de Gemas','gema'],[0,'Fruta Wumpa','fruta']];
-const rankOf = (lv) => RANKS.find(r => lv >= r[0]);
-const rankKey = (lv) => rankOf(lv)[2];
-const nextTier = (lv) => [...RANKS].reverse().find(r => r[0] > lv);
-const spriteCache = {};
+const rankOf = (lv) => { const d = RankEngine.of(lv); return [d.min_level, d.title, d.key]; };
+const rankKey = (lv) => RankEngine.keyOf(lv);
+const nextTier = (lv) => { const n = RankEngine.nextOf(lv); return n ? [n.min_level, n.title] : null; };
+const sprite = (key, size) => RankEngine.sprite(key, size);
 function sprite(key, size){
   const k = key + size;
   if(spriteCache[k]) return spriteCache[k];
@@ -873,6 +872,7 @@ db.channel('level-ups')
 setInterval(() => { loadSummary(); loadBoard(); loadFeed(); if(!$('questView').hidden) loadQuests(); }, 30000);   // mensajes y tiempo activo se refrescan así
 
 loadCosmetics().finally(() => { loadSummary(); loadBoard(); loadFeed(); if(openShopAfterBoot) openShop(); });
+RankEngine.init(db, () => { try { render(); renderFeed(); } catch {} });   // caché de 1 h; vuelve a dibujar si cambió algún rango
 </script>
 <script src="shop-plus.js"></script>
 </body>
