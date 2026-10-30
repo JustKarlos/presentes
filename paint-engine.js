@@ -26,7 +26,8 @@
   var RGB = /^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(?:,\s*(?:0|1|0?\.\d{1,3}|1\.0)\s*)?\)$/i;
   var HSL = /^hsla?\(\s*\d{1,3}(?:\.\d{1,2})?\s*,\s*\d{1,3}(?:\.\d{1,2})?%\s*,\s*\d{1,3}(?:\.\d{1,2})?%\s*(?:,\s*(?:0|1|0?\.\d{1,3}|1\.0)\s*)?\)$/i;
 
-  var hosts = ['nlgkpoomhgehuabrkwhp.supabase.co'];
+  var hosts = [{ host: 'nlgkpoomhgehuabrkwhp.supabase.co', prefix: '/storage/v1/object/public/' }];   // tu almacenamiento (config() puede cambiarlo)
+  var fixed = [{ host: 'cdn.7tv.app', prefix: '/paint/' }];                                          // imágenes de pinturas de 7TV (siempre permitidas)
   var opts = { animations: true, shadows: true, prefix: 'pt' };
   var rules = {};                                   // prefix -> { key: {sig, css} }
 
@@ -37,7 +38,8 @@
   function safeUrl(u) {
     if (typeof u !== 'string' || u.length > 500) return null;
     var p; try { p = new URL(u); } catch (e) { return null; }
-    if (p.protocol !== 'https:' || hosts.indexOf(p.hostname) < 0 || p.pathname.indexOf('/storage/v1/object/public/') !== 0) return null;
+    var okHost = hosts.concat(fixed).some(function (h) { return h.host === p.hostname && p.pathname.indexOf(h.prefix) === 0; });
+    if (p.protocol !== 'https:' || !okHost || !/\.(?:png|webp|gif|avif|jpe?g|svg)$/i.test(p.pathname)) return null;
     return p.href.replace(/["'()\\\s<>]/g, function (c) { return encodeURIComponent(c); });
   }
 
@@ -191,7 +193,11 @@
       c.toggle(opts.prefix + '-noshadow', !opts.shadows);
     }
   }
-  function config(o) { if (o && Array.isArray(o.imageHosts)) hosts = o.imageHosts.filter(function (h) { return typeof h === 'string' && /^[a-z0-9.-]+$/i.test(h); }); }
+  function config(o) {
+    if (!o || !Array.isArray(o.imageHosts)) return;
+    hosts = o.imageHosts.map(function (h) { return typeof h === 'string' ? { host: h, prefix: '/storage/v1/object/public/' } : h; })
+      .filter(function (h) { return h && /^[a-z0-9.-]+$/i.test(h.host) && /^\/[a-z0-9\/_-]*$/i.test(h.prefix || ''); });
+  }
 
   /* ---------- presets (colores y nombres propios) ---------- */
   function hard(cols, pos) { var o = []; cols.forEach(function (c, i) { o.push([c, pos[i]], [c, pos[i + 1]]); }); return o; }
