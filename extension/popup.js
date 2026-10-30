@@ -4,9 +4,12 @@
   var $ = function (id) { return document.getElementById(id); };
   var ask = function (msg) { return new Promise(function (res) { chrome.runtime.sendMessage(msg, function (r) { res(chrome.runtime.lastError ? { ok: false, error: chrome.runtime.lastError.message } : r); }); }); };
 
+  var SUB = ['paints', 'badges', 'animations', 'shadows', 'skipPainted'];
+  function lock(on) { SUB.forEach(function (k) { $(k).disabled = !on; }); }
+
   function render(s) {
-    $('enabled').checked = s.enabled; $('paints').checked = s.paints; $('badges').checked = s.badges;
-    $('paints').disabled = $('badges').disabled = !s.enabled;
+    SUB.forEach(function (k) { $(k).checked = s[k]; });
+    lock(s.enabled);
     $('shop').href = s.siteUrl.replace(/\/?$/, '/') + '#tienda';
     $('supabaseUrl').value = s.supabaseUrl; $('anonKey').value = s.anonKey; $('siteUrl').value = s.siteUrl; $('debug').checked = s.debug;
   }
@@ -29,17 +32,17 @@
         if (chrome.runtime.lastError || !st) { out.innerHTML = '<span class="warn">Recarga la pestaña de Kick para activar la extensión.</span>'; return; }
         if (!st.enabled) { out.textContent = 'Desactivado.'; return; }
         if (!st.rowsOnPage) { out.innerHTML = '<span class="warn">No se detecta el chat. Si ya está abierto, Kick pudo cambiar su estructura (ver README).</span>'; return; }
-        out.textContent = st.rowsOnPage + ' mensajes en pantalla · ' + st.applied + ' con insignia o pintura · ' + st.cached + ' usuarios en caché' + (st.errors ? ' · ' + st.errors + ' errores de red' : '');
+        out.textContent = st.rowsOnPage + ' mensajes en pantalla · ' + st.applied + ' con insignia o pintura · ' + st.cached + ' usuarios en caché' + (st.skipped ? ' · ' + st.skipped + ' con pintura de otra extensión' : '') + (st.errors ? ' · ' + st.errors + ' errores de red' : '');
       });
     });
   }
 
   chrome.storage.sync.get(KCX_DEFAULTS, function (s) {
     render(s);
-    ['enabled', 'paints', 'badges'].forEach(function (k) {
+    ['enabled'].concat(SUB).forEach(function (k) {
       $(k).addEventListener('change', function () {
         var o = {}; o[k] = $(k).checked; chrome.storage.sync.set(o);
-        if (k === 'enabled') $('paints').disabled = $('badges').disabled = !$(k).checked;
+        if (k === 'enabled') lock($(k).checked);
         setTimeout(diagnose, 400);
       });
     });
@@ -56,7 +59,7 @@
     } catch (err) { msg.className = 'msg err'; msg.textContent = 'Las direcciones deben empezar por https://'; return; }
     chrome.permissions.contains({ origins: [origin + '/*'] }, function (has) {
       var save = function () {
-        chrome.storage.sync.set(next, function () { ask({ type: 'clearCache' }).then(function () { msg.textContent = 'Guardado.'; render(Object.assign({}, KCX_DEFAULTS, next, { enabled: $('enabled').checked, paints: $('paints').checked, badges: $('badges').checked })); checkConnection(); }); });
+        chrome.storage.sync.set(next, function () { ask({ type: 'clearCache' }).then(function () { msg.textContent = 'Guardado.'; render(Object.assign({}, KCX_DEFAULTS, next, { enabled: $('enabled').checked, paints: $('paints').checked, badges: $('badges').checked, animations: $('animations').checked, shadows: $('shadows').checked, skipPainted: $('skipPainted').checked })); checkConnection(); }); });
       };
       if (has) save();
       else chrome.permissions.request({ origins: [origin + '/*'] }, function (ok) { if (ok) save(); else { msg.className = 'msg err'; msg.textContent = 'Hace falta permiso para conectar con esa dirección.'; } });
