@@ -33,7 +33,7 @@
   var IMG = /^https:\/\/[a-z0-9.-]+\/[^\s"'<>()\\]+\.(?:png|svg|webp)$/i;
   var CACHE_KEY = 'rankDefs', TTL = 60 * 60 * 1000;
 
-  var defs = [], byKey = {}, cache = {}, signature = '', listeners = [];
+  var defs = [], byKey = {}, byId = {}, cache = {}, signature = '', listeners = [];
 
   function validSprite(s) {
     if (!s || typeof s !== 'object' || !s.pal || typeof s.pal !== 'object' || !Array.isArray(s.rows) || s.rows.length !== 10) return null;
@@ -75,14 +75,16 @@
     list.sort(function (a, b) { return a.min_level - b.min_level; });
     var sig = list.map(function (d) { return [d.min_level, d.title, d.key, d.image_url || '', d.sprite ? JSON.stringify(d.sprite) : ''].join('~'); }).join('|');
     if (sig === signature) return false;
-    defs = list; signature = sig; byKey = {}; cache = {};
-    for (i = 0; i < defs.length; i++) byKey[defs[i].key] = defs[i];
+    defs = list; signature = sig; byKey = {}; byId = {}; cache = {};
+    for (i = 0; i < defs.length; i++) { byKey[defs[i].key] = defs[i]; if (defs[i].id != null) byId[defs[i].id] = defs[i]; }
     BUILTIN.forEach(function (k) { if (!byKey[k]) byKey[k] = norm({ min_level: 0, title: k, builtin: k }); });
     return true;
   }
   set(FALLBACK.map(function (f) { return { min_level: f[0], title: f[1], builtin: f[2] }; }));
 
   function of(level) { level = Number(level) || 0; var d = defs[0], i; for (i = 0; i < defs.length; i++) if (defs[i].min_level <= level) d = defs[i]; return d; }
+  // Rango que se MUESTRA: el elegido por la persona si ya lo desbloqueó (min_level <= nivel) y sigue activo; si no, el que corresponde a su nivel.
+  function shownFor(level, rankId) { var d = rankId != null ? byId[rankId] : null; return d && d.min_level <= (Number(level) || 0) ? d : of(level); }
   function nextOf(level) { level = Number(level) || 0; for (var i = 0; i < defs.length; i++) if (defs[i].min_level > level) return defs[i]; return null; }
   function sprite(key, size) {
     var ck = key + '|' + size; if (cache[ck]) return cache[ck];
@@ -114,7 +116,9 @@
   }
   // Tras la carga rápida desde caché, avisa si cambió algo respecto a lo que ya se dibujó
   var api = { init: init, set: set, of: of, nextOf: nextOf, keyOf: function (l) { return of(l).key; }, byKey: function (k) { return byKey[k]; }, sprite: sprite, srcOf: srcOf,
-    fallbackKey: function (l) { return of(l).builtin || 'fruta'; }, svg: svg, validSprite: validSprite, builtinSprite: builtinSprite, sig: function () { return signature; },
+    fallbackKey: function (l, rid) { return shownFor(l, rid).builtin || 'fruta'; },
+    shownFor: shownFor, byId: function (id) { return byId[id]; }, keyOfUser: function (u) { return shownFor(u && u.level, u && u.rank_id).key; },
+    unlocked: function (level) { level = Number(level) || 0; return defs.filter(function (d) { return d.min_level <= level; }); }, svg: svg, validSprite: validSprite, builtinSprite: builtinSprite, sig: function () { return signature; },
     all: function () { return defs.slice(); }, BUILTIN: BUILTIN, PAL: PAL, clearCache: function () { try { localStorage.removeItem(CACHE_KEY); } catch (e) {} } };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.RankEngine = api;
