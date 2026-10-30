@@ -25,7 +25,25 @@ button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}but
 .it small{color:var(--tan)}.it b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.it .bar{display:flex;gap:.3rem;align-items:center;justify-content:space-between}
 .bar button{padding:.15rem .6rem;font-size:.8rem}.tools{display:flex;gap:.5rem;margin-bottom:.6rem}.tools>*{flex:1}
 #toast{position:fixed;right:1rem;bottom:1rem;background:#2b2d2a;border:2px solid var(--gold);border-radius:10px;padding:.6rem 1rem;display:none;max-width:90vw;z-index:9}
+.tabsA{display:flex;gap:.4rem;margin-bottom:.8rem}.tabsA button{background:#353934;color:#d9d5c4;border:2px solid var(--rim)}.tabsA button.on{border-color:#4be01a;color:#7dff4a}
+.pvbox{display:grid;gap:.4rem;margin-bottom:.5rem}.pv{border-radius:8px;padding:.7rem;text-align:center;min-height:64px;display:grid;place-items:center}.pv.dk{background:#0b0e0f}.pv.lt{background:#f1f1f1}
+.pchat{background:#0b0e0f;border-radius:8px;padding:.5rem .7rem;font:700 .9rem system-ui,sans-serif;color:#e6e6e6;text-shadow:none}.pchat small{color:#6b7370;margin-right:.4rem}
+.perr{color:#ff8a6a;font-size:.8rem;min-height:1.1rem}.pnote{color:var(--gold);font-size:.8rem}
+.pl{border:2px solid var(--rim);border-radius:10px;padding:.5rem;margin:.5rem 0;position:relative;min-width:0}.pl legend{color:var(--gold);font-size:.85rem;padding:0 .3rem}
+.pls{position:absolute;right:.4rem;top:-1.1rem;display:flex;gap:.2rem}.pls button,.psh button,.sr2 button{padding:.1rem .5rem;font-size:.8rem}.pls button:disabled,.sr2 button:disabled{opacity:.4}
+.cf{display:flex;gap:.3rem}.cf input[type=color]{width:42px!important;flex:none;padding:.1rem!important;height:34px;background:#181a18}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}.row4{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem}
+.sbar{position:relative;height:26px;border:2px solid var(--rim);border-radius:6px;margin:.4rem .6rem .7rem}
+.sbar .sh{position:absolute;top:-6px;width:14px;height:36px;margin-left:-7px;border:2px solid #fff;border-radius:4px;box-shadow:0 0 0 2px #000;cursor:ew-resize;touch-action:none}
+.stops{display:grid;gap:.3rem;margin-bottom:.3rem}.sr2{display:grid;grid-template-columns:minmax(0,1fr) 80px auto;gap:.3rem;align-items:center}
+.psh{border:1px dashed var(--rim);border-radius:8px;padding:.4rem;margin:.4rem 0;display:grid;gap:.3rem}
+#pJson{min-height:90px;font:12px ui-monospace,monospace}.sec{color:var(--gold);font-weight:800;margin:.8rem 0 .2rem}
+.rgrid{display:grid;grid-template-columns:repeat(10,28px);gap:1px;background:#0a0c0a;border:2px solid var(--rim);width:max-content;touch-action:none;user-select:none}
+.rgrid i{display:block;width:28px;height:28px;background:repeating-conic-gradient(#2a2d2a 0 25%,#212421 0 50%) 0 0/14px 14px;cursor:crosshair}
+.rsw{width:30px;height:30px;border:2px solid var(--rim);border-radius:6px;padding:0;position:relative}.rsw[aria-pressed=true]{outline:3px solid var(--gold)}
 </style></head><body><main>
+<script src="paint-engine.js"></script>
+<script src="rank-engine.js"></script>
 <script>const CFG = {SUPABASE_URL: "https://nlgkpoomhgehuabrkwhp.supabase.co",
   SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sZ2twb29taGdlaHVhYnJrd2hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE3NjE3NzAsImV4cCI6MjEwNzMzNzc3MH0.DM1cUzclLbu8ej8m7PAQEja6X20gBadNiuqMEzbk-_g"};   // clave pública (la misma de index.html)</script>
 <h1>Admin · Cosméticos</h1>
@@ -35,6 +53,8 @@ button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}but
   <p style="margin-top:.7rem;font-size:.8rem;color:var(--tan)">¿No conecta? Abrí <a id="tl" target="_blank" rel="noopener" style="color:var(--gold)">este enlace</a>: si todo está bien verás <code>{"ok":false,"reason":"unauthorized"}</code>.</p>
 </section>
 <section id="app" hidden>
+  <nav class="tabsA" role="tablist" aria-label="Secciones"><button type="button" role="tab" class="on" data-tab="objs" aria-selected="true">Objetos</button><button type="button" role="tab" data-tab="paints" aria-selected="false">Pinturas</button><button type="button" role="tab" data-tab="ranks" aria-selected="false">Rangos</button></nav>
+  <div id="tabObjs">
   <div class="drop" id="bulk">Arrastrá varias imágenes acá para crear borradores rápido (cuadradas = marcos, el resto = fondos). Quedan desactivadas para que las revises.</div>
   <div class="cols">
     <form id="f" class="panel">
@@ -56,6 +76,60 @@ button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}but
       <div class="tools"><select id="fType"><option value="">Todos</option><option value="frame">Marcos</option><option value="background">Fondos</option><option value="name_effect">Nombres</option></select><input id="fQ" type="search" placeholder="Buscar…"></div>
       <div id="list" class="grid"></div></div>
   </div>
+</div>
+<div id="tabPaints" hidden><div class="cols">
+  <div class="panel"><h2>Efectos de nombre</h2>
+    <div class="tools"><button type="button" id="pNew">Nueva</button></div>
+    <div class="tools"><select id="pPreset" aria-label="Preset"></select><button type="button" class="ghost" id="pLoadPreset">Cargar preset</button></div>
+    <div id="pList" class="grid" style="grid-template-columns:1fr"></div></div>
+  <form id="pForm" class="panel">
+    <h2 id="pFt">Nueva pintura</h2>
+    <div class="pvbox"><div id="pvDark" class="pv dk"></div><div id="pvLight" class="pv lt"></div><div id="pvChat" class="pchat"></div></div>
+    <p id="pErr" class="perr" role="status"></p><p id="pNote" class="pnote"></p>
+    <label>Texto de ejemplo<input id="pSample" value="MiNombre" maxlength="24"></label>
+    <div class="row"><label>Nombre<input id="pName" maxlength="60"></label><label>Id (se genera solo)<input id="pId" readonly></label></div>
+    <label>Descripción<input id="pDesc" maxlength="200"></label>
+    <div class="row"><label>Precio (XP)<input id="pCost" type="number" min="0" value="6000"></label><label>Orden<input id="pSort" type="number" value="100"></label></div>
+    <label class="chk"><input id="pActive" type="checkbox" checked> Activa en la tienda</label>
+    <div class="sec">Capas (la última queda arriba)</div><div id="pLayers"></div><button type="button" class="ghost" id="pAddL">+ Capa</button>
+    <div class="sec">Sombras</div><div id="pShadows"></div><button type="button" class="ghost" id="pAddS">+ Sombra</button>
+    <div class="sec">Texto</div>
+    <div class="row3"><label>Peso<select id="gWeight" data-g="weight"><option>400</option><option>500</option><option>600</option><option>700</option><option>800</option><option>900</option></select></label>
+      <label class="chk" style="align-self:end"><input id="gUpper" data-g="upper" type="checkbox"> Mayúsculas</label>
+      <label class="chk" style="align-self:end"><input id="gStroke" data-g="stroke" type="checkbox"> Contorno</label></div>
+    <div class="row"><label>Grosor del contorno<input id="gStrokeW" data-g="stroke" type="number" min="0" max="3" step="0.5" value="1"></label><label>Color del contorno<span class="cf"><input type="color" data-pick value="#150a03" aria-label="Elegir color"><input id="gStrokeC" data-g="stroke" data-c type="text" value="#150a03" maxlength="60"></span></label></div>
+    <div class="acts"><button type="submit">Guardar</button><button type="button" class="ghost" id="pDraft">Guardar como borrador</button><button type="button" class="ghost" id="pDup">Duplicar</button><button type="button" class="ghost" id="pRestore" hidden>Restaurar versión anterior</button><button type="button" class="del" id="pDel" hidden>Eliminar</button></div>
+    <div class="sec">Importar / exportar JSON</div>
+    <textarea id="pJson" spellcheck="false" aria-label="JSON de la pintura"></textarea>
+    <div class="acts"><button type="button" class="ghost" id="pExport">Exportar (copiar)</button><button type="button" class="ghost" id="pImport">Importar</button></div>
+  </form></div></div>
+<div id="tabRanks" hidden><div class="cols">
+  <div class="panel"><h2>Rangos</h2>
+    <div class="tools"><button type="button" id="rNew">Nuevo rango</button></div>
+    <div id="rCover" class="pnote" role="status"></div>
+    <div id="rList" class="grid" style="grid-template-columns:1fr"></div></div>
+  <form id="rForm" class="panel">
+    <h2 id="rFt">Nuevo rango</h2>
+    <input id="rId" type="hidden">
+    <div class="row"><label>Nivel mínimo<input id="rMin" type="number" min="0" max="200" value="0"></label><label>Título<input id="rTitle" maxlength="40"></label></div>
+    <div class="row"><label>Insignia<select id="rSrc"><option value="builtin">Incluida</option><option value="sprite">Dibujada (10×10)</option><option value="image">Imagen subida</option></select></label>
+      <label id="rBuiltinL">Insignia incluida (o de respaldo)<select id="rBuiltin"></select></label></div>
+    <div id="rSpriteBox" hidden>
+      <div class="acts" style="margin:0 0 .4rem"><button type="button" class="ghost" id="rCopy">Copiar de la incluida</button><button type="button" class="ghost" id="rClear">Vaciar</button></div>
+      <div id="rPal" class="acts" style="margin:0 0 .4rem"></div>
+      <div id="rGrid" class="rgrid" aria-label="Cuadrícula de 10 por 10"></div>
+    </div>
+    <div id="rImgBox" hidden>
+      <label>Imagen (PNG o WEBP, cuadrada)<input id="rFile" type="file" accept="image/png,image/webp"></label>
+      <label>o URL https<input id="rUrl" type="text" placeholder="https://…supabase.co/storage/v1/object/public/…png"></label>
+    </div>
+    <div class="sec">Vista previa</div>
+    <div class="acts" id="rPrev" style="align-items:center;margin:0"></div>
+    <p id="rErr" class="perr" role="status"></p>
+    <div class="row"><label>Color de acento (opcional)<span class="cf"><input type="color" data-pick value="#ffc21a" aria-label="Elegir color"><input id="rAccent" data-c type="text" maxlength="60" placeholder="#ffc21a"></span></label><label>Orden<input id="rSort" type="number" value="0"></label></div>
+    <label class="chk"><input id="rActive" type="checkbox" checked> Activo</label>
+    <div class="acts"><button type="submit">Guardar</button><button type="button" class="del" id="rDel" hidden>Eliminar</button></div>
+  </form></div></div>
 </section><div id="toast"></div>
 <script>
 const $ = (id) => document.getElementById(id), FN = CFG.SUPABASE_URL + '/functions/v1/admin-cosmetics';
@@ -136,4 +210,264 @@ async function doBulk(files) {
 }
 $('tl').href = FN + '/ping';
 if (KEY) { $('key').value = KEY; enter(); }
+</script>
+<script>
+/* ===== Pestaña Pinturas (Fase 3) ===== */
+(() => {
+const PE = window.PaintEngine, $$ = (s, r = document) => r.querySelector(s), clone = (o) => JSON.parse(JSON.stringify(o));
+try { PE.config({imageHosts: [new URL(CFG.SUPABASE_URL).hostname]}); } catch {}
+const blank = () => ({v: 1, layers: [{type: 'linear', angle: 90, repeat: true, size: [200, 100], stops: [['#35d0ff', 0], ['#b46bff', 50], ['#35d0ff', 100]], anim: {mode: 'scroll-x', duration: 6, steps: 0}}], shadows: [{x: 1, y: 1, blur: 0, color: '#150a03'}], weight: 800});
+let P = blank(), cur = null;
+const hex6 = (c) => /^#[0-9a-f]{6}/i.test(c || '') ? c.slice(0, 7) : /^#[0-9a-f]{3}$/i.test(c || '') ? '#' + [...c.slice(1)].map(x => x + x).join('') : '#000000';
+const cf = (attrs, v) => `<span class="cf"><input type="color" data-pick value="${hex6(v)}" aria-label="Elegir color"><input type="text" data-c ${attrs} value="${esc(v)}" maxlength="60" spellcheck="false"></span>`;
+const opt = (list, c) => list.map(([v, l]) => `<option value="${v}" ${String(v) === String(c) ? 'selected' : ''}>${l}</option>`).join('');
+const nIn = (k, v, min, max, step = 1) => `<input type="number" data-k="${k}" min="${min}" max="${max}" step="${step}" value="${v ?? ''}">`;
+const barCss = (L) => 'linear-gradient(90deg,' + [...L.stops].sort((a, b) => a[1] - b[1]).map(s => `${s[0]} ${s[1]}%`).join(',') + ')';
+
+function setType(L, t) {
+  L.type = t;
+  if (t === 'solid') L.color = L.color || (L.stops && L.stops[0] && L.stops[0][0]) || '#ffffff';
+  else if (t === 'url') L.url = L.url || '';
+  else { if (!L.stops || L.stops.length < 2) L.stops = [['#ffffff', 0], ['#000000', 100]]; if (t === 'linear') L.angle = L.angle ?? 180; else L.shape = L.shape || 'ellipse'; }
+}
+function stopsHtml(L) {
+  return `<div class="sbar" style="background:${esc(barCss(L))}">${L.stops.map((s, i) => `<i class="sh" data-s="${i}" tabindex="0" role="slider" aria-label="Parada ${i + 1}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${s[1]}" style="left:${s[1]}%;background:${esc(s[0])}"></i>`).join('')}</div>
+  <div class="stops">${L.stops.map((s, i) => `<div class="sr2" data-s="${i}">${cf('data-k="stopc"', s[0])}<input type="number" data-k="stopp" min="0" max="100" step="0.1" value="${s[1]}" aria-label="Posición en %"><button type="button" class="ghost" data-a="rmstop" aria-label="Quitar parada" ${L.stops.length <= 2 ? 'disabled' : ''}>×</button></div>`).join('')}</div>
+  <button type="button" class="ghost" data-a="addstop" ${L.stops.length >= 12 ? 'disabled' : ''}>+ Parada</button>`;
+}
+function layerHtml(L, i, n) {
+  const t = L.type, a = L.anim || {mode: 'none', duration: 4, steps: 0}, sz = L.size || [100, 100];
+  const spec = t === 'linear' ? `<label>Ángulo: <b data-o="angle">${L.angle ?? 180}°</b><input type="range" min="0" max="360" data-k="angle" value="${L.angle ?? 180}"></label>`
+    : t === 'radial' ? `<label>Forma<select data-k="shape">${opt([['ellipse', 'Elipse'], ['circle', 'Círculo']], L.shape)}</select></label>`
+    : t === 'solid' ? `<label>Color${cf('data-k="color"', L.color || '#ffffff')}</label>`
+    : `<label>URL (https del almacenamiento del proyecto)<input type="text" data-k="url" value="${esc(L.url || '')}"></label>`;
+  return `<fieldset class="pl" data-i="${i}"><legend>Capa ${i + 1}${n > 1 && i === n - 1 ? ' (arriba)' : ''}</legend>
+    <div class="pls"><button type="button" class="ghost" data-a="up" aria-label="Subir capa" ${i === n - 1 ? 'disabled' : ''}>↑</button><button type="button" class="ghost" data-a="down" aria-label="Bajar capa" ${i === 0 ? 'disabled' : ''}>↓</button><button type="button" class="del" data-a="rm" aria-label="Quitar capa" ${n < 2 ? 'disabled' : ''}>×</button></div>
+    <div class="row"><label>Tipo<select data-k="type">${opt([['linear', 'Degradado lineal'], ['radial', 'Degradado radial'], ['solid', 'Color sólido'], ['url', 'Imagen']], t)}</select></label>${spec}</div>
+    <div class="row3"><label>Ancho %${nIn('sw', sz[0], 10, 400)}</label><label>Alto %${nIn('sh2', sz[1], 10, 400)}</label><label class="chk" style="align-self:end"><input type="checkbox" data-k="repeat" ${L.repeat ? 'checked' : ''}> Repetir</label></div>
+    ${t === 'linear' || t === 'radial' ? stopsHtml(L) : ''}
+    <div class="row3"><label>Animación<select data-k="am">${opt([['none', 'Ninguna'], ['scroll-x', 'Desplazar ←'], ['scroll-y', 'Desplazar ↑'], ['shimmer', 'Destello'], ['pulse', 'Pulso de brillo'], ['hue', 'Giro de tono']], a.mode)}</select></label><label>Duración (s)${nIn('ad', a.duration, 0.3, 30, 0.1)}</label><label>Pasos (0 = suave)${nIn('as', a.steps, 0, 24)}</label></div></fieldset>`;
+}
+const shHtml = (s, j) => `<div class="psh" data-j="${j}"><div class="row4"><label>X${nIn('x', s.x, -8, 8, 0.5)}</label><label>Y${nIn('y', s.y, -8, 8, 0.5)}</label><label>Desenfoque${nIn('blur', s.blur, 0, 12, 0.5)}</label></div>${cf('data-k="color"', s.color)}<button type="button" class="del" data-a="rmsh">Quitar sombra</button></div>`;
+
+function pRender() {
+  P.shadows = P.shadows || [];
+  $('pLayers').innerHTML = P.layers.map((L, i) => layerHtml(L, i, P.layers.length)).join('');
+  $('pShadows').innerHTML = P.shadows.map(shHtml).join('');
+  $('pAddL').disabled = P.layers.length >= 4; $('pAddS').disabled = P.shadows.length >= 3;
+  $('gWeight').value = String(P.weight || 700); $('gUpper').checked = !!P.uppercase;
+  const st = P.stroke; $('gStroke').checked = !!st; $('gStrokeW').value = st ? st.width : 1; $('gStrokeC').value = st ? st.color : '#150a03'; $('gStrokeC').previousElementSibling.value = hex6($('gStrokeC').value);
+  pPreview();
+}
+function pPreview() {
+  const d = PE.validate(P), err = $('pErr');
+  if (!d) { err.textContent = 'Hay un valor no válido (colores, URL o rangos). Se muestra la última vista válida y no se puede guardar.'; return false; }
+  err.textContent = '';
+  const cls = PE.register('draft', d), nm = esc($('pSample').value || 'MiNombre'), sp = (fs) => `<span class="${cls}" style="font-size:${fs};display:inline-block;padding:.16em .22em">${nm}</span>`;
+  $('pvDark').innerHTML = sp('2rem'); $('pvLight').innerHTML = sp('2rem');
+  $('pvChat').innerHTML = `<small>12:34</small>${sp('.95rem')}<span>: ¡Hola a todos!</span>`;
+  return true;
+}
+function refreshBar(lay, L) {
+  const bar = $$('.sbar', lay); if (!bar) return;
+  bar.style.background = barCss(L);
+  [...bar.children].forEach((h, i) => { h.style.left = L.stops[i][1] + '%'; h.style.background = L.stops[i][0]; h.setAttribute('aria-valuenow', L.stops[i][1]); });
+}
+function pList() {
+  $('pList').innerHTML = ITEMS.filter(c => c.type === 'name_effect').map(c => {
+    const cls = c.meta?.paint ? PE.register(c.id, c.meta.paint) : '';
+    return `<div class="it ${c.active ? '' : 'off'} ${cur && cur.id === c.id ? 'sel' : ''}"><div class="th" style="height:60px">${cls ? `<span class="${cls}" style="font-size:1.4rem;font-weight:800;display:inline-block;padding:.16em .22em">${esc(c.name)}</span>` : esc(c.css_class || '—')}</div>
+      <div class="bar"><b title="${esc(c.name)}">${esc(c.name)}</b><button type="button" data-pe="${esc(c.id)}">Editar</button></div><small>${c.meta?.paint ? 'Pintura' : 'Clase CSS'}${c.active ? '' : ' · borrador'}</small></div>`;
+  }).join('') || '<p style="color:var(--tan)">Todavía no hay efectos de nombre.</p>';
+}
+function pLoad(c) {
+  cur = c || null;
+  $('pId').value = c?.id || ''; $('pFt').textContent = c ? 'Editar pintura' : 'Nueva pintura';
+  $('pName').value = c?.name || ''; $('pDesc').value = c?.description || ''; $('pCost').value = c?.cost ?? 6000;
+  $('pSort').value = c?.sort ?? Math.max(100, ...ITEMS.map(i => i.sort + 1 || 0)); $('pActive').checked = c ? c.active : true;
+  $('pDel').hidden = !c; $('pRestore').hidden = !c?.meta?.prev; let note = '';
+  if (c?.meta?.paint) P = clone(c.meta.paint);
+  else if (c) { const m = {'ne-neon': 'neon', 'ne-ice': 'hielo', 'ne-gold': 'oro', 'ne-fire': 'fuego', 'ne-rainbow': 'arcoiris'}[c.css_class];
+    P = clone(m ? PE.presets[m].def : blank()); note = `Este efecto usa la clase CSS «${c.css_class || '—'}»${m ? ' y se cargó el preset equivalente (aproximado)' : ''}. Al guardar pasará a ser una pintura y su aspecto puede cambiar un poco.`; }
+  else P = blank();
+  $('pNote').textContent = note; pRender(); pList();
+}
+
+/* ---- eventos del formulario ---- */
+const F = $('pForm');
+F.addEventListener('input', (e) => {
+  const el = e.target;
+  if (el.matches('[data-pick]')) { const t = el.nextElementSibling, old = t.value; t.value = el.value + (/^#[0-9a-f]{8}$/i.test(old) ? old.slice(7) : ''); t.dispatchEvent(new Event('input', {bubbles: true})); return; }
+  if (el.dataset.c !== undefined && el.previousElementSibling) el.previousElementSibling.value = hex6(el.value);
+  const g = el.dataset.g, v = el.type === 'checkbox' ? el.checked : (el.type === 'number' || el.type === 'range') ? parseFloat(el.value) : el.value;
+  if (g) {
+    if (g === 'weight') P.weight = +v; else if (g === 'upper') P.uppercase = v;
+    else { const on = $('gStroke').checked; P.stroke = on ? {width: parseFloat($('gStrokeW').value) || 1, color: $('gStrokeC').value} : undefined; }
+    return pPreview();
+  }
+  if (el.id === 'pSample') return pPreview();
+  const k = el.dataset.k; if (!k) return;
+  const lay = el.closest('.pl'), sh = el.closest('.psh');
+  if (lay) {
+    const L = P.layers[+lay.dataset.i];
+    if (k === 'type') { setType(L, v); return pRender(); }
+    if (k === 'sw' || k === 'sh2') { L.size = L.size || [100, 100]; L.size[k === 'sw' ? 0 : 1] = v; }
+    else if (k === 'am') (L.anim = L.anim || {}).mode = v;
+    else if (k === 'ad') (L.anim = L.anim || {}).duration = v;
+    else if (k === 'as') (L.anim = L.anim || {}).steps = v;
+    else if (k === 'stopc' || k === 'stopp') { L.stops[+el.closest('.sr2').dataset.s][k === 'stopc' ? 0 : 1] = v; refreshBar(lay, L); }
+    else { L[k] = v; if (k === 'angle') $$('[data-o=angle]', lay).textContent = v + '°'; }
+  } else if (sh) P.shadows[+sh.dataset.j][k] = v;
+  pPreview();
+});
+F.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-a]'); if (!b) return;
+  const lay = b.closest('.pl'), i = lay ? +lay.dataset.i : -1, a = b.dataset.a, L = P.layers[i];
+  if (a === 'up' && i < P.layers.length - 1) [P.layers[i], P.layers[i + 1]] = [P.layers[i + 1], P.layers[i]];
+  else if (a === 'down' && i > 0) [P.layers[i], P.layers[i - 1]] = [P.layers[i - 1], P.layers[i]];
+  else if (a === 'rm' && P.layers.length > 1) P.layers.splice(i, 1);
+  else if (a === 'addstop' && L.stops.length < 12) { const s = L.stops, l = s[s.length - 1], p = s[s.length - 2]; s.push([l[0], l[1]]); l[1] = Math.round((p[1] + l[1]) / 2 * 10) / 10; }
+  else if (a === 'rmstop' && L.stops.length > 2) L.stops.splice(+b.closest('.sr2').dataset.s, 1);
+  else if (a === 'rmsh') P.shadows.splice(+b.closest('.psh').dataset.j, 1);
+  else return;
+  pRender();
+});
+$('pAddL').onclick = () => { if (P.layers.length < 4) { P.layers.push({type: 'linear', angle: 180, repeat: false, size: [100, 100], stops: [['#ffffff55', 0], ['#00000000', 100]], anim: {mode: 'none', duration: 4, steps: 0}}); pRender(); } };
+$('pAddS').onclick = () => { P.shadows = P.shadows || []; if (P.shadows.length < 3) { P.shadows.push({x: 0, y: 0, blur: 4, color: '#000000'}); pRender(); } };
+
+/* arrastrar paradas sobre la barra (con teclado: flechas) */
+$('pLayers').addEventListener('pointerdown', (e) => {
+  const h = e.target.closest('.sh'); if (!h) return; e.preventDefault(); h.setPointerCapture(e.pointerId);
+  const lay = h.closest('.pl'), L = P.layers[+lay.dataset.i], bar = h.parentElement, s = +h.dataset.s;
+  const mv = (ev) => { const r = bar.getBoundingClientRect(); L.stops[s][1] = Math.round(Math.max(0, Math.min(100, (ev.clientX - r.left) / r.width * 100)) * 10) / 10; refreshBar(lay, L); const n = $$(`.sr2[data-s="${s}"] [data-k=stopp]`, lay); if (n) n.value = L.stops[s][1]; pPreview(); };
+  const up = () => { h.removeEventListener('pointermove', mv); h.removeEventListener('pointerup', up); h.removeEventListener('pointercancel', up); L.stops.sort((a, b) => a[1] - b[1]); pRender(); };
+  h.addEventListener('pointermove', mv); h.addEventListener('pointerup', up); h.addEventListener('pointercancel', up);
+});
+$('pLayers').addEventListener('keydown', (e) => {
+  const h = e.target.closest('.sh'); if (!h || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return; e.preventDefault();
+  const lay = h.closest('.pl'), L = P.layers[+lay.dataset.i], s = +h.dataset.s, d = (e.key === 'ArrowRight' ? 1 : -1) * (e.shiftKey ? 10 : 1);
+  L.stops[s][1] = Math.max(0, Math.min(100, Math.round((L.stops[s][1] + d) * 10) / 10)); refreshBar(lay, L);
+  const n = $$(`.sr2[data-s="${s}"] [data-k=stopp]`, lay); if (n) n.value = L.stops[s][1]; pPreview();
+});
+
+/* ---- guardar, duplicar, restaurar, importar y exportar ---- */
+const snap = (c) => ({name: c.name, description: c.description, cost: c.cost, sort: c.sort, active: c.active, css_class: c.css_class || '', meta: (({prev, ...r}) => r)(c.meta || {})});
+async function pSave(draft) {
+  const name = $('pName').value.trim(); if (!name) return toast('Falta el nombre');
+  const d = PE.validate(P); if (!d) return toast('La pintura tiene valores no válidos');
+  const id = $('pId').value || slug(name), old = ITEMS.find(i => i.id === id), meta = {...(old?.meta || {}), paint: d}; delete meta.prev;
+  if (old) meta.prev = snap(old);
+  const r = await api('/upsert', {json: {id, type: 'name_effect', name, description: $('pDesc').value, cost: +$('pCost').value, css_class: old?.css_class || '', asset_url: '', sort: +$('pSort').value, active: draft ? false : $('pActive').checked, meta}});
+  if (!r.ok) return toast(r.reason === 'invalid_paint' ? 'El servidor rechazó la pintura (invalid_paint)' : r.reason || 'Error al guardar');
+  toast(draft ? 'Guardado como borrador ✔' : 'Guardado ✔'); await load(); pLoad(ITEMS.find(i => i.id === id) || r.item);
+}
+F.addEventListener('submit', (e) => { e.preventDefault(); pSave(false); });
+$('pDraft').onclick = () => pSave(true);
+$('pDup').onclick = () => { $('pId').value = ''; cur = null; $('pName').value = ($('pName').value || 'Pintura') + ' (copia)'; $('pActive').checked = false; $('pDel').hidden = true; $('pRestore').hidden = true; $('pFt').textContent = 'Nueva pintura (copia)'; toast('Copia lista: ponle un nombre y guárdala'); pList(); };
+$('pNew').onclick = () => pLoad(null);
+$('pDel').onclick = async () => { if (!cur || !confirm('¿Eliminar esta pintura? Si alguien ya la compró, mejor desactívala.')) return;
+  const r = await api('/delete', {json: {id: cur.id}}); toast(r.ok ? 'Eliminada' : r.reason === 'in_use' ? 'Ya la tienen usuarios: guárdala como borrador' : r.reason); if (r.ok) { await load(); pLoad(null); } };
+$('pRestore').onclick = async () => {
+  const c = cur, pv = c?.meta?.prev; if (!pv) return;
+  const r = await api('/upsert', {json: {id: c.id, type: c.type, name: pv.name, description: pv.description, cost: pv.cost, css_class: pv.css_class, asset_url: c.asset_url || '', sort: pv.sort, active: pv.active, meta: {...pv.meta, prev: snap(c)}}});
+  if (!r.ok) return toast(r.reason || 'No se pudo restaurar'); toast('Versión anterior restaurada ✔'); await load(); pLoad(ITEMS.find(i => i.id === c.id));
+};
+$('pExport').onclick = () => { $('pJson').value = JSON.stringify(P, null, 1); $('pJson').select(); navigator.clipboard?.writeText($('pJson').value).catch(() => {}); toast('JSON copiado'); };
+$('pImport').onclick = () => { let o; try { o = JSON.parse($('pJson').value); } catch { return toast('El JSON no es válido'); }
+  const d = PE.validate(o); if (!d) return toast('La pintura importada tiene valores no permitidos'); P = clone(d); pRender(); toast('Importada'); };
+$('pPreset').innerHTML = Object.entries(PE.presets).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('');
+$('pLoadPreset').onclick = () => { const k = $('pPreset').value, pr = PE.presets[k]; P = clone(pr.def); if (!$('pName').value) { $('pName').value = pr.label.replace(/ \(.*\)/, ''); } pRender(); };
+$('pList').addEventListener('click', (e) => { const b = e.target.closest('[data-pe]'); if (b) pLoad(ITEMS.find(i => i.id === b.dataset.pe)); });
+
+/* ---- pestañas y miniaturas con pintura en «Objetos» ---- */
+document.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-tab]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-selected', on); });
+  $('tabObjs').hidden = b.dataset.tab !== 'objs'; $('tabPaints').hidden = b.dataset.tab !== 'paints'; $('tabRanks').hidden = b.dataset.tab !== 'ranks'; if (b.dataset.tab === 'ranks' && window.rkLoad) rkLoad();
+  if (b.dataset.tab === 'paints') { pList(); pPreview(); }
+}));
+const _rl = renderList;
+renderList = function () {
+  _rl();
+  document.querySelectorAll('#list [data-ed]').forEach(b => { const c = ITEMS.find(i => i.id === b.dataset.ed); if (c?.type === 'name_effect' && c.meta?.paint) { const cls = PE.register(c.id, c.meta.paint), th = b.closest('.it').querySelector('.th'); th.innerHTML = `<span class="${cls}" style="font-size:1.5rem;font-weight:800;display:inline-block;padding:.16em .22em">${esc(c.name)}</span>`; } });
+  pList();
+};
+$('fType').onchange = $('fQ').oninput = renderList;
+pLoad(null);
+})();
+</script>
+<script>
+/* ===== Pestaña Rangos (Fase 4) ===== */
+(() => {
+const RE = window.RankEngine, $$ = (s, r = document) => r.querySelector(s), clone = (o) => JSON.parse(JSON.stringify(o));
+let RK = [], cur = null, S = {pal: {a: '#ffffff'}, rows: Array(10).fill('..........')}, sel = 'a', painting = false, loaded = false;
+const POOL = 'abcdefghijklmnopqrstuvwxyz0123456789';
+const hex6 = (c) => /^#[0-9a-f]{6}/i.test(c || '') ? c.slice(0, 7) : /^#[0-9a-f]{3}$/i.test(c || '') ? '#' + [...c.slice(1)].map(x => x + x).join('') : '#000000';
+const rb = $('rBuiltin'); rb.innerHTML = RE.BUILTIN.map(k => `<option value="${k}">${k}</option>`).join('');
+const badge = (r, px) => r.image_url ? `<img src="${esc(r.image_url)}" width="${px}" height="${px}" alt="" style="object-fit:contain;image-rendering:pixelated">` : RE.svg(r.sprite ? r.sprite : RE.builtinSprite(r.builtin || 'fruta'), px);
+
+function cover() {
+  const act = RK.filter(r => r.active).sort((a, b) => a.min_level - b.min_level), out = [];
+  act.forEach((r, i) => out.push(`Nv. ${r.min_level}${act[i + 1] ? '–' + (act[i + 1].min_level - 1) : '+'}: ${r.title}`));
+  $('rCover').textContent = !act.some(r => r.min_level === 0) ? '⚠ Falta un rango activo desde el nivel 0.' : 'Tramos: ' + out.join(' · ');
+}
+function rList() {
+  cover();
+  $('rList').innerHTML = [...RK].sort((a, b) => a.min_level - b.min_level).map(r => `<div class="it ${r.active ? '' : 'off'} ${cur && cur.id === r.id ? 'sel' : ''}"><div class="bar" style="justify-content:flex-start;gap:.6rem">${badge(r, 28)}<b>Nv. ${r.min_level} · ${esc(r.title)}</b><button type="button" data-re="${r.id}" style="margin-left:auto">Editar</button></div><small>${r.image_url ? 'Imagen' : r.sprite ? 'Dibujada' : 'Incluida: ' + esc(r.builtin || '')}${r.active ? '' : ' · inactivo'}</small></div>`).join('') || '<p style="color:var(--tan)">Sin rangos todavía.</p>';
+}
+function draw() {
+  $('rPal').innerHTML = Object.keys(S.pal).map(k => `<button type="button" class="rsw" data-pk="${k}" aria-pressed="${sel === k}" aria-label="Color ${k}" style="background:${esc(S.pal[k])}"></button><input type="color" data-pc="${k}" value="${hex6(S.pal[k])}" aria-label="Cambiar color ${k}" style="width:30px;height:30px;padding:0">`).join('')
+    + `<button type="button" class="ghost" data-pk="." aria-pressed="${sel === '.'}">Borrar</button><button type="button" class="ghost" data-pk="+" ${Object.keys(S.pal).length >= 12 ? 'disabled' : ''}>+ Color</button>`;
+  $('rGrid').innerHTML = S.rows.map((row, y) => [...row].map((c, x) => `<i data-x="${x}" data-y="${y}" style="${c === '.' ? '' : 'background:' + esc(S.pal[c] || '#000')}"></i>`).join('')).join('');
+  prev();
+}
+function curDef() {
+  const src = $('rSrc').value, d = {id: $('rId').value || null, min_level: +$('rMin').value, title: $('rTitle').value.trim(), builtin: rb.value, sprite: null, image_url: null, accent: $('rAccent').value.trim() || null, sort: +$('rSort').value || 0, active: $('rActive').checked};
+  if (src === 'sprite') d.sprite = clone(S); if (src === 'image') d.image_url = $('rUrl').value.trim() || null;
+  return d;
+}
+function prev() {
+  const d = curDef(), err = $('rErr'); err.textContent = '';
+  if (d.sprite && !RE.validSprite(d.sprite)) { err.textContent = 'El sprite no es válido.'; return; }
+  if (d.image_url && !/^https:\/\/[a-z0-9.-]+\/[^\s"'<>()\\]+\.(png|svg|webp)$/i.test(d.image_url)) { err.textContent = 'La URL de la imagen no es válida (https y .png, .webp o .svg).'; return; }
+  $('rPrev').innerHTML = [14, 18, 44].map(px => `<span style="display:inline-flex;align-items:center;gap:.3rem">${badge(d, px)}<small>${px}px</small></span>`).join('') + `<span style="font-weight:800">${esc(d.title || 'Título')} · Nv. ${d.min_level}</span>`;
+}
+function srcUI() { const s = $('rSrc').value; $('rSpriteBox').hidden = s !== 'sprite'; $('rImgBox').hidden = s !== 'image'; $('rBuiltinL').firstChild.textContent = s === 'builtin' ? 'Insignia incluida' : 'Insignia de respaldo'; prev(); }
+function rLoad(r) {
+  cur = r || null; $('rId').value = r?.id || ''; $('rFt').textContent = r ? 'Editar rango' : 'Nuevo rango';
+  $('rMin').value = r?.min_level ?? 0; $('rTitle').value = r?.title || ''; rb.value = r?.builtin || 'fruta'; $('rAccent').value = r?.accent || ''; $('rSort').value = r?.sort ?? RK.length; $('rActive').checked = r ? r.active : true;
+  $('rSrc').value = r?.image_url ? 'image' : r?.sprite ? 'sprite' : 'builtin'; $('rUrl').value = r?.image_url || '';
+  S = r?.sprite ? clone(r.sprite) : clone(RE.builtinSprite(r?.builtin || 'fruta')); S.pal = {...S.pal}; sel = Object.keys(S.pal)[0] || 'a';
+  $('rDel').hidden = !r; srcUI(); draw(); rList();
+}
+window.rkLoad = async () => {
+  if (loaded) return; const j = await api('/rank/list');
+  if (!j.ok) return toast(j.reason ? 'Rangos: ' + j.reason : 'No se pudo cargar /rank/list. ¿Agregaste las rutas a la función?');
+  loaded = true; RK = j.items || []; rLoad(null);
+};
+const sync = () => { const a = RK.filter(r => r.active); if (a.length) RE.set(a); };
+
+$('rPal').addEventListener('click', (e) => { const b = e.target.closest('[data-pk]'); if (!b) return;
+  if (b.dataset.pk === '+') { const k = [...POOL].find(c => !(c in S.pal)); if (k) { S.pal[k] = '#ffffff'; sel = k; } } else sel = b.dataset.pk; draw(); });
+$('rPal').addEventListener('input', (e) => { const k = e.target.dataset.pc; if (k) { S.pal[k] = e.target.value; draw(); } });
+const paint = (el) => { if (!el || el.tagName !== 'I') return; const x = +el.dataset.x, y = +el.dataset.y, row = S.rows[y]; S.rows[y] = row.slice(0, x) + sel + row.slice(x + 1); el.style.background = sel === '.' ? '' : S.pal[sel]; };
+$('rGrid').addEventListener('pointerdown', (e) => { painting = true; paint(e.target); e.preventDefault(); });
+$('rGrid').addEventListener('pointermove', (e) => { if (painting) paint(document.elementFromPoint(e.clientX, e.clientY)); });
+addEventListener('pointerup', () => { if (painting) { painting = false; prev(); } });
+$('rCopy').onclick = () => { S = clone(RE.builtinSprite(rb.value)); S.pal = {...S.pal}; sel = Object.keys(S.pal)[0]; draw(); };
+$('rClear').onclick = () => { S.rows = Array(10).fill('..........'); draw(); };
+$('rSrc').onchange = srcUI;
+$('rForm').addEventListener('input', (e) => { if (e.target.matches('[data-pick]')) { const t = e.target.nextElementSibling; t.value = e.target.value; } prev(); });
+$('rFile').onchange = async () => { const f = $('rFile').files[0]; if (!f) return; const fd = new FormData(); fd.append('file', f); fd.append('folder', 'ranks'); fd.append('name', $('rTitle').value || f.name);
+  const r = await api('/upload', {body: fd}); if (!r.ok) return toast(r.reason || 'No se pudo subir (¿la función admite la carpeta «ranks»?)'); $('rUrl').value = r.url; prev(); };
+$('rForm').addEventListener('submit', async (e) => { e.preventDefault();
+  const d = curDef(); if (!d.title) return toast('Falta el título'); if (d.sprite && !RE.validSprite(d.sprite)) return toast('El sprite no es válido');
+  const r = await api('/rank/upsert', {json: d});
+  if (!r.ok) return toast({duplicate_level: 'Ya existe un rango con ese nivel mínimo', rank_zero_required: 'Debe quedar un rango activo desde el nivel 0', invalid_sprite: 'Sprite no válido', invalid_image: 'URL de imagen no válida', invalid_level: 'Nivel no válido', no_badge: 'Falta la insignia'}[r.reason] || r.reason || 'Error al guardar');
+  const i = RK.findIndex(x => x.id === r.item.id); if (i >= 0) RK[i] = r.item; else RK.push(r.item); sync(); toast('Guardado ✔'); rLoad(r.item); });
+$('rDel').onclick = async () => { if (!cur || !confirm('¿Eliminar este rango? Quienes tengan ese nivel pasarán al rango anterior.')) return;
+  const r = await api('/rank/delete', {json: {id: cur.id}}); if (!r.ok) return toast(r.reason === 'rank_zero_required' ? 'No puedes eliminar el rango del nivel 0' : r.reason || 'Error');
+  RK = RK.filter(x => x.id !== cur.id); sync(); toast('Eliminado'); rLoad(null); };
+$('rNew').onclick = () => rLoad(null);
+$('rList').addEventListener('click', (e) => { const b = e.target.closest('[data-re]'); if (b) rLoad(RK.find(r => String(r.id) === b.dataset.re)); });
+})();
 </script></main></body></html>
