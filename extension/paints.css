@@ -79,3 +79,8 @@
 @media (prefers-reduced-motion:reduce){
   .kcx-ne-neon,.kcx-ne-ice,.kcx-ne-gold,.kcx-ne-fire,.kcx-ne-rainbow{animation:none}
 }
+
+/* Interruptores del popup (clases que pone content.js en <html>) */
+:root.kcx-pt-noanim .kcx-p{animation:none!important}
+:root.kcx-pt-noshadow .kcx-p{filter:none!important}
+:root.kcx-pt-noshadow .kcx-ne-neon{text-shadow:none!important}

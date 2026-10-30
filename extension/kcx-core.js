@@ -9,15 +9,17 @@
   'use strict';
 
   var DEFAULT_SELECTORS = {
-    row:      ['div[data-chat-entry]', '.chat-entry'],                       // cada mensaje del chat
-    username: ['.chat-entry-username', '[class*="chat-entry-username"]']      // el nombre dentro del mensaje
-  };
+  row:      ['div[data-chat-entry]', '.chat-entry', 'div[data-index]'],
+  username: ['.chat-entry-username', '[class*="chat-entry-username"]', 'button[data-prevent-expand][title]']
+};
+  // Marcas de otras extensiones que ya pintan el nombre (7TV). Si Kick o 7TV cambian, ajústalas aquí o con opts.paintedSelectors.
+  var DEFAULT_PAINTED = ['.seventv-painted-content', '[data-seventv-painted-text]', '[class*="seventv-paint"]'];
   var RANKS = [[35, 'tiempo'], [20, 'caja'], [10, 'mascara'], [5, 'gema'], [0, 'fruta']];   // nivel mínimo -> insignia
   var TTL_OK = 5 * 60 * 1000;        // datos de un usuario: 5 minutos
   var TTL_MISS = 60 * 1000;          // usuario sin datos: 1 minuto
   var RETRY_AFTER_ERROR = 30 * 1000; // si falla la consulta, se reintenta en 30 s
   var MAX_BATCH = 100;
-  var NE_RE = /^ne-[a-z0-9_-]{1,30}$/;
+  var NE_RE = /^ne-[a-z0-9_-]{1,40}$/;
 
   // Kick muestra "Mi_Usuario"; la base guarda "mi-usuario" (minúsculas y guiones)
   function slugOf(text) {
@@ -40,7 +42,7 @@
     var selectors = { row: DEFAULT_SELECTORS.row, username: DEFAULT_SELECTORS.username };
     if (opts.selectors) { if (opts.selectors.row) selectors.row = opts.selectors.row; if (opts.selectors.username) selectors.username = opts.selectors.username; }
     var rowSel = selectors.row.join(','), userSel = selectors.username.join(',');
-    var cfg = { enabled: true, paints: true, badges: true };
+    var cfg = { enabled: true, paints: true, badges: true, skipPainted: true };
     var k; for (k in (opts.settings || {})) cfg[k] = opts.settings[k];
     var debug = !!opts.debug;
     var log = function () { if (debug) console.debug.apply(console, ['[kcx]'].concat([].slice.call(arguments))); };
@@ -50,13 +52,16 @@
     var inflight = new Set();
     var retryAt = new Map();
     var seenRows = new WeakSet(), appliedRows = new WeakSet();
-    var counters = { rowsSeen: 0, applied: 0, lookups: 0, errors: 0 };
+    var counters = { rowsSeen: 0, applied: 0, lookups: 0, errors: 0, skipped: 0 };
+    var skippedRows = new WeakSet(), paintedSel = (opts.paintedSelectors || DEFAULT_PAINTED).join(',');
+    function hash(str) { var h = 5381, i; for (i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+    function isPainted(el) { try { return !!(el.matches(paintedSel) || el.closest(paintedSel) || el.querySelector(paintedSel)); } catch (e) { return false; } }
     var observer = null, flushTimer = null, rafId = 0, queue = new Set();
 
     function userEl(row) { return row.querySelector(userSel); }
 
     function clearEl(el) {
-      var cls = []; el.classList.forEach(function (c) { if (c === 'kcx-p' || c.indexOf('kcx-ne-') === 0) cls.push(c); });
+      var cls = []; el.classList.forEach(function (c) { if (c === 'kcx-p' || c.indexOf('kcx-ne-') === 0 || c.indexOf('kcx-pt-') === 0) cls.push(c); });
       cls.forEach(function (c) { el.classList.remove(c); });
       var prev = el.previousElementSibling;
       if (prev && prev.classList && prev.classList.contains('kcx-badge')) prev.remove();
@@ -64,23 +69,35 @@
     }
 
     function apply(row, el, d) {
-      var ne = cfg.paints && d && NE_RE.test(d.ne || '') ? d.ne : '';
+      var other = cfg.paints && cfg.skipPainted !== false && isPainted(el);     // otra extensión ya pintó este nombre
+      var pcls = '', ne = '';
+      if (cfg.paints && d && !other) {
+        if (d.np && d.nid && opts.paintClass) pcls = opts.paintClass(d.nid, d.np) || '';   // pintura nueva (datos): kcx-pt-<id>
+        if (!pcls && NE_RE.test(d.ne || '')) ne = d.ne;                                    // pintura clásica: kcx-ne-*
+      }
       var lv = cfg.badges && d && typeof d.lv === 'number' ? d.lv : null;
-      var key = ne + '|' + (lv === null ? '' : lv);
+      var key = (pcls ? pcls + '#' + hash(JSON.stringify(d.np)) : ne) + (other ? '!' : '') + '|' + (lv === null ? '' : lv) + '|' + (opts.rankSig ? opts.rankSig() : '') + '|' + (d && d.rid != null ? d.rid : '');
       if (el.dataset.kcx === key) return;              // ya está aplicado
       clearEl(el);
       el.dataset.kcx = key;
-      if (ne) { el.classList.add('kcx-p', 'kcx-' + ne); }
+      if (pcls) el.classList.add(pcls);
+      else if (ne) el.classList.add('kcx-p', 'kcx-' + ne);
+      if (other && !skippedRows.has(row)) { skippedRows.add(row); counters.skipped++; }
+      if (pcls && cfg.skipPainted !== false && !el.dataset.kcxChk) {        // 7TV puede pintar un instante después: se revisa otra vez
+        el.dataset.kcxChk = '1';
+        setTimeout(function () { if (el.isConnected) apply(row, el, d); }, 1500);
+      }
       if (lv !== null && el.parentNode) {
         var img = document.createElement('img');
         img.className = 'kcx-badge';
-        img.src = opts.badgeSrc(rankKey(lv));
+        img.src = opts.badgeSrc(opts.rankKey ? opts.rankKey(lv, d) : rankKey(lv));
+        if (opts.badgeFallback) img.onerror = function () { img.onerror = null; img.src = opts.badgeFallback(lv, d); };   // p. ej. si la página bloquea data: o la imagen falla
         img.alt = '';
         img.width = 18; img.height = 18; img.draggable = false;
         img.title = 'Nv. ' + lv + (d.rank ? ' · ' + d.rank : '');
         el.parentNode.insertBefore(img, el);
       }
-      if ((ne || lv !== null) && !appliedRows.has(row)) { appliedRows.add(row); counters.applied++; }
+      if ((pcls || ne || lv !== null) && !appliedRows.has(row)) { appliedRows.add(row); counters.applied++; }
     }
 
     function process(row) {
@@ -166,7 +183,7 @@
 
     function stats() {
       return {
-        rowsSeen: counters.rowsSeen, applied: counters.applied, lookups: counters.lookups, errors: counters.errors,
+        rowsSeen: counters.rowsSeen, applied: counters.applied, lookups: counters.lookups, errors: counters.errors, skipped: counters.skipped,
         rowsOnPage: document.querySelectorAll(rowSel).length, usernamesOnPage: document.querySelectorAll(userSel).length,
         cached: cache.size, enabled: cfg.enabled
       };
