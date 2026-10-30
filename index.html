@@ -552,7 +552,7 @@ function rowItem(u){
   const title = u.rank_title || rankOf(u.level)[1];
   return `<li><button class="row" data-u="${esc(u.username)}"><span class="rk">${u.rank}</span>${avatarF(u,40)}
     <span class="info"><b>${nameHtml(u)}<span class="lvl">Nv. ${u.level}</span></b>
-      <small class="rk2">${sprite(rankKey(u.level),14)}<span>${esc(title)} · ${sub}</span></small></span>
+      <small class="rk2">${sprite(RankEngine.keyOfUser(u),14)}<span>${esc(title)} · ${sub}</span></small></span>
     <span class="total">${fmtVal(st.metric,u.value)}</span></button></li>`;
 }
 
@@ -690,7 +690,7 @@ async function openProfile(raw){
   const span = Math.max(1, u.xp_next - u.xp_level_start);
   const pct = Math.max(0, Math.min(100, Math.round((u.xp - u.xp_level_start) / span * 100)));
   const nt = nextTier(u.level);
-  $('mRankBox').innerHTML = `<div class="rankrow">${sprite(rankKey(u.level),44)}<div><b>${esc(title)}</b><span>Nivel ${u.level}</span></div></div>
+  $('mRankBox').innerHTML = `<div class="rankrow">${sprite(RankEngine.keyOfUser(u),44)}<div><b>${esc(title)}</b><span>Nivel ${u.level}</span></div></div>
     <div class="xpbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:0"></i><em>${nf(u.xp)} / ${nf(u.xp_next)} XP</em></div>
     <p class="xpnote">Te ${u.xp_next - u.xp === 1 ? 'falta' : 'faltan'} ${nf(Math.max(0, u.xp_next - u.xp))} XP para el nivel ${u.level + 1}.${nt ? ` Siguiente rango: ${nt[1]} (nivel ${nt[0]}).` : ' Alcanzaste el rango máximo.'}</p>`;
   requestAnimationFrame(() => requestAnimationFrame(() => { const f = $('mRankBox').querySelector('.xpbar i'); if(f) f.style.width = pct + '%'; }));
