@@ -53,6 +53,24 @@
 .sp-paused,.sp-paused *,.sp-paused *::after{animation-play-state:paused!important}
 .sp-foldbtn{display:none}
 @media (max-width:760px){.sp-foldbtn{display:inline-flex}.sp-prev.fold>*:not(.sp-vh){display:none}.sp-prev{max-height:56vh}}
+
+/* Tamaño: la tienda ocupa casi toda la ventana y cada columna hace scroll por separado */
+.sp-head{display:flex;flex-wrap:wrap;align-items:center;gap:.2rem .9rem;margin-bottom:.4rem}
+.sp-head .shoptitle{margin:0;flex:none}.sp-head #shopWallet{flex:1 1 300px;min-width:0}
+.sp-head .wallet{margin:0;padding:.35rem .7rem}.sp-head .wallet small{font-size:.7rem}
+.sp-eq{margin-bottom:.2rem}.sp-slot{padding:.2rem .6rem}
+.sp-tools{margin:.3rem 0}.sp-tools .chips{display:flex;gap:.35rem}
+.shopmsg{min-height:1.1rem;margin:.2rem 0}
+@media (min-width:761px){
+  .shopcard.sp{max-width:min(1280px,96vw);height:min(94vh,900px);max-height:94vh;display:flex;flex-direction:column;overflow-y:auto}
+  .sp-body{flex:1 1 auto;min-height:340px;grid-template-columns:minmax(0,1fr) 320px;align-items:stretch}
+  .sp-body>#shopGrid{min-height:0;overflow:auto;align-content:start;padding-right:.3rem}
+  .sp-body>.sp-prev{position:static;min-height:0;max-height:none;overflow:auto}
+}
+@media (max-width:760px){
+  .shopcard.sp{max-height:94vh}
+  .sp-head #shopWallet{flex-basis:100%}
+}
 `; document.head.append(st); }
   document.documentElement.dataset.shopPlus = '2'; console.info('[tienda v2] activa');
   const ST = {type: 'all', q: '', sort: 'new', mine: false, afford: false, sel: null, confirm: null, busy: false,
@@ -61,14 +79,14 @@
   root.classList.add('sp');
   root.innerHTML = `
     <button id="shopClose" class="close" aria-label="Cerrar">&times;</button>
-    <h2 id="shopTitle" class="shoptitle">Tienda de cosméticos <small style="font-size:.9rem;color:var(--tan)">v2</small></h2>
-    <div id="shopWallet"></div><div id="spEq" class="sp-eq"></div>
+    <div class="sp-head"><h2 id="shopTitle" class="shoptitle">Tienda de cosméticos</h2><div id="shopWallet"></div></div>
+    <div id="spEq" class="sp-eq"></div>
     <div class="sp-tools">
       <div class="chips" id="spTabs"><button class="chip" data-t="all">Todos</button><button class="chip" data-t="frame">Marcos</button><button class="chip" data-t="name_effect">Nombres</button><button class="chip" data-t="background">Fondos</button></div>
       <label class="search"><span class="sr">Buscar objeto</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="spQ" type="search" placeholder="Buscar objeto…" autocomplete="off"></label>
       <select id="spSort" class="sp-sel" aria-label="Ordenar por"><option value="new">Novedades</option><option value="asc">Precio: menor</option><option value="desc">Precio: mayor</option><option value="name">Nombre</option></select>
+      <div class="chips"><button class="chip" id="spMine">Míos</button><button class="chip" id="spAfford">Puedo comprar</button></div>
     </div>
-    <div class="chips"><button class="chip" id="spMine">Míos</button><button class="chip" id="spAfford">Puedo comprar</button></div>
     <p id="shopMsg" class="shopmsg" role="status"></p>
     <div class="sp-body"><div id="shopGrid" class="shopgrid"></div><aside id="spPrev" class="sp-prev"></aside></div>`;
 
