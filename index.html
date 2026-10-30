@@ -28,6 +28,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="paint-engine.js"></script>
 <style>
 :root{--ts:1px 1px 0 rgba(21,10,3,.9),0 0 4px rgba(0,0,0,.75);--cream:#f3e7c4;--tan:#cdb98a;--gold:#ffc21a;--leaf:#3fd01f;--dark:#262826;--line:#3a3d38;--rim:#50564f;
   --ol:2px 2px 0 #150a03,-1px -1px 0 #150a03,1px -1px 0 #150a03,-1px 1px 0 #150a03;
@@ -507,7 +508,15 @@ function avatarF(u, size){
   const f = frameOf(u);
   return f ? `<span class="frame ${f}${size < 60 ? ' sm' : ''}">${avatar(u, size)}</span>` : avatar(u, size);
 }
-const nameHtml = (u) => `<span class="ne ${nameFxOf(u)}">${esc(u.display_name)}</span>`;
+/* Si el objeto trae meta.paint se dibuja con PaintEngine; si no, se usa css_class como siempre */
+function paintClsOf(id){
+  const c = id && COS.get(id);
+  return c?.meta?.paint && window.PaintEngine ? PaintEngine.register(c.id, c.meta.paint) : '';
+}
+const nameHtml = (u) => {
+  const p = paintClsOf(u.name_id ?? u.equipped_name_effect_id);
+  return `<span class="ne ${p || nameFxOf(u)}">${esc(u.display_name)}</span>`;
+};
 
 const st = { metric:'presentes', range:'all', from:null, to:null };
 let rows = [], feedRows = [], reqId = 0, firstRender = true;
