@@ -441,13 +441,6 @@ const rankOf = (lv) => { const d = RankEngine.of(lv); return [d.min_level, d.tit
 const rankKey = (lv) => RankEngine.keyOf(lv);
 const nextTier = (lv) => { const n = RankEngine.nextOf(lv); return n ? [n.min_level, n.title] : null; };
 const sprite = (key, size) => RankEngine.sprite(key, size);
-function sprite(key, size){
-  const k = key + size;
-  if(spriteCache[k]) return spriteCache[k];
-  let r = '';
-  SPRITES[key].forEach((row, y) => [...row].forEach((c, x) => { if(c !== '.') r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${PAL[c]}"/>`; }));
-  return spriteCache[k] = `<svg class="spr" width="${size}" height="${size}" viewBox="0 0 10 10" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
-}
 const normUser = (raw) => String(raw || '').trim().toLowerCase().replace(/^@/, '').replace(/_/g, '-');
 
 function avatar(u, size){
