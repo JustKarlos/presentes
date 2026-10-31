@@ -1,0 +1,33 @@
+/* Cosméticos para los widgets de OBS: copiado de index.html (marcos de avatar y efectos de nombre).
+   Las rutas de imágenes asumen que esta carpeta está dentro de la de la página (../assets/...). */
+.frame{display:inline-grid;position:relative;border-radius:50%;flex:none}
+.frame .av{box-shadow:none!important}
+.frame::after{content:"";position:absolute;inset:-20%;pointer-events:none;background:no-repeat 0 0/100% 100%;image-rendering:pixelated}
+.fr-wood::after{background-image:url("../assets/frames/wood.png")}
+.fr-moss::after{background-image:url("../assets/frames/moss.png");background-size:200% 100%;animation:frm2 1.6s steps(1) infinite}
+.fr-gem::after{background-image:url("../assets/frames/gem.png");background-size:400% 100%;animation:frm4 1.6s steps(1) infinite}
+.fr-gold::after{background-image:url("../assets/frames/gold.png");background-size:400% 100%;animation:frm4 2s steps(1) infinite}
+.fr-fire::after{inset:-30%;background-image:url("../assets/frames/fire.png");background-size:400% 100%;animation:frm4 .64s steps(1) infinite}
+.fr-rainbow::after{background-image:url("../assets/frames/rainbow.png");background-size:600% 100%;animation:frm6 1.2s steps(1) infinite}
+/* Edición Halloween: arte propio de 576 px, el hueco para el avatar mide 337 px */
+.fr-bones::after,.fr-pumpkin::after,.fr-twigs::after{inset:-33%}
+.fr-bones::after{background-image:url("../assets/frames/bones.png")}
+.fr-pumpkin::after{background-image:url("../assets/frames/pumpkin.png")}
+.fr-twigs::after{background-image:url("../assets/frames/twigs.png")}
+.frame.sm.fr-bones::after,.frame.sm.fr-pumpkin::after,.frame.sm.fr-twigs::after{image-rendering:auto}
+@keyframes frm2{0%{background-position:0 0}50%{background-position:100% 0}}
+@keyframes frm4{0%{background-position:0 0}25%{background-position:33.3333% 0}50%{background-position:66.6667% 0}75%{background-position:100% 0}}
+@keyframes frm6{0%{background-position:0 0}16.66%{background-position:20% 0}33.33%{background-position:40% 0}50%{background-position:60% 0}66.66%{background-position:80% 0}83.33%{background-position:100% 0}}
+.ne{display:inline-block;max-width:calc(100% + .44em);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom;padding:.16em .22em;margin:-.16em -.22em}
+.ne-ice,.ne-gold,.ne-fire,.ne-rainbow{color:transparent;-webkit-background-clip:text;background-clip:text;text-shadow:none;background-repeat:no-repeat}
+.ne-neon{color:#f2ffee;text-shadow:0 0 1px #fff,0 0 4px #53fc18,0 0 9px #2fb80f,0 0 16px rgba(47,184,15,.65),1px 1px 0 #0a2a05;animation:neon 4s steps(1) infinite}
+@keyframes neon{0%{opacity:1}92%{opacity:.62}93%{opacity:1}96%{opacity:.78}97%{opacity:1}}
+.ne-ice{background-image:linear-gradient(105deg,transparent 0 42%,rgba(255,255,255,.95) 46% 54%,transparent 58% 100%),linear-gradient(180deg,#fff 0 26%,#c4f3ff 26% 52%,#63d9ff 52% 78%,#2a9fd6 78% 100%);background-size:260% 100%,100% 100%;background-position:100% 0,0 0;filter:drop-shadow(1px 1px 0 #0b3550) drop-shadow(0 0 4px rgba(99,217,255,.75));animation:sweep 3.2s steps(14) infinite}
+.ne-gold{background-image:linear-gradient(105deg,transparent 0 42%,rgba(255,255,255,.9) 46% 54%,transparent 58% 100%),linear-gradient(180deg,#fff6c2 0 24%,#ffd84a 24% 50%,#ffb81c 50% 74%,#c98a0b 74% 100%);background-size:260% 100%,100% 100%;background-position:100% 0,0 0;filter:drop-shadow(1px 1px 0 #7a4a05) drop-shadow(2px 2px 0 #3a1b08);animation:sweep 3.6s steps(14) infinite}
+@keyframes sweep{0%{background-position:100% 0,0 0}45%{background-position:0% 0,0 0}100%{background-position:0% 0,0 0}}
+.ne-fire{background-image:linear-gradient(0deg,#c02a0c 0 20%,#ee4a1a 20% 42%,#ff9a1f 42% 62%,#ffe27a 62% 78%,#ff9a1f 78% 90%,#c02a0c 90% 100%);background-size:100% 50%;background-repeat:repeat-y;filter:drop-shadow(1px 1px 0 #3a0a05) drop-shadow(0 0 5px rgba(255,106,26,.7));animation:flames .9s steps(6) infinite}
+@keyframes flames{from{background-position:0 0}to{background-position:0 -100%}}
+.ne-rainbow{background-image:linear-gradient(180deg,rgba(255,255,255,.38) 0 28%,transparent 28% 72%,rgba(0,0,0,.28) 72% 100%),linear-gradient(90deg,#ff4d4d 0 16.66%,#ff9a1f 16.66% 33.33%,#ffd84a 33.33% 50%,#3fd01f 50% 66.66%,#35d0ff 66.66% 83.33%,#b46bff 83.33% 100%);background-size:100% 100%,50% 100%;background-repeat:no-repeat,repeat-x;filter:drop-shadow(1px 1px 0 #150a03) drop-shadow(-1px -1px 0 #150a03);animation:bands 1.2s steps(6) infinite}
+@keyframes bands{from{background-position:0 0,0 0}to{background-position:0 0,100% 0}}
+@media (prefers-reduced-motion:reduce){.ne-neon,.ne-ice,.ne-gold,.ne-fire,.ne-rainbow{animation:none}
+.fr-moss::after,.fr-gem::after{animation-duration:3.2s}.fr-gold::after{animation-duration:4s}.fr-fire::after{animation-duration:1.6s}.fr-rainbow::after{animation-duration:3s}}
