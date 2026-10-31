@@ -12,6 +12,8 @@
 .bdg{display:inline-block;font-size:.6em;padding:0 .35em;margin-right:.35em;border-radius:.4vh;border:.25vh solid #150a03;vertical-align:.14em;line-height:1.25;text-shadow:none;color:#fff}
 .b-broadcaster{background:#e0452c}.b-moderator{background:#3fd01f;color:#0f2a08}.b-vip{background:#b46bff}.b-subscriber{background:#ffc21a;color:#3a1b08}
 .b-og,.b-founder,.b-verified,.b-staff{background:#35d0ff;color:#06222b}
+.bi{display:inline-block;width:1.05em;height:1.05em;vertical-align:-.17em;margin-right:.3em;filter:drop-shadow(.08em .08em 0 #150a03)}
+.bc{font-size:.6em;margin-right:.35em;vertical-align:.1em}
 @keyframes in{from{transform:translateX(-4vw);opacity:0}to{transform:none;opacity:1}}
 @keyframes out{to{transform:translateX(-4vw);opacity:0}}
 #chat.pos-br .msg,#chat.pos-tr .msg{animation-name:inr}#chat.pos-br .msg.out,#chat.pos-tr .msg.out{animation-name:outr}
@@ -21,7 +23,7 @@
 </style></head><body>
 <div id="chat"></div>
 <script>
-/* Parámetros: ?key=  &pos=bl|br|tl|tr  &ttl=15 (segundos)  &max=8  &w=34 (ancho en vw)  &fs=2.5 (letra en vh)  &font=NombreGoogleFonts  &pixel=1  &av=1 (avatar con marco) */
+/* Parámetros: ?key=  &pos=bl|br|tl|tr  &ttl=15 (segundos)  &max=8  &w=34 (ancho en vw)  &fs=2.5 (letra en vh)  &font=NombreGoogleFonts  &pixel=1  &av=1 (avatar con marco)  &subcount=1 (meses de sub)  &bimg=1 (insignias desde ../assets/badges/)  &debug=1 */
 const { P, num, esc, listen, load7tv, parseParts, partsHtml, colorOf } = OV;
 const TTL = num('ttl', 15) * 1000, MAX = num('max', 8), el = document.getElementById('chat');
 el.className = 'pos-' + (P.get('pos') || 'bl');
@@ -29,7 +31,34 @@ document.documentElement.style.setProperty('--w', num('w', 34) + 'vw');
 document.documentElement.style.setProperty('--fs', num('fs', 2.5) + 'vh');
 if(P.get('pixel') === '1') document.body.classList.add('pixel');
 const SHOW_AV = P.get('av') === '1';
-const BDG = { broadcaster:'STREAMER', moderator:'MOD', vip:'VIP', subscriber:'SUB', og:'OG', founder:'FUNDADOR', verified:'✔', staff:'STAFF' };
+const SUBCOUNT = P.get('subcount') === '1', BIMG = P.get('bimg') === '1', DEBUG = P.get('debug') === '1';
+/* Iconos propios (SVG 16x16) con los tipos de insignia que manda Kick. Cambia colores o formas aquí.
+   Con &bimg=1 se usan imágenes tuyas: ../assets/badges/<tipo>.svg (o .png si cambias BIMG_EXT). */
+const BIMG_EXT = 'svg';
+const rr = (c) => `<rect x="1" y="1" width="14" height="14" rx="3" fill="${c}"/>`;
+const BADGE_SVG = {
+  broadcaster: rr('#e0452c') + '<path fill="#fff" d="M3.5 5.5h6v5h-6zM10.5 7l2.5-1.5v5L10.5 9z"/>',
+  moderator:   rr('#3fd01f') + '<path fill="#0f2a08" d="M11.5 2.5l2 2-1 1-1-1-4.2 4.2.8.8-1 1-.8-.8-1.6 1.6-1.4-1.4 1.6-1.6-.8-.8 1-1 .8.8L10.5 3.5z"/>',
+  vip:         rr('#b46bff') + '<path fill="#fff" d="M8 3l4 3-4 7-4-7z"/><path fill="#7d3fd0" d="M4 6h8L8 3z"/>',
+  verified:    '<circle cx="8" cy="8" r="7" fill="#53fc18"/><path fill="none" stroke="#0f2a08" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4.8 8.3l2.2 2.2 4.3-4.6"/>',
+  subscriber:  rr('#ffc21a') + '<path fill="#3a1b08" d="M8 2.8l1.5 3.1 3.4.5-2.5 2.4.6 3.4L8 10.6l-3 1.6.6-3.4L3.1 6.4l3.4-.5z"/>',
+  sub_gifter:  rr('#35d0ff') + '<path fill="#06222b" d="M3 6h10v2H3zM4 8h8v5H4z"/><path fill="#fff" d="M7.2 6h1.6v7H7.2z"/>',
+  og:          rr('#ff9a1f') + '<text x="8" y="11.2" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="7.5" fill="#3a1b08">OG</text>',
+  founder:     rr('#ffd84a') + '<path fill="#3a1b08" d="M3 11V6l2.5 2L8 4.5 10.5 8 13 6v5z"/>',
+  staff:       rr('#35d0ff') + '<path fill="#06222b" d="M8 2.5l5 2v3.5c0 3-2.2 4.7-5 5.5-2.8-.8-5-2.5-5-5.5V4.5z"/>',
+};
+const GENERIC_SVG = rr('#8a8a8a') + '<circle cx="8" cy="8" r="2.4" fill="#fff"/>';
+const safeType = (t) => /^[a-z0-9_]{1,24}$/.test(t || '') ? t : '';
+function badgeHtml(list){
+  return (list || []).slice(0, 6).map(b => {
+    const t = safeType(b.type); if (!t) return '';
+    const cnt = SUBCOUNT && t === 'subscriber' && b.count > 0 ? `<span class="bc">${b.count}</span>` : '';
+    const ico = BIMG
+      ? `<img class="bi" src="../assets/badges/${t}.${BIMG_EXT}" alt="" onerror="this.style.display='none'">`
+      : `<svg class="bi" viewBox="0 0 16 16" aria-hidden="true">${BADGE_SVG[t] || GENERIC_SVG}</svg>`;
+    return ico + cnt;
+  }).join('');
+}
 const drop = (n) => { n.classList.add('out'); setTimeout(() => n.remove(), 520); };
 const safeCls = (c) => /^[a-z0-9_-]{1,40}$/.test(c || '') ? c : '';
 
@@ -38,6 +67,7 @@ async function onChat(p){
   const n = document.createElement('div');
   n.className = 'msg';
 
+  if (DEBUG) console.log('chat payload', p);
   const cs = p.cosmetics || {};
   let paintCls = '';                                   // igual que la página: si el efecto trae meta.paint, lo dibuja PaintEngine
   try { if (cs.paint && cs.name_id && window.PaintEngine) paintCls = safeCls(PaintEngine.register(cs.name_id, cs.paint)); } catch (e) { console.error('paint', e); }
@@ -52,7 +82,7 @@ async function onChat(p){
     (fr ? `<span class="frame ${fr} sm">${avImg}</span>` : avImg) + `</span>`;
 
   n.innerHTML = av +
-    (p.badges || []).slice(0, 3).map(b => `<span class="bdg b-${esc(b)}">${BDG[b] || esc(b)}</span>`).join('') +
+    badgeHtml(p.badge_list) +
     name + `<span class="sep">:</span> <span class="tx">${partsHtml(parseParts(p.content || ''))}</span>`;
 
   el.append(n);
