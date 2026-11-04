@@ -61,6 +61,9 @@
 .mp-list{display:grid;gap:.35rem}.mp-hint{color:var(--tan);font-size:.82rem}
 .mp-acts{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}.mp-acts select{background:#1a1c1a;border:2px solid var(--rim);border-radius:8px;color:var(--cream);padding:.25rem .5rem;font:inherit;text-shadow:none}
 .mp-chat{background:#0b0e0f;border-radius:8px;padding:.5rem .6rem;font:700 .85rem system-ui,sans-serif;color:#e6e6e6;text-shadow:none;display:flex;gap:.3rem;align-items:center;flex-wrap:wrap}.mp-chat small{color:#6b7370;font-weight:600}
+.mp-chk{display:flex;gap:.5rem;align-items:center;cursor:pointer}
+.mp-sec input[type=number]{background:#1a1c1a;border:2px solid var(--rim);border-radius:8px;color:var(--cream);padding:.25rem .5rem;font:inherit;text-shadow:none}
+.mp-sec select{background:#1a1c1a;border:2px solid var(--rim);border-radius:8px;color:var(--cream);padding:.25rem .5rem;font:inherit;text-shadow:none}
 @media (max-width:760px){.mp-grid{grid-template-columns:1fr}.mp-prev{position:static}}
 `;
   document.head.append(mcss);
@@ -73,7 +76,7 @@
   modal.innerHTML = '<div class="card mpcard"><button id="mpClose" class="close" aria-label="Cerrar">&times;</button><h2 id="mpTitle" class="shoptitle">Mi perfil</h2><p id="mpMsg" class="shopmsg" role="status"></p><div id="mpBody"></div></div>';
   document.body.append(modal);
 
-  let busy = false, msgT;
+  let busy = false, msgT, PS = null;
   const mpMsg = (t, ok = true) => { const m = $('mpMsg'); m.style.color = ok ? '' : '#ff8a6a'; m.textContent = t; clearTimeout(msgT); msgT = setTimeout(() => { m.textContent = ''; }, 4000); };
   const eqOf = () => wallet?.equipped || {};
   const shownDef = () => RankEngine.shownFor(wallet.level, eqOf().rank);
@@ -108,6 +111,28 @@
     return `<section class="mp-sec"><h3>Insignia de rango <small>solo cambia lo que se ve: tu nivel y tu XP no se tocan</small></h3><div class="mp-list">
       <button type="button" class="mp-rk ${sel === null ? 'on' : ''}" data-mp="rank" data-id="" aria-pressed="${sel === null}">${sprite(auto.key, 28)}<span><b>Automática</b><small>La de tu nivel (${esc(auto.title)})</small></span></button>${rows}</div></section>`;
   }
+  const MES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  function privacy() {
+    if (!PS) return '<section class="mp-sec"><h3>Privacidad y cumpleaños</h3><p class="mp-hint">No se pudieron cargar tus ajustes. Falta actualizar la función de Kick y ejecutar regalos_perfil.sql.</p></section>';
+    return `<section class="mp-sec"><h3>Privacidad y cumpleaños <small>tú decides qué ve el resto</small></h3><div class="mp-list">
+      <label class="mp-chk"><input type="checkbox" data-ps="inventory_public" ${PS.inventory_public ? 'checked' : ''}> Mostrar mis cosméticos en mi perfil público</label>
+      <label class="mp-chk"><input type="checkbox" data-ps="allow_gifts" ${PS.allow_gifts ? 'checked' : ''}> Permitir que me regalen cosméticos</label>
+      <div class="mp-acts"><span>Cumpleaños</span>
+        <input id="psDay" type="number" min="1" max="31" placeholder="Día" value="${PS.birthday_day ?? ''}" style="width:5rem" aria-label="Día">
+        <select id="psMonth" aria-label="Mes">${MES.map((m, i) => `<option value="${i + 1}" ${PS.birthday_month === i + 1 ? 'selected' : ''}>${m}</option>`).join('')}</select>
+        <button type="button" class="btn" data-mp="bday">Guardar</button>${PS.birthday_month ? '<button type="button" class="btn ghost" data-mp="bdayclear">Borrar</button>' : ''}</div>
+      <label class="mp-chk"><input type="checkbox" data-ps="birthday_public" ${PS.birthday_public ? 'checked' : ''} ${PS.birthday_month ? '' : 'disabled'}> Mostrar mi cumpleaños en mi perfil público</label>
+      <p class="mp-hint">Solo se guarda el día y el mes, no el año. Por defecto tu cumpleaños es privado.</p></div></section>`;
+  }
+  async function savePS(patch) {
+    if (busy) return; busy = true;
+    const r = await shopApi('/shop/profile', patch); busy = false;
+    if (!r || !r.ok) {
+      mpMsg(r?.reason === 'invalid' ? 'Esa fecha no es válida.' : 'No se pudo guardar. Inténtalo otra vez.', false);
+      const g = await shopApi('/shop/profile'); if (g && g.ok) PS = g.settings; return mpRender();
+    }
+    PS = r.settings; mpMsg('Guardado ✔'); mpRender();
+  }
   function mpRender() {
     const body = $('mpBody');
     if (!sess) { body.innerHTML = `<p>Inicia sesión con tu cuenta de Kick para personalizar tu perfil.</p><p style="margin-top:.6rem"><a class="btn" href="${FN_URL}/login/start">Iniciar sesión con Kick</a></p>`; return; }
@@ -116,7 +141,7 @@
     body.innerHTML = `<div class="mp-grid"><aside class="mp-prev" aria-label="Vista previa">${previewHtml()}
         <div class="mp-acts"><button type="button" class="btn" data-mp="public">Ver mi perfil público</button><button type="button" class="btn ghost" data-mp="shop">Ir a la tienda</button></div>
         <label class="mp-hint">Vista del perfil público <select id="mpView"><option value="auto" ${v === 'auto' ? 'selected' : ''}>Automática</option><option value="compact" ${v === 'compact' ? 'selected' : ''}>Vertical</option><option value="wide" ${v === 'wide' ? 'selected' : ''}>Horizontal</option></select></label></aside>
-      <div>${ranks()}${tiles('frame', 'Marco de avatar')}${tiles('name_effect', 'Efecto de nombre')}${tiles('background', 'Fondo de perfil')}</div></div>`;
+      <div>${ranks()}${tiles('frame', 'Marco de avatar')}${tiles('name_effect', 'Efecto de nombre')}${tiles('background', 'Fondo de perfil')}${privacy()}</div></div>`;
   }
   async function mpAct(kind, id, type) {
     if (busy || !wallet) return; busy = true;
@@ -142,7 +167,7 @@
     modalOn(modal); $('mpClose').focus(); $('mpMsg').textContent = ''; mpRender();
     (async () => {
       if (!COS.size) await loadCosmetics();
-      if (sess) { const ok = await shopApi('/shop/session'); if (ok.ok) await loadWallet(); }
+      if (sess) { const ok = await shopApi('/shop/session'); if (ok.ok) { await loadWallet(); const g = await shopApi('/shop/profile'); PS = g && g.ok ? g.settings : null; } }
       await RankEngine.init(db); mpRender();
     })();
   }
@@ -152,7 +177,10 @@
     const b = e.target.closest('[data-mp]'); if (!b || b.disabled) return; const k = b.dataset.mp;
     if (k === 'public') { closeMp(); openProfile(sess.user); }
     else if (k === 'shop') { closeMp(); window.openShop && window.openShop(); }
+    else if (k === 'bday') { const d = +$('psDay').value; if (!d) return mpMsg('Escribe el día.', false); savePS({ birthday_month: +$('psMonth').value, birthday_day: d }); }
+    else if (k === 'bdayclear') savePS({ birthday_month: null, birthday_day: null });
     else mpAct(k, b.dataset.id, b.dataset.type); });
   modal.addEventListener('change', (e) => { if (e.target.id === 'mpView') { try { if (e.target.value === 'auto') localStorage.removeItem(KEY); else localStorage.setItem(KEY, e.target.value); } catch {} mpMsg('Vista guardada ✔'); } });
+  modal.addEventListener('change', (e) => { const k = e.target.dataset.ps; if (k) savePS({ [k]: e.target.checked }); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('open')) closeMp(); });
 })();

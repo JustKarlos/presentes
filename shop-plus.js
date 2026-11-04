@@ -133,6 +133,7 @@
       : list().map(c => `<div class="item sp-item r${rar(c, t)}${eqd(c) ? ' eq' : ''}${ST.sel === c.id ? ' sel' : ''}${tried(c.id) ? ' tried' : ''}" data-sel="${esc(c.id)}">${!c.active ? '<span class="sp-new sp-ret">Retirado</span>' : isNew(c) ? '<span class="sp-new">Nuevo</span>' : ''}
           <div class="prev">${tile(c, u)}</div><b class="in">${esc(c.name)}</b><small>${esc(c.description || '')}</small>
           <button type="button" class="btn ghost sp-try" data-try="${esc(c.id)}" aria-pressed="${tried(c.id)}">${tried(c.id) ? 'Probando' : 'Probar'}</button>
+          ${c.active && wallet ? `<button type="button" class="btn ghost sp-try" data-act="gift" data-id="${esc(c.id)}">🎁 Regalar</button>` : ''}
           <div class="ibot"><span class="cost">${own(c) ? (eqd(c) ? '<span class="badge-eq">Equipado</span>' : 'Tuyo') : nf(c.cost) + ' XP'}</span>${primary(c)}</div></div>`).join('')
         || '<p class="empty" style="grid-column:1/-1">No hay objetos con esos filtros.</p>';
   }
@@ -205,6 +206,20 @@
     if (ST.busy) return;
     if (a === 'login') { location.href = FN_URL + '/login/start'; return; }
     if (a === 'cancel') { ST.confirm = null; return render(); }
+    if (a === 'gift') {
+      const c = COS.get(id); if (!c || !wallet) return; ST.sel = id;
+      if (wallet.balance < c.cost) return msg(MSG.insufficient, false);
+      const raw = prompt(`¿A quién le regalas «${c.name}»? Escribe su usuario de Kick.`);
+      if (!raw || !raw.trim()) return;
+      const to = normUser(raw);
+      if (!confirm(`¿Regalar "${c.name}" a @${to} por ${nf(c.cost)} XP?\nTe quedarán ${nf(wallet.balance - c.cost)} XP. No se puede deshacer.`)) return;
+      ST.busy = true; let r;
+      try { r = await shopApi('/shop/gift', {cosmetic_id: id, to}); } catch (err) { console.error(err); r = {ok: false, reason: 'error'}; }
+      ST.busy = false;
+      msg(r.ok ? `🎁 ¡Regalo enviado a @${to}!` : (MSG[r.reason] || MSG.error), !!r.ok);
+      try { await loadWallet(); } catch (err) { console.error(err); }
+      render(); return;
+    }
     if (a === 'buy') {                                         // confirmación nativa: imposible de pasar por alto
       const c = COS.get(id); if (!c || !wallet) return; ST.sel = id;
       if (!confirm(`¿Comprar "${c.name}" por ${nf(c.cost)} XP?\nTe quedarán ${nf(wallet.balance - c.cost)} XP.`)) return render();

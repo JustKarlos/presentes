@@ -278,6 +278,14 @@ a.btn{display:inline-block;text-decoration:none}
 @media (max-width:900px){.layout{grid-template-columns:1fr}.feed{position:static}.stats{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:700px){header{grid-template-columns:1fr;justify-items:center}.status{justify-self:center;order:2}.hspace{display:none}.banner{padding:1.1rem 2.6rem}.banner p{font-size:1rem}.podium{padding-top:9.5rem}}
 @media (max-width:480px){.stat b{font-size:2rem}.p1 .av{width:68px!important;height:68px!important}.p2 .av,.p3 .av{width:52px!important;height:52px!important}.pod{width:36%}.pod.p1 .frame{margin-bottom:24px}.pod.p2 .frame,.pod.p3 .frame{margin-bottom:18px}.pod .nm{font-size:.9rem}.pod .pts{font-size:.74rem;white-space:nowrap}.panel,.feed,.card{border-width:16px;border-image-width:16px}.stat{border-width:16px;border-image-width:16px}}
+/* Colección en el perfil público */
+.cosh{font-family:var(--display);font-weight:700;color:var(--tan);margin:.5rem 0 .25rem}
+.cosgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:.4rem}
+.cos{background:#1a1c1a;border:2px solid var(--rim);border-radius:10px;padding:.3rem;display:grid;gap:.2rem;justify-items:center;text-align:center;align-content:center;min-height:92px}
+.cos.on{border-color:#4be01a}
+.cos small{font-size:.7rem;line-height:1.1;color:var(--tan);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cosv{display:grid;place-items:center;padding:.5rem;max-width:100%}
+.cos .swatch{width:72px;height:36px}
 </style>
 </head>
 <body>
@@ -668,9 +676,33 @@ $('qUser').addEventListener('input', () => {
 try { $('qUser').value = localStorage.getItem('kickUser') || ''; } catch {}
 
 /* ---------- perfil ---------- */
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const TIPOS = { frame:'Marcos', name_effect:'Efectos de nombre', background:'Fondos' };
+const fmtBday = (s) => { const [m, d] = s.split('-').map(Number); return `${d} de ${MESES[m - 1]}`; };
+const bdayToday = (s) => { const n = new Date(); return s === String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0'); };
+function cosTile(c, u, on){
+  const v = c.type === 'frame' ? avatarF({ ...u, frame_id: c.id }, 40)
+    : c.type === 'name_effect' ? `<span style="font-size:1rem;font-family:var(--display);font-weight:700">${nameHtml({ ...u, name_id: c.id })}</span>`
+    : `<div class="swatch ${c.css}" style="${c.url ? `background-image:url('${esc(c.url)}');background-size:cover;background-position:center bottom;image-rendering:pixelated` : ''}"></div>`;
+  return `<div class="cos${on ? ' on' : ''}" title="${esc(c.name)}"><span class="cosv">${v}</span><small>${esc(c.name)}${on ? ' · puesto' : ''}</small></div>`;
+}
+function profileExtras(u, pp){
+  if(!pp) return '';
+  if(pp.owned == null) return '<p class="xpnote">🔒 Esta persona mantiene su colección de cosméticos en privado.</p>';
+  const items = pp.owned.map(id => COS.get(id)).filter(Boolean);
+  if(!items.length) return '<p class="xpnote">Todavía no tiene cosméticos.</p>';
+  const eq = new Set([u.frame_id, u.name_id, u.background_id]);
+  return `<h3 class="qh">Colección (${items.length})</h3>` + ['frame', 'name_effect', 'background'].map(t => {
+    const l = items.filter(c => c.type === t); if(!l.length) return '';
+    return `<div class="cosh">${TIPOS[t]}</div><div class="cosgrid">${l.map(c => cosTile(c, u, eq.has(c.id))).join('')}</div>`;
+  }).join('');
+}
 async function openProfile(raw){
   const username = normUser(raw);
-  const [u, qs] = await Promise.all([rpc('get_user_stats', { p_username: username }), rpc('get_quests', { p_username: username })]);
+  const [u, qs, pp] = await Promise.all([
+    rpc('get_user_stats', { p_username: username }), rpc('get_quests', { p_username: username }),
+    db.rpc('get_public_profile', { p_username: username }).then(r => r.data || null, () => null),   // si aún no corriste el SQL, simplemente no muestra nada
+  ]);
   if(!u) return false;
   const pair = (l1,v1,l2,v2) => `<div class="pair"><div><span>${l1}</span><b>${v1}</b></div><div><span>${l2}</span><b>${v2}</b></div></div>`;
   $('mAvatar').innerHTML = avatarF(u, 72);
@@ -683,7 +715,7 @@ async function openProfile(raw){
     if(bg.css) card.classList.add(bg.css);
     if(bg.url) card.style.backgroundImage = `linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),url("${bg.url}")`;
   }
-  $('mSub').textContent = `@${u.username}`;
+  $('mSub').textContent = `@${u.username}` + (pp?.birthday ? (bdayToday(pp.birthday) ? ' · 🎉 ¡Hoy cumple años!' : ` · 🎂 ${fmtBday(pp.birthday)}`) : '');
 
   const title = u.rank_title || rankOf(u.level)[1];
   const span = Math.max(1, u.xp_next - u.xp_level_start);
@@ -692,6 +724,7 @@ async function openProfile(raw){
   $('mRankBox').innerHTML = `<div class="rankrow">${sprite(RankEngine.keyOfUser(u),44)}<div><b>${esc(title)}</b><span>Nivel ${u.level}</span></div></div>
     <div class="xpbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:0"></i><em>${nf(u.xp)} / ${nf(u.xp_next)} XP</em></div>
     <p class="xpnote">Te ${u.xp_next - u.xp === 1 ? 'falta' : 'faltan'} ${nf(Math.max(0, u.xp_next - u.xp))} XP para el nivel ${u.level + 1}.${nt ? ` Siguiente rango: ${nt[1]} (nivel ${nt[0]}).` : ' Alcanzaste el rango máximo.'}</p>`;
+  $('mRankBox').insertAdjacentHTML('beforeend', profileExtras(u, pp));
   requestAnimationFrame(() => requestAnimationFrame(() => { const f = $('mRankBox').querySelector('.xpbar i'); if(f) f.style.width = pct + '%'; }));
 
   $('pairs').innerHTML = [
@@ -743,10 +776,16 @@ function logout(callApi){
   try { localStorage.removeItem('kickSession'); } catch {}
   renderShop();
 }
-async function loadWallet(){ wallet = sess ? await rpc('get_wallet', { p_username: sess.user }) : null; }
+async function loadWallet(){
+  if(!sess){ wallet = null; return; }
+  const r = await shopApi('/shop/wallet');
+  wallet = r && r.ok ? r.wallet : null;
+}
 
 const MSG = { insufficient:'No te alcanza la XP.', already_owned:'Ya tienes este objeto.', user_not_found:'Todavía no estás en el ranking: escribe en el chat durante un directo.',
   item_not_found:'Ese objeto ya no está disponible.', not_owned:'Primero tienes que comprarlo.', no_session:'Tu sesión venció: inicia sesión de nuevo.',
+  self_gift:'No puedes regalarte algo a ti mismo.', recipient_not_found:'Esa persona todavía no está en el ranking: tiene que haber escrito en el chat durante un directo.',
+  recipient_has_it:'Esa persona ya tiene ese objeto.', recipient_blocks_gifts:'Esa persona no acepta regalos.',
   network:'No pude conectar con el servidor.', error:'Algo salió mal. Inténtalo otra vez.' };
 
 function previewHtml(c){
