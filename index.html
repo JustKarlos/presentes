@@ -33,7 +33,8 @@
 <style>
 :root{--ts:1px 1px 0 rgba(21,10,3,.9),0 0 4px rgba(0,0,0,.75);--cream:#f3e7c4;--tan:#cdb98a;--gold:#ffc21a;--leaf:#3fd01f;--dark:#262826;--line:#3a3d38;--rim:#50564f;
   --ol:2px 2px 0 #150a03,-1px -1px 0 #150a03,1px -1px 0 #150a03,-1px 1px 0 #150a03;
-  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;--body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif}
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;--body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ease-out:cubic-bezier(0.23,1,0.32,1);--dur-press:160ms;--dur-fast:200ms;--dur-bar:480ms}
 *{box-sizing:border-box;margin:0}
 body{text-shadow:var(--ts);color:var(--cream);font-family:var(--body);font-weight:600;line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased;background:#0d2013}
 body::before{content:"";position:fixed;inset:0;z-index:-1;background-color:#0d2013;
@@ -58,17 +59,29 @@ a, button, [role="button"], input[type="submit"] {
   cursor: url('assets/pointer.png')16 16, pointer;
 }
 
-/* Cabecera */
-header{padding:1.2rem 0 0;display:grid;grid-template-columns:1fr minmax(0,620px) 1fr;gap:1rem;align-items:start}
-.sign img{display:block;width:100%;height:auto;filter:drop-shadow(0 8px 10px rgba(0,0,0,.55));image-rendering:auto}
-.status{justify-self:start;display:flex;align-items:center;gap:.45rem;white-space:nowrap;font-family:var(--display);font-weight:700;font-size:1.05rem;line-height:1.1;color:#fff;text-shadow:var(--ol);border:12px solid transparent;border-image:url("assets/tab.png") 14 fill/12px stretch;padding:0 .35rem;filter:drop-shadow(0 4px 4px rgba(0,0,0,.45));image-rendering:pixelated}
+/* Portada: la primera pantalla (arte del canal + marco sólido + podio + resumen) */
+.hero{position:relative;isolation:isolate;display:flex;flex-direction:column;min-height:min(100vh,900px);min-height:min(100svh,900px);padding-bottom:1.2rem}
+.hero-art{position:absolute;inset:0;z-index:-1;background:#0d2013 url("assets/bg.jpg") center/cover no-repeat}
+.hero-art::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(4,12,7,.4),rgba(4,12,7,.8))}
+.hero-in{width:100%;max-width:1080px;margin:0 auto;padding:0 1rem;display:flex;flex-direction:column;flex:1}
+.hero-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding-top:1.2rem}
+.hero-main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);gap:1.4rem;align-items:center;padding:1rem 0}
+.hero .hero-box{padding:1.4rem 1.3rem 1.5rem;text-align:center}
+.sign{margin:0 auto;max-width:560px}
+.sign img{display:block;width:100%;height:auto;filter:drop-shadow(0 8px 10px rgba(0,0,0,.55))}
+.hero-lead{max-width:32rem;margin:1rem auto 0;font-size:1.05rem;color:#e8dfc4}
+.hero-lead code{font-family:var(--display);font-weight:700;font-size:1.2rem;color:var(--gold)}
+.hero-acts{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin-top:1.2rem}
+.hero-stats{margin-top:auto}
+.hero-alt{display:none}
+#kickLink[hidden]+.hero-alt{display:inline-flex}
+.status{display:flex;align-items:center;gap:.45rem;white-space:nowrap;font-family:var(--display);font-weight:700;font-size:1.05rem;line-height:1.1;color:#fff;text-shadow:var(--ol);border:12px solid transparent;border-image:url("assets/tab.png") 14 fill/12px stretch;padding:0 .35rem;filter:drop-shadow(0 4px 4px rgba(0,0,0,.45));image-rendering:pixelated}
 .dot{width:10px;height:10px;border-radius:2px;transform:rotate(45deg);background:#5b6a67;box-shadow:0 0 0 2px #150a03;flex:none}
-.banner{max-width:900px;margin:.4rem auto 0;padding:1.5rem 4.2rem;text-align:center;background:url("assets/banner.png") center/100% 100% no-repeat;filter:drop-shadow(0 6px 8px rgba(0,0,0,.45))}
-.banner p{font-family:var(--display);font-weight:600;font-size:1.2rem;line-height:1.25;color:#fff;text-shadow:var(--ol)}
-.banner code{color:var(--gold);font-weight:700}
+/* Objetivos táctiles de la portada a 44 px */
+.kicklink,.shopbtn{display:inline-flex;align-items:center;justify-content:center;min-height:44px}
 
 /* Tarjetas de resumen */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:1.2rem 0 0}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem;margin:1.2rem 0 0}
 .stat{border:22px solid transparent;border-image:url("assets/frame.png") 56 fill/22px stretch;padding:0 .1rem}
 .stat .lb{display:flex;align-items:center;gap:.4rem;font-family:var(--display);font-weight:700;font-size:1.1rem;line-height:1.1;color:#fff;text-shadow:var(--ol)}
 .stat .lb svg{color:var(--leaf);flex:none}
@@ -77,16 +90,17 @@ header{padding:1.2rem 0 0;display:grid;grid-template-columns:1fr minmax(0,620px)
 .stat small i{font-style:normal}
 
 /* Podio (imagen + avatares encima) */
-.podium{max-width:700px;margin:0 auto;padding-top:8.8rem}
+.podium{max-width:700px;margin:0 auto;padding-top:10.5rem}
 .pstage{position:relative}
 .pstage>img{display:block;width:100%;height:auto;filter:drop-shadow(0 8px 8px rgba(0,0,0,.5))}
-.pod{position:absolute;transform:translateX(-50%);width:32%;display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
-/* Ajusta aquí la posición de cada puesto: left = centro horizontal, bottom = altura sobre el bloque */
-.podium{padding-top:10.5rem}
+.pod{position:absolute;transform:translateX(-50%);width:27%;display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
+/* Ajusta aquí la posición de cada puesto: left = centro horizontal, bottom = altura sobre el bloque.
+   El 27% de ancho deja 27,5% entre centros: los puestos ya no se pisan. */
 .pod.p1 .frame{margin-bottom:30px}
 .pod.p2 .frame,.pod.p3 .frame{margin-bottom:23px}
-.p1{left:48%;bottom:95%}.p2{left:20.5%;bottom:78%}.p3{left:77%;bottom:65%}
+.p1{left:48%;bottom:97%}.p2{left:20.5%;bottom:78%}.p3{left:77%;bottom:65%}
 .pod .nm{font-family:var(--display);font-weight:700;font-size:1.1rem;line-height:1.15;color:#fff;text-shadow:var(--ol);max-width:100%;white-space:nowrap;overflow:visible;filter:drop-shadow(1px 0 0 #150a03) drop-shadow(-1px 0 0 #150a03) drop-shadow(0 1px 0 #150a03) drop-shadow(0 -1px 0 #150a03) drop-shadow(0 0 3px rgba(0,0,0,.85))}
+.pod .nm .ne{white-space:normal;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .pod .pts{font-family:var(--display);font-weight:700;font-size:.95rem;color:var(--gold);text-shadow:var(--ol);margin-bottom:.35rem}
 .p1 .av{box-shadow:0 0 0 3px #150a03,0 0 0 6px var(--gold),0 0 22px rgba(255,194,26,.5)}
 .p2 .av,.p3 .av{box-shadow:0 0 0 3px #150a03,0 0 0 5px #8a8f86}
@@ -94,7 +108,7 @@ header{padding:1.2rem 0 0;display:grid;grid-template-columns:1fr minmax(0,620px)
 
 /* Paneles con marco */
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:1rem;align-items:start;margin-top:1rem}
-.panel,.feed,.card,.about{border:22px solid transparent;border-image:url("assets/frame.png") 56/22px stretch;background:linear-gradient(#2b2d2a,#222421) padding-box;padding:.1rem .4rem .5rem}
+.panel,.feed,.card,.about,.hero-box{border:22px solid transparent;border-image:url("assets/frame.png") 56/22px stretch;background:linear-gradient(#2b2d2a,#222421) padding-box;padding:.1rem .4rem .5rem}
 .ptitle{font-family:var(--display);font-weight:700;font-size:1.6rem;text-align:center;color:#fff;text-shadow:var(--ol);margin:-.9rem 0 .6rem}
 .tabs{display:flex;gap:.25rem;overflow-x:auto;padding-bottom:2px}
 .tab{flex:1 1 auto;white-space:nowrap;text-align:center;font-family:var(--display);font-weight:700;font-size:1.05rem;color:#fff;text-shadow:var(--ol);
@@ -108,7 +122,12 @@ header{padding:1.2rem 0 0;display:grid;grid-template-columns:1fr minmax(0,620px)
 .chip:hover{filter:brightness(1.2)}
 .chip.on{border-color:#4be01a;color:#7dff4a}
 .pw{position:relative}
-.pop{position:absolute;top:calc(100% + .5rem);left:0;z-index:20;width:240px;display:grid;gap:.6rem;padding:.9rem;border:2px solid var(--rim);border-radius:12px;background:#2b2d2a;box-shadow:0 12px 30px rgba(0,0,0,.6)}
+.pop{position:absolute;top:calc(100% + .5rem);left:0;z-index:20;width:240px;display:none;gap:.6rem;padding:.9rem;border:2px solid var(--rim);border-radius:12px;background:#2b2d2a;box-shadow:0 12px 30px rgba(0,0,0,.6);
+  transform-origin:top left;opacity:0;transform:translateY(-4px) scale(.97);
+  transition:opacity var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-out),display var(--dur-fast) allow-discrete}
+.pop.open{display:grid;opacity:1;transform:none}
+@starting-style{.pop.open{opacity:0;transform:translateY(-4px) scale(.97)}}
+@media (prefers-reduced-motion:reduce){.pop{transition:opacity .01s;transform:none}}
 .pop label{font-size:.8rem;color:var(--tan);display:grid;gap:.2rem}
 .pop input{background:#181a18;border:2px solid var(--rim);border-radius:8px;color:var(--cream);padding:.4rem .6rem;font:inherit;color-scheme:dark}
 .pop .acts{display:flex;gap:.5rem}
@@ -150,10 +169,48 @@ header{padding:1.2rem 0 0;display:grid;grid-template-columns:1fr minmax(0,620px)
 .card{position:relative;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;padding:.4rem .7rem .8rem}
 .close{position:absolute;top:-.2rem;right:.2rem;font-size:1.8rem;color:var(--tan);line-height:1}
 .close:hover{color:#fff}
-.mh{display:flex;gap:1rem;align-items:center;margin:.2rem 0 1rem;padding-right:1.5rem}
-.mh h2{font-family:var(--display);font-weight:700;font-size:1.9rem;line-height:1.05;word-break:break-all;color:var(--gold);text-shadow:var(--ol)}
-.mh p{color:var(--tan);font-size:.88rem}
-.pairs{display:grid;gap:.45rem}
+.mh{display:flex;gap:1rem;align-items:flex-start;margin:.15rem 0 .9rem;padding-right:1.5rem}
+.mh-info{min-width:0;flex:1}
+.mh h2{font-family:var(--display);font-weight:700;font-size:1.9rem;line-height:1.05;word-break:break-word;color:var(--gold);text-shadow:var(--ol)}
+.mh p,.m-sub{color:var(--tan);font-size:.88rem;margin-top:.1rem}
+.m-chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.45rem}
+.m-chip{display:inline-flex;align-items:center;gap:.3rem;padding:.12rem .55rem;border:2px solid var(--rim);border-radius:999px;background:rgba(26,28,26,.75);font-size:.78rem;color:var(--cream)}
+.m-chip b{font-family:var(--display);font-weight:700;font-size:.95rem;color:#fff;line-height:1}
+.m-chip.gold b{color:var(--gold)}.m-chip.green b{color:#7dff4a}
+.m-progress{background:#1a1c1a;border:2px solid var(--rim);border-radius:12px;padding:.7rem .8rem;margin-bottom:.75rem}
+.m-progress .rankrow{margin-bottom:.45rem}
+.m-progress .xpnote{margin:.4rem 0 0}
+.pairs,.m-stats{display:grid;gap:.7rem}
+.m-group{display:grid;gap:.35rem}
+.m-group h4{font-family:var(--display);font-weight:700;font-size:1.05rem;color:#fff;text-shadow:var(--ol);margin:0 .1rem}
+.m-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.4rem}
+.m-stat{background:#1a1c1a;border:2px solid var(--rim);border-radius:10px;padding:.45rem .65rem;min-width:0}
+.m-stat span{display:block;font-size:.72rem;color:var(--tan);line-height:1.2}
+.m-stat b{display:block;font-family:var(--display);font-weight:700;font-size:1.25rem;line-height:1.15;color:#fff;overflow-wrap:anywhere}
+.m-stat small{display:inline-block;margin-top:.15rem;font-size:.72rem;color:var(--gold);font-weight:700}
+.m-stat.hero{grid-column:span 2;background:linear-gradient(180deg,#222622,#1a1c1a)}
+.m-stat.hero b{font-size:1.45rem}
+.m-sec{margin-top:.75rem}
+.m-sec[hidden]{display:none}
+.m-sec-title{margin:0}
+.m-fold{width:100%;display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.45rem .6rem;background:#1a1c1a;border:2px solid var(--rim);border-radius:10px;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.m-fold:hover{filter:brightness(1.12);border-color:#575c55}
+.m-fold:focus-visible{outline:2px solid var(--leaf);outline-offset:2px}
+.m-fold .m-count{font-size:.8rem;color:var(--tan);font-family:var(--body);font-weight:600;text-shadow:none;margin-left:.35rem}
+.m-chev{font-size:1rem;color:var(--tan);transition:transform .18s ease;flex:none}
+.m-fold[aria-expanded="false"] .m-chev{transform:rotate(-90deg)}
+.m-panel{margin-top:.4rem}
+.m-panel[hidden]{display:none}
+#mCollectionBody .xpnote{margin:.1rem 0 .4rem}
+#mCollectionBody{display:grid;gap:.45rem}
+.m-coll-group{display:grid;gap:.25rem}
+.m-coll-group .cosh{margin-top:0}
+.m-coll-scroll{max-height:260px;overflow:auto;padding-right:.15rem}
+.m-group h4{display:flex;align-items:center;gap:.35rem}
+.m-group h4::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--leaf);box-shadow:0 0 0 2px rgba(83,252,24,.15);flex:none}
+.m-stat{background:linear-gradient(180deg,#1d201d,#1a1c1a);transition:border-color .15s ease}
+.m-stat:hover{border-color:#575c55}
+@media (max-width:420px){.m-grid{grid-template-columns:1fr}.m-stat.hero{grid-column:span 1}}
 .pair{display:grid;grid-template-columns:1fr 1fr;background:#1a1c1a;border:2px solid var(--rim);border-radius:10px}
 .pair div{padding:.5rem .8rem}
 .pair div+div{border-left:2px solid var(--rim)}
@@ -166,15 +223,16 @@ header{padding:1.2rem 0 0;display:grid;grid-template-columns:1fr minmax(0,620px)
 .lvl{display:inline-block;margin-left:.45rem;padding:0 .4rem;border:2px solid #150a03;border-radius:5px;background:#3a2413;color:var(--gold);font-family:var(--display);font-weight:700;font-size:.82rem;line-height:1.25;vertical-align:1px}
 .info small.rk2{display:flex;align-items:center;gap:.3rem;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .xpbar{position:relative;height:24px;border:3px solid #150a03;border-radius:6px;background:#161816;overflow:hidden}
-.xpbar i{position:absolute;inset:0 auto 0 0;width:0;background:repeating-linear-gradient(90deg,#7fe044 0 8px,#5fc02e 8px 16px);box-shadow:inset 0 3px 0 rgba(255,255,255,.35);transition:width 1.1s steps(16,end)}
+.xpbar i{position:absolute;inset:0 auto 0 0;width:0;background:repeating-linear-gradient(90deg,#7fe044 0 8px,#5fc02e 8px 16px);box-shadow:inset 0 3px 0 rgba(255,255,255,.35);transition:width var(--dur-bar) steps(12,end)}
 .xpbar em{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;font-family:var(--display);font-weight:700;font-size:.95rem;color:#fff;text-shadow:var(--ol)}
 .xpbar.sm{height:20px}.xpbar.sm em{font-size:.85rem}
 .rankrow{display:flex;align-items:center;gap:.7rem;margin-bottom:.55rem}
 .rankrow b{display:block;font-family:var(--display);font-weight:700;font-size:1.4rem;line-height:1.1;color:#fff;text-shadow:var(--ol)}
 .rankrow span{color:var(--tan);font-size:.85rem}
 .xpnote{color:var(--tan);font-size:.8rem;margin:.4rem 0 .9rem}
-.card h3.qh,.qgroup h3{font-family:var(--display);font-weight:700;font-size:1.25rem;color:#fff;text-shadow:var(--ol);margin:1rem 0 .45rem}
+.card h3.qh,.qgroup h3{font-family:var(--display);font-weight:700;font-size:1.25rem;color:#fff;text-shadow:var(--ol);margin:.2rem 0 .45rem}
 .quests{display:grid;gap:.5rem}
+#mQuests{max-height:320px;overflow:auto;padding-right:.15rem}
 .quest{background:#1a1c1a;border:2px solid var(--rim);border-radius:10px;padding:.55rem .7rem}
 .quest.done{border-color:#4be01a}
 .qtop{display:flex;justify-content:space-between;gap:.6rem;margin-bottom:.4rem}
@@ -233,7 +291,7 @@ header{padding:1.2rem 0 0;display:grid;grid-template-columns:1fr minmax(0,620px)
 .pb-haunted{--art:url("assets/backgrounds/haunted.png");background-color:#d4f1e9}   /* sus zonas transparentes son rayos de luz */
 .pb-pumpkin{--art:url("assets/backgrounds/pumpkin.png")}
 .swatch[class*="pb-"]{background-image:var(--art);background-size:cover;background-position:center 62%;image-rendering:pixelated}
-.card[class*="pb-"] .pair,.card[class*="pb-"] .quest{background:rgba(12,14,12,.58)}
+.card[class*="pb-"] .pair,.card[class*="pb-"] .quest,.card[class*="pb-"] .m-progress,.card[class*="pb-"] .m-stat,.card[class*="pb-"] .m-chip,.modal .card.pb-img .m-progress,.modal .card.pb-img .m-stat,.modal .card.pb-img .m-chip{background:rgba(12,14,12,.62)}
 .card[class*="pb-"]{background-image:linear-gradient(rgba(8,8,10,.2),rgba(8,8,10,.46)),var(--art);background-size:cover;background-position:center top;background-repeat:no-repeat;background-clip:padding-box;image-rendering:pixelated}
 
 /* Tienda */
@@ -272,12 +330,13 @@ a.btn{display:inline-block;text-decoration:none}
 @media (max-width:700px){.hright{justify-self:center;order:3}}
 @media (prefers-reduced-motion:reduce){.ne-neon,.ne-ice,.ne-gold,.ne-fire,.ne-rainbow{animation:none}
 .fr-moss::after,.fr-gem::after{animation-duration:3.2s}.fr-gold::after{animation-duration:4s}.fr-fire::after{animation-duration:1.6s}.fr-rainbow::after{animation-duration:3s}}
-.flash{animation:flash 1.6s ease-out}
-@keyframes flash{from{background:rgba(83,252,24,.28)}to{background:transparent}}
-@media (prefers-reduced-motion:reduce){.flash,.live{animation:none}}
-@media (max-width:900px){.layout{grid-template-columns:1fr}.feed{position:static}.stats{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:700px){header{grid-template-columns:1fr;justify-items:center}.status{justify-self:center;order:2}.hspace{display:none}.banner{padding:1.1rem 2.6rem}.banner p{font-size:1rem}.podium{padding-top:9.5rem}}
-@media (max-width:480px){.stat b{font-size:2rem}.p1 .av{width:68px!important;height:68px!important}.p2 .av,.p3 .av{width:52px!important;height:52px!important}.pod{width:36%}.pod.p1 .frame{margin-bottom:24px}.pod.p2 .frame,.pod.p3 .frame{margin-bottom:18px}.pod .nm{font-size:.9rem}.pod .pts{font-size:.74rem;white-space:nowrap}.panel,.feed,.card{border-width:16px;border-image-width:16px}.stat{border-width:16px;border-image-width:16px}}
+@media (prefers-reduced-motion:reduce){.live{animation:none}}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}.feed{position:static}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-main{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:700px){.hero-top{justify-content:center}.podium{padding-top:9.5rem}}
+@media (max-width:480px){.stat b{font-size:1.6rem}.p1 .av{width:68px!important;height:68px!important}.p2 .av,.p3 .av{width:52px!important;height:52px!important}.pod.p1 .frame{margin-bottom:24px}.pod.p2 .frame,.pod.p3 .frame{margin-bottom:18px}.pod .nm{font-size:.9rem}.pod .pts{font-size:.74rem;white-space:nowrap}.panel,.feed,.card,.hero-box{border-width:16px;border-image-width:16px}.stat{border-width:16px;border-image-width:16px}
+  /* En pantallas de 320-400 px la fila no da para rango+avatar+nombre+total en una línea:
+     el nombre quedaba en ~11 px. El total baja a una segunda línea alineada a la derecha. */
+  .row{flex-wrap:wrap;row-gap:.3rem}.total{flex:0 0 100%;text-align:right}}
 /* Colección en el perfil público */
 .cosh{font-family:var(--display);font-weight:700;color:var(--tan);margin:.5rem 0 .25rem}
 .cosgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:.4rem}
@@ -304,23 +363,38 @@ const CONFIG = {
 /* ================================================================ */
 </script>
 
+<header class="hero">
+  <div class="hero-art" aria-hidden="true"></div>
+  <div class="hero-in">
+    <div class="hero-top">
+      <div class="status" role="status"><span class="dot" id="dot"></span><span id="statusTxt">Conectando…</span></div>
+      <div class="hright"><button class="shopbtn" id="shopBtn" type="button">Tienda</button></div>
+    </div>
+
+    <div class="hero-main">
+      <div class="hero-box">
+        <div class="sign"><img src="assets/sign.png" alt="Ranking de presentes" width="1250" height="390" fetchpriority="high"><h1 id="chan" class="sr">Ranking de presentes</h1></div>
+        <p class="hero-lead">Escribe <code>!presente</code> en el chat durante el directo. Sumas 1 punto cada hora y tu racha crece por cada día seguido que participes.</p>
+        <div class="hero-acts">
+          <a class="kicklink" id="kickLink" href="#" target="_blank" rel="noopener" hidden>Ir al chat</a>
+          <a class="kicklink hero-alt" href="#main">Ver la clasificación</a>
+        </div>
+      </div>
+      <section id="podium" class="podium" aria-label="Los tres primeros puestos"></section>
+    </div>
+
+    <div class="hero-stats">
+      <section class="stats" aria-label="Resumen">
+        <div class="stat"><div class="lb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Total de presentes</div><b id="c1">–</b><small id="c1s">&nbsp;</small></div>
+        <div class="stat"><div class="lb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-5.4A8 8 0 1 1 21 12z"/></svg>Total de mensajes</div><b id="c2">–</b><small id="c2s">&nbsp;</small></div>
+        <div class="stat"><div class="lb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-3.5 3-5.5 6.5-5.5s6 2 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c2 .6 3.3 2.3 3.5 5"/></svg>Usuarios del chat</div><b id="c3">–</b><small id="c3s">&nbsp;</small></div>
+        <div class="stat"><div class="lb"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4-2 5-2 8a3 3 0 006 0c0-1-.5-2-1-3 3 1 5 4 5 7a8 8 0 01-16 0c0-5 4-7 8-12z"/></svg>Mejor racha activa</div><b id="c4">–</b><small id="c4s">&nbsp;</small></div>
+      </section>
+    </div>
+  </div>
+</header>
+
 <div class="wrap">
-  <header>
-    <div class="status" role="status"><span class="dot" id="dot"></span><span id="statusTxt">Conectando…</span></div>
-    <div class="sign"><img src="assets/sign.png" alt="Ranking de presentes" width="1250" height="390" fetchpriority="high"><h1 id="chan" class="sr">Ranking de presentes</h1></div>
-    <div class="hright"><a class="kicklink" id="kickLink" href="#" target="_blank" rel="noopener" hidden>Ir al chat</a><button class="shopbtn" id="shopBtn" type="button">Tienda</button></div>
-  </header>
-  <div class="banner"><p>Escribe <code>!presente</code> en el chat durante el directo. Sumas 1 punto cada hora y tu racha crece por cada día seguido que participes.</p></div>
-
-  <section class="stats" aria-label="Resumen">
-    <div class="stat"><div class="lb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Total de presentes</div><b id="c1">–</b><small id="c1s">&nbsp;</small></div>
-    <div class="stat"><div class="lb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-5.4A8 8 0 1 1 21 12z"/></svg>Total de mensajes</div><b id="c2">–</b><small id="c2s">&nbsp;</small></div>
-    <div class="stat"><div class="lb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-3.5 3-5.5 6.5-5.5s6 2 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c2 .6 3.3 2.3 3.5 5"/></svg>Usuarios del chat</div><b id="c3">–</b><small id="c3s">&nbsp;</small></div>
-    <div class="stat"><div class="lb"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4-2 5-2 8a3 3 0 006 0c0-1-.5-2-1-3 3 1 5 4 5 7a8 8 0 01-16 0c0-5 4-7 8-12z"/></svg>Mejor racha activa</div><b id="c4">–</b><small id="c4s">&nbsp;</small></div>
-  </section>
-
-  <section id="podium" class="podium" aria-label="Los tres primeros puestos"></section>
-
   <div class="layout">
     <main class="panel" id="main" tabindex="-1">
       <h2 class="ptitle">Clasificación</h2>
@@ -341,11 +415,11 @@ const CONFIG = {
           <button class="chip" data-r="30d">30 días</button>
         </div>
         <div class="pw">
-          <button class="chip" id="dateBtn" aria-haspopup="true">
+          <button class="chip" id="dateBtn" aria-haspopup="true" aria-expanded="false">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
             <span id="dateLbl">Fecha</span>
           </button>
-          <div class="pop" id="pop" hidden>
+          <div class="pop" id="pop">
             <label>Desde<input type="date" id="dFrom"></label>
             <label>Hasta<input type="date" id="dTo"></label>
             <div class="acts"><button class="btn" id="dApply">Aplicar</button><button class="btn ghost" id="dClear">Limpiar</button></div>
@@ -391,11 +465,17 @@ const CONFIG = {
 <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="mName">
   <div class="card">
     <button id="mClose" class="close" aria-label="Cerrar">&times;</button>
-    <div class="mh"><span id="mAvatar"></span><div><h2 id="mName"></h2><p id="mSub"></p></div></div>
-    <div id="mRankBox"></div>
-    <div class="pairs" id="pairs"></div>
-    <h3 class="qh">Misiones</h3>
-    <div class="quests" id="mQuests"></div>
+    <div class="mh"><span id="mAvatar"></span><div class="mh-info"><h2 id="mName"></h2><p id="mSub" class="m-sub"></p><div id="mChips" class="m-chips"></div></div></div>
+    <div id="mRankBox" class="m-progress"></div>
+    <div class="pairs m-stats" id="pairs"></div>
+    <section id="mCollectionSec" class="m-sec m-collapsible" hidden>
+      <h3 class="qh m-sec-title"><button type="button" class="m-fold" id="mCollectionToggle" aria-expanded="false" aria-controls="mCollectionPanel"><span id="mCollectionTitle">Colección</span><span class="m-chev" aria-hidden="true">▾</span></button></h3>
+      <div id="mCollectionPanel" class="m-panel" hidden><div id="mCollectionBody"></div></div>
+    </section>
+    <section class="m-sec m-sec-quests m-collapsible">
+      <h3 class="qh m-sec-title"><button type="button" class="m-fold" id="mQuestsToggle" aria-expanded="true" aria-controls="mQuestsPanel"><span id="mQuestsTitle">Misiones</span><span class="m-chev" aria-hidden="true">▾</span></button></h3>
+      <div id="mQuestsPanel" class="m-panel"><div class="quests" id="mQuests"></div></div>
+    </section>
   </div>
 </div>
 
@@ -456,7 +536,7 @@ function avatar(u, size){
   const h = hue(u.username);
   const st = `width:${size}px;height:${size}px;font-size:${Math.round(size*.38)}px`;
   if(u.avatar_url && /^https:\/\//.test(u.avatar_url))
-    return `<img class="av" style="${st}" src="${esc(u.avatar_url)}" alt="" loading="lazy" referrerpolicy="no-referrer" data-ini="${ini}" data-h="${h}">`;
+    return `<img class="av" style="${st}" src="${esc(u.avatar_url)}" alt="" width="${size}" height="${size}" loading="lazy" referrerpolicy="no-referrer" data-ini="${ini}" data-h="${h}">`;
   return `<span class="av" style="${st};background:hsl(${h} 30% 24%)">${ini}</span>`;
 }
 document.addEventListener('error', (e) => {
@@ -570,7 +650,7 @@ function render(notFound){
   const pod = $('podium');
   const top = all.slice(0,3);
   pod.hidden = top.length === 0;
-  pod.innerHTML = `<div class="pstage"><img src="assets/podium.png" alt="">${top.map(podiumTile).join('')}</div>`;
+  pod.innerHTML = `<div class="pstage"><img src="assets/podium.png" alt="" width="1090" height="400">${top.map(podiumTile).join('')}</div>`;
 
   const list = q ? all.filter(u => u.username.includes(q) || u.display_name.toLowerCase().includes(q)) : all.slice(3);
   $('board').innerHTML = list.map(rowItem).join('');
@@ -614,18 +694,19 @@ $('chips').addEventListener('click', (e) => {
   const c = e.target.closest('.chip'); if(!c) return;
   st.range = c.dataset.r; st.from = st.to = null; markRange(); loadBoard();
 });
-$('dateBtn').addEventListener('click', (e) => { e.stopPropagation(); $('pop').hidden = !$('pop').hidden; });
+const setPop = (open) => { $('pop').classList.toggle('open', open); $('dateBtn').setAttribute('aria-expanded', String(open)); };
+$('dateBtn').addEventListener('click', (e) => { e.stopPropagation(); setPop(!$('pop').classList.contains('open')); });
 $('pop').addEventListener('click', (e) => e.stopPropagation());
-document.addEventListener('click', () => { $('pop').hidden = true; });
+document.addEventListener('click', () => setPop(false));
 $('dApply').onclick = () => {
   const f = $('dFrom').value, t = $('dTo').value || f;
   if(!f) return;
   st.range = 'custom'; st.from = f <= t ? f : t; st.to = f <= t ? t : f;
-  $('pop').hidden = true; markRange(); loadBoard();
+  setPop(false); markRange(); loadBoard();
 };
 $('dClear').onclick = () => {
   $('dFrom').value = $('dTo').value = ''; st.range = 'all'; st.from = st.to = null;
-  $('pop').hidden = true; markRange(); loadBoard();
+  setPop(false); markRange(); loadBoard();
 };
 
 /* ---------- búsqueda ---------- */
@@ -686,16 +767,18 @@ function cosTile(c, u, on){
     : `<div class="swatch ${c.css}" style="${c.url ? `background-image:url('${esc(c.url)}');background-size:cover;background-position:center bottom;image-rendering:pixelated` : ''}"></div>`;
   return `<div class="cos${on ? ' on' : ''}" title="${esc(c.name)}"><span class="cosv">${v}</span><small>${esc(c.name)}${on ? ' · puesto' : ''}</small></div>`;
 }
-function profileExtras(u, pp){
-  if(!pp) return '';
-  if(pp.owned == null) return '<p class="xpnote">🔒 Esta persona mantiene su colección de cosméticos en privado.</p>';
+function profileCollection(u, pp){
+  if(!pp) return { html: '<p class="xpnote">No se pudo cargar la colección.</p>', count: null, show: true };
+  if(pp.owned == null) return { html: '<p class="xpnote">🔒 Esta persona mantiene su colección de cosméticos en privado.</p>', count: null, show: true };
   const items = pp.owned.map(id => COS.get(id)).filter(Boolean);
-  if(!items.length) return '<p class="xpnote">Todavía no tiene cosméticos.</p>';
+  if(!items.length) return { html: '<p class="xpnote">Todavía no tiene cosméticos.</p>', count: 0, show: true };
   const eq = new Set([u.frame_id, u.name_id, u.background_id]);
-  return `<h3 class="qh">Colección (${items.length})</h3>` + ['frame', 'name_effect', 'background'].map(t => {
+  const body = ['frame', 'name_effect', 'background'].map(t => {
     const l = items.filter(c => c.type === t); if(!l.length) return '';
-    return `<div class="cosh">${TIPOS[t]}</div><div class="cosgrid">${l.map(c => cosTile(c, u, eq.has(c.id))).join('')}</div>`;
+    return `<div class="m-coll-group"><div class="cosh">${TIPOS[t]}</div><div class="cosgrid">${l.map(c => cosTile(c, u, eq.has(c.id))).join('')}</div></div>`;
   }).join('');
+  const scroll = items.length > 12 ? `<div class="m-coll-scroll">${body}</div>` : body;
+  return { html: scroll, count: items.length, show: true };
 }
 async function openProfile(raw){
   const username = normUser(raw);
@@ -704,7 +787,6 @@ async function openProfile(raw){
     db.rpc('get_public_profile', { p_username: username }).then(r => r.data || null, () => null),   // si aún no corriste el SQL, simplemente no muestra nada
   ]);
   if(!u) return false;
-  const pair = (l1,v1,l2,v2) => `<div class="pair"><div><span>${l1}</span><b>${v1}</b></div><div><span>${l2}</span><b>${v2}</b></div></div>`;
   $('mAvatar').innerHTML = avatarF(u, 72);
   $('mName').innerHTML = nameHtml(u);
   const card = $('modal').querySelector('.card');
@@ -715,36 +797,85 @@ async function openProfile(raw){
     if(bg.css) card.classList.add(bg.css);
     if(bg.url) card.style.backgroundImage = `linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),url("${bg.url}")`;
   }
-  $('mSub').textContent = `@${u.username}` + (pp?.birthday ? (bdayToday(pp.birthday) ? ' · 🎉 ¡Hoy cumple años!' : ` · 🎂 ${fmtBday(pp.birthday)}`) : '');
-
   const title = u.rank_title || rankOf(u.level)[1];
+  const bday = pp?.birthday ? (bdayToday(pp.birthday) ? '🎉 Hoy cumple años' : `🎂 ${fmtBday(pp.birthday)}`) : '';
+  $('mSub').innerHTML = `<span>@${esc(u.username)}</span>${bday ? ` <span>· ${esc(bday)}</span>` : ''}`;
+  const chips = [
+    `<span class="m-chip gold"><b>#${nf(u.xp_rank)}</b> XP</span>`,
+    `<span class="m-chip green"><b>${nf(u.streak)}</b> ${plural(u.streak,'día de racha','días de racha')}</span>`,
+    `<span class="m-chip"><b>${nf(u.total_presentes)}</b> ${plural(u.total_presentes,'presente','presentes')}</span>`
+  ];
+  $('mChips').innerHTML = chips.join('');
+
   const span = Math.max(1, u.xp_next - u.xp_level_start);
   const pct = Math.max(0, Math.min(100, Math.round((u.xp - u.xp_level_start) / span * 100)));
   const nt = nextTier(u.level);
-  $('mRankBox').innerHTML = `<div class="rankrow">${sprite(RankEngine.keyOfUser(u),44)}<div><b>${esc(title)}</b><span>Nivel ${u.level}</span></div></div>
-    <div class="xpbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:0"></i><em>${nf(u.xp)} / ${nf(u.xp_next)} XP</em></div>
-    <p class="xpnote">Te ${u.xp_next - u.xp === 1 ? 'falta' : 'faltan'} ${nf(Math.max(0, u.xp_next - u.xp))} XP para el nivel ${u.level + 1}.${nt ? ` Siguiente rango: ${nt[1]} (nivel ${nt[0]}).` : ' Alcanzaste el rango máximo.'}</p>`;
-  $('mRankBox').insertAdjacentHTML('beforeend', profileExtras(u, pp));
+  $('mRankBox').innerHTML = `<div class="rankrow">${sprite(RankEngine.keyOfUser(u),44)}<div><b>${esc(title)}</b><span>Nivel ${u.level} · ${nf(u.xp)} XP total</span></div></div>
+    <div class="xpbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="Progreso de nivel"><i style="width:0"></i><em>${nf(u.xp)} / ${nf(u.xp_next)} XP</em></div>
+    <p class="xpnote">Te ${u.xp_next - u.xp === 1 ? 'falta' : 'faltan'} ${nf(Math.max(0, u.xp_next - u.xp))} XP para el nivel ${u.level + 1}.${nt ? ` Siguiente rango: ${esc(nt[1])} (nivel ${nt[0]}).` : ' Alcanzaste el rango máximo.'}</p>`;
   requestAnimationFrame(() => requestAnimationFrame(() => { const f = $('mRankBox').querySelector('.xpbar i'); if(f) f.style.width = pct + '%'; }));
 
+  const stat = (label, value, sub='') => `<div class="m-stat"><span>${esc(label)}</span><b>${esc(String(value))}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</div>`;
+  const group = (title, items) => `<section class="m-group"><h4>${esc(title)}</h4><div class="m-grid">${items.join('')}</div></section>`;
   $('pairs').innerHTML = [
-    pair('XP total', nf(u.xp), 'Puesto en XP', `#${nf(u.xp_rank)}`),
-    pair('Mensajes totales', nf(u.total_messages), 'Puesto en el chat', `#${nf(u.chat_rank)}`),
-    pair('Presentes totales', nf(u.total_presentes), 'Puesto en presentes', `#${nf(u.presentes_rank)}`),
-    pair('Mensajes hoy', nf(u.messages_today), 'Mensajes últimos 7 días', nf(u.messages_7d)),
-    pair('Tiempo activo total', fmtMin(u.active_total), 'Puesto en tiempo activo', `#${nf(u.active_rank)}`),
-    pair('Tiempo activo hoy', fmtMin(u.active_today), 'Tiempo activo últimos 7 días', fmtMin(u.active_7d)),
-    pair('Racha actual', `${u.streak} ${plural(u.streak,'día','días')}`, 'Mejor racha', `${u.best_streak} ${plural(u.best_streak,'día','días')}`),
-    pair('Miembro desde', fmtDay(u.member_since), 'Último presente', ago(u.last_presente_at)),
+    group('Presentes', [
+      stat('Presentes totales', nf(u.total_presentes), `Puesto #${nf(u.presentes_rank)}`),
+      stat('Último presente', ago(u.last_presente_at)),
+      stat('Racha actual', `${nf(u.streak)} ${plural(u.streak,'día','días')}`),
+      stat('Mejor racha', `${nf(u.best_streak)} ${plural(u.best_streak,'día','días')}`),
+    ]),
+    group('Chat y comunidad', [
+      stat('Mensajes totales', nf(u.total_messages), `Puesto #${nf(u.chat_rank)}`),
+      stat('Mensajes hoy', nf(u.messages_today)),
+      stat('Mensajes (7 días)', nf(u.messages_7d)),
+      stat('Puesto en XP', `#${nf(u.xp_rank)}`),
+    ]),
+    group('Tiempo activo y cuenta', [
+      stat('Tiempo activo total', fmtMin(u.active_total), `Puesto #${nf(u.active_rank)}`),
+      stat('Tiempo activo hoy', fmtMin(u.active_today)),
+      stat('Tiempo activo (7 días)', fmtMin(u.active_7d)),
+      stat('Miembro desde', fmtDay(u.member_since)),
+    ]),
   ].join('');
-  $('mQuests').innerHTML = (qs || []).map(q => questCard(q, true)).join('');
+
+  const setFold = (btnId, panelId, open) => {
+    const btn = $(btnId), panel = $(panelId);
+    if (!btn || !panel) return;
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    panel.hidden = !open;
+  };
+
+  const coll = profileCollection(u, pp);
+  const csec = $('mCollectionSec');
+  if (csec) {
+    csec.hidden = !coll.show;
+    $('mCollectionTitle').innerHTML = `Colección${coll.count != null ? ` <span class="m-count">${nf(coll.count)} ${plural(coll.count,'objeto','objetos')}</span>` : ''}`;
+    $('mCollectionBody').innerHTML = coll.html;
+    setFold('mCollectionToggle', 'mCollectionPanel', !(coll.count > 0)); // plegada si tiene objetos para dejar ver misiones
+  }
+
+  const ql = qs || [];
+  const done = ql.filter(q => q.completed).length;
+  $('mQuestsTitle').innerHTML = `Misiones${ql.length ? ` <span class="m-count">${done}/${ql.length} completadas</span>` : ''}`;
+  $('mQuests').innerHTML = ql.map(q => questCard(q, true)).join('') || '<p class="xpnote">No hay misiones por ahora.</p>';
+  setFold('mQuestsToggle', 'mQuestsPanel', true);
+
   modalOn($('modal')); $('mClose').focus();
   return true;
 }
 const closeModal = () => modalOff($('modal'));
 $('mClose').onclick = closeModal;
-$('modal').addEventListener('click', (e) => { if(e.target === $('modal')) closeModal(); });
-document.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ closeModal(); closeShop(); $('pop').hidden = true; } });
+$('modal').addEventListener('click', (e) => {
+  if(e.target === $('modal')) return closeModal();
+  const fold = e.target.closest('.m-fold');
+  if(fold && $('modal').contains(fold)){
+    const open = fold.getAttribute('aria-expanded') === 'true';
+    fold.setAttribute('aria-expanded', open ? 'false' : 'true');
+    const panel = document.getElementById(fold.getAttribute('aria-controls'));
+    if(panel) panel.hidden = open;
+  }
+});
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ closeModal(); closeShop(); setPop(false); } });
 
 /* ---------- sesión con Kick y tienda ---------- */
 let sess = null, wallet = null, shopFilter = 'all', openShopAfterBoot = false;
@@ -851,11 +982,12 @@ $('shopGrid').addEventListener('click', async (e) => {
 
 /* ---------- accesibilidad: ventanas y pestañas con teclado ---------- */
 let lastFocus = null;
-function modalOn(el){ lastFocus = document.activeElement; el.classList.add('open'); document.querySelector('.wrap').inert = true; }
+const pageRegions = () => document.querySelectorAll('.hero,.wrap');   // todo lo que queda detrás de una ventana
+function modalOn(el){ lastFocus = document.activeElement; el.classList.add('open'); pageRegions().forEach(n => n.inert = true); }
 function modalOff(el){
   el.classList.remove('open');
   if(!document.querySelector('.modal.open')){
-    document.querySelector('.wrap').inert = false;
+    pageRegions().forEach(n => n.inert = false);
     if(lastFocus && lastFocus !== document.body && document.contains(lastFocus)) lastFocus.focus();
   }
 }

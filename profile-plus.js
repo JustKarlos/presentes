@@ -10,12 +10,14 @@
 #modal .card .pf-tog:hover{border-color:var(--leaf);color:#7dff4a}
 #modal .card.pf-has-tog .mh{padding-right:7.5rem}
 @media (min-width:761px){
-  #modal .card.pf-wide{max-width:min(1040px,96vw);max-height:min(92vh,700px);display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);
-    grid-template-areas:"mh pairs" "rank pairs" "qh pairs" "qs pairs";grid-template-rows:auto auto auto 1fr;column-gap:1.1rem;align-content:start;background-position:center}
-  #modal .card.pf-wide .mh{grid-area:mh}#modal .card.pf-wide #mRankBox{grid-area:rank}
-  #modal .card.pf-wide .pairs{grid-area:pairs;align-content:stretch;grid-auto-rows:1fr}
-  #modal .card.pf-wide .pair{align-items:stretch}#modal .card.pf-wide .pair div{display:flex;flex-direction:column;justify-content:center}
-  #modal .card.pf-wide h3.qh{grid-area:qh;margin-top:.4rem}#modal .card.pf-wide #mQuests{grid-area:qs;align-content:start}
+  #modal .card.pf-wide{max-width:min(1040px,96vw);max-height:min(92vh,760px);display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);
+    grid-template-areas:"mh pairs" "rank pairs" "coll pairs" "qs pairs";grid-template-rows:auto auto auto 1fr;column-gap:1.1rem;align-content:start;background-position:center}
+  #modal .card.pf-wide .mh{grid-area:mh}
+  #modal .card.pf-wide #mRankBox{grid-area:rank}
+  #modal .card.pf-wide #pairs{grid-area:pairs;align-content:start}
+  #modal .card.pf-wide #mCollectionSec{grid-area:coll;margin-top:0}
+  #modal .card.pf-wide .m-sec-quests{grid-area:qs;margin-top:0;min-height:0}
+  #modal .card.pf-wide #mQuests{max-height:100%;overflow:auto}
 }
 @media (max-width:760px){#modal .card .pf-tog{display:none}#modal .card.pf-has-tog .mh{padding-right:1.5rem}}
 `;
