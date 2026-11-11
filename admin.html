@@ -61,19 +61,20 @@ button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}but
       <h2 id="ft">Nuevo objeto</h2>
       <div id="pv"><small style="color:var(--tan)">Elegí una imagen para ver cómo queda</small></div>
       <label>Imagen (PNG, WEBP, JPG o GIF · máx. 4 MB)<input id="file" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label>
-      <div class="row"><label>Tipo<select id="type"><option value="frame">Marco de avatar</option><option value="background">Fondo de perfil</option><option value="name_effect">Efecto de nombre (solo clase CSS)</option></select></label>
+      <div class="row"><label>Tipo<select id="type"><option value="frame">Marco de avatar</option><option value="background">Fondo de perfil</option><option value="name_effect">Efecto de nombre (solo clase CSS)</option><option value="badge">Insignia de rango</option></select></label>
         <label>Nombre<input id="name" required maxlength="60"></label></div>
       <label>Descripción<input id="desc" maxlength="200"></label>
       <div class="row"><label>Precio (XP)<input id="cost" type="number" min="0" value="3000"></label><label>Orden<input id="sort" type="number" value="100"></label></div>
       <div class="row"><label>Colección (opcional)<input id="coll" maxlength="30" placeholder="Halloween"></label><label>Clase CSS (opcional)<input id="css" maxlength="40" placeholder="fr-pumpkin"></label></div>
       <label id="lInset">Tamaño del marco: <span id="vInset">-35.7</span> % (-35.7 = marcos de este set)<input id="inset" type="range" min="-60" max="-15" step=".1" value="-35.7"></label>
       <div id="lDim"><label>Oscurecer fondo: <span id="vDim">0.15</span><input id="dim" type="range" min="0" max=".6" step=".05" value=".15"></label><label class="chk"><input id="border" type="checkbox"> La imagen ya trae su propio borde</label><label class="chk"><input id="wide" type="checkbox"> Fondo horizontal (el perfil se abre en vista ancha)</label></div>
-      <label class="chk"><input id="active" type="checkbox" checked> Activo en la tienda</label><label class="chk"><input id="isnew" type="checkbox"> Marcar como “Nuevo”</label>
+      <label id="lRank" hidden>Insignia de rango<select id="rRank"></select></label>
+<label class="chk"><input id="active" type="checkbox" checked> Activo en la tienda</label><label class="chk"><input id="isnew" type="checkbox"> Marcar como “Nuevo”</label>
       <input id="id" type="hidden">
       <div class="acts"><button type="submit">Guardar</button><button type="button" class="ghost" id="reset">Nuevo</button><button type="button" class="del" id="del" hidden>Eliminar</button></div>
     </form>
     <div class="panel"><h2>Objetos</h2>
-      <div class="tools"><select id="fType"><option value="">Todos</option><option value="frame">Marcos</option><option value="background">Fondos</option><option value="name_effect">Nombres</option></select><input id="fQ" type="search" placeholder="Buscar…"></div>
+      <div class="tools"><select id="fType"><option value="">Todos</option><option value="frame">Marcos</option><option value="background">Fondos</option><option value="name_effect">Nombres</option><option value="badge">Insignias</option></select><input id="fQ" type="search" placeholder="Buscar…"></div>
       <div id="list" class="grid"></div></div>
   </div>
 </div>
@@ -128,7 +129,7 @@ button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}but
     <p id="rErr" class="perr" role="status"></p>
     <div class="row"><label>Color de acento (opcional)<span class="cf"><input type="color" data-pick value="#ffc21a" aria-label="Elegir color"><input id="rAccent" data-c type="text" maxlength="60" placeholder="#ffc21a"></span></label><label>Orden<input id="rSort" type="number" value="0"></label></div>
     <label class="chk"><input id="rActive" type="checkbox" checked> Activo</label>
-    <div class="acts"><button type="submit">Guardar</button><button type="button" class="del" id="rDel" hidden>Eliminar</button></div>
+    <div class="acts"><button type="submit">Guardar</button><button type="button" class="ghost" id="rToShop">Crear objeto de tienda</button><button type="button" class="del" id="rDel" hidden>Eliminar</button></div>
   </form></div></div>
 </section><div id="toast"></div>
 <script>
@@ -151,36 +152,50 @@ async function enter() {
   if (!r.ok) { $('lm').textContent = r.reason === 'unauthorized' ? 'Clave incorrecta' : (r.reason || 'Error'); return; }
   localStorage.setItem('adminKey', KEY); $('login').hidden = true; $('app').hidden = false; load();
 }
-async function load() { const r = await api('/list'); if (!r.ok) return toast(r.reason); ITEMS = r.items; renderList(); }
+async function load() { const r = await api('/list'); if (!r.ok) return toast(r.reason); ITEMS = r.items; renderList(); if (window.rkLoad) { try { await window.rkLoad(); window.__ranks = window.rkItems ? window.rkItems() : window.__ranks; } catch (e) {} } }
 function renderList() {
   const t = $('fType').value, q = $('fQ').value.toLowerCase();
   $('list').innerHTML = ITEMS.filter(c => (!t || c.type === t) && (c.name + ' ' + (c.css_class || '')).toLowerCase().includes(q)).map(c => `
     <div class="it ${c.active ? '' : 'off'} ${$('id').value === c.id ? 'sel' : ''}"><div class="th" style="${c.asset_url ? `background-image:url('${esc(c.asset_url)}')` : ''}">${c.asset_url ? '' : esc(c.css_class || '—')}</div>
-      <b title="${esc(c.name)}">${esc(c.name)}</b><small>${{frame: 'Marco', background: 'Fondo', name_effect: 'Nombre'}[c.type]} · ${Number(c.cost).toLocaleString('es-AR')} XP${c.meta?.collection ? ' · ' + esc(c.meta.collection) : ''}</small>
+      <b title="${esc(c.name)}">${esc(c.name)}</b><small>${{frame: 'Marco', background: 'Fondo', name_effect: 'Nombre', badge: 'Insignia'}[c.type]} · ${Number(c.cost).toLocaleString('es-AR')} XP${c.meta?.collection ? ' · ' + esc(c.meta.collection) : ''}</small>
       <div class="bar"><label class="chk" style="margin:0"><input type="checkbox" data-tg="${esc(c.id)}" ${c.active ? 'checked' : ''}> Activo</label><button type="button" data-ed="${esc(c.id)}">Editar</button></div></div>`).join('') || '<p style="color:var(--tan)">Todavía no hay objetos.</p>';
 }
 function fill(c) {
   $('id').value = c?.id || ''; $('ft').textContent = c ? 'Editar objeto' : 'Nuevo objeto'; $('del').hidden = !c; pending = null; pendUrl = c?.asset_url || ''; $('file').value = '';
   $('type').value = c?.type || 'frame'; $('name').value = c?.name || ''; $('desc').value = c?.description || ''; $('cost').value = c?.cost ?? 3000; $('sort').value = c?.sort ?? Math.max(100, ...ITEMS.map(i => i.sort + 1 || 0));
-  $('coll').value = c?.meta?.collection || ''; $('css').value = c?.css_class || ''; $('inset').value = c?.meta?.inset ?? -35.7; $('dim').value = c?.meta?.dim ?? .15; $('border').checked = !!c?.meta?.border; $('wide').checked = !!c?.meta?.wide;
+  $('coll').value = c?.meta?.collection || ''; $('css').value = c?.css_class || ''; $('inset').value = c?.meta?.inset ?? -35.7; $('dim').value = c?.meta?.dim ?? .15; $('border').checked = !!c?.meta?.border; $('wide').checked = !!c?.meta?.wide; $('rRank').value = c?.rank_id || '';
   $('active').checked = c ? c.active : true; $('isnew').checked = !!c?.meta?.new; sync(); renderList();
 }
 function sync() {
-  const t = $('type').value; $('lInset').hidden = t !== 'frame'; $('lDim').hidden = t !== 'background'; $('vInset').textContent = $('inset').value; $('vDim').textContent = $('dim').value;
+  const t = $('type').value; $('lInset').hidden = t !== 'frame'; $('lDim').hidden = t !== 'background'; $('lRank').hidden = t !== 'badge'; $('vInset').textContent = $('inset').value; $('vDim').textContent = $('dim').value;
+  if (t === 'badge') {
+    const ranks = window.__ranks || [];
+    const cur = $('rRank').value;
+    $('rRank').innerHTML = ranks.map(r => `<option value="${r.id}">${esc(r.title)} (Nv. ${r.min_level})</option>`).join('') || '<option value="">Sin rangos</option>';
+    if (cur) $('rRank').value = cur;
+  }
   const u = pendUrl, pv = $('pv');
+  if (!u && t === 'badge') {
+    const rid = +$('rRank').value; const rk = (window.__ranks || []).find(r => r.id === rid);
+    pv.innerHTML = rk ? (rk.image_url ? `<img src="${esc(rk.image_url)}" style="width:96px;height:96px;object-fit:contain;image-rendering:pixelated">` : (window.RankEngine ? window.RankEngine.sprite(rk.key, 96) : '')) : '<small style="color:var(--tan)">Elegí un rango o una imagen</small>';
+    return;
+  }
   pv.innerHTML = !u ? '<small style="color:var(--tan)">Elegí una imagen para ver cómo queda</small>'
     : t === 'frame' ? `<div class="fa" style="--fi:url('${u}');--fin:${$('inset').value}%"><i></i></div>`
-    : t === 'background' ? `<div class="bgp" style="${$('wide').checked ? 'height:150px;' : ''}background-image:linear-gradient(rgba(0,0,0,${$('dim').value}),rgba(0,0,0,${$('dim').value})),url('${u}')">${esc($('name').value || 'Nombre')}<br><small>XP total 12.345</small></div>` : '';
+    : t === 'background' ? `<div class="bgp" style="${$('wide').checked ? 'height:150px;' : ''}background-image:linear-gradient(rgba(0,0,0,${$('dim').value}),rgba(0,0,0,${$('dim').value})),url('${u}')">${esc($('name').value || 'Nombre')}<br><small>XP total 12.345</small></div>`
+    : t === 'badge' ? `<img src="${u}" style="width:96px;height:96px;object-fit:contain;image-rendering:pixelated">` : '';
 }
 function pick(f) { if (!f) return; pending = f; if (pendUrl.startsWith('blob:')) URL.revokeObjectURL(pendUrl); pendUrl = URL.createObjectURL(f);
   if (!$('name').value) $('name').value = f.name.replace(/\.[^.]+$/, '').replace(/^(frame|bg|fondo|marco)[_-]/i, '').replace(/[_-]+/g, ' '); 
   const im = new Image(); im.onload = () => { $('type').value = Math.abs(im.width / im.height - 1) < .08 ? 'frame' : 'background'; sync(); }; im.src = pendUrl; sync(); }
-async function upload(file, type, name) { const fd = new FormData(); fd.append('file', file); fd.append('folder', type === 'frame' ? 'frames' : 'backgrounds'); fd.append('name', name); return api('/upload', {body: fd}); }
+async function upload(file, type, name) { const fd = new FormData(); fd.append('file', file); fd.append('folder', type === 'frame' ? 'frames' : type === 'badge' ? 'ranks' : 'backgrounds'); fd.append('name', name); return api('/upload', {body: fd}); }
 $('f').addEventListener('submit', async (e) => {
   e.preventDefault(); const type = $('type').value, name = $('name').value.trim(); let url = pending ? '' : pendUrl;
   if (pending) { const r = await upload(pending, type, name); if (!r.ok) return toast(r.reason || 'No se pudo subir la imagen'); url = r.url; }
-  if (type !== 'name_effect' && !url && !$('css').value) return toast('Falta la imagen (o una clase CSS)');
+  if (type !== 'name_effect' && type !== 'badge' && !url && !$('css').value) return toast('Falta la imagen (o una clase CSS)');
+if (type === 'badge' && !url && !$('css').value && !$('rRank').value) return toast('Falta la imagen o la insignia de rango');
   const r = await api('/upsert', {json: {id: $('id').value || slug(name), type, name, description: $('desc').value, cost: +$('cost').value, css_class: $('css').value.trim(), asset_url: url, sort: +$('sort').value, active: $('active').checked,
+    rank_id: type === 'badge' ? (+$('rRank').value || null) : null,
     meta: {inset: +$('inset').value, dim: +$('dim').value, border: $('border').checked, wide: $('wide').checked, collection: $('coll').value.trim(), new: $('isnew').checked}}});
   if (!r.ok) return toast(r.reason || 'Error al guardar'); toast('Guardado ✔'); await load(); fill(r.item);
 });
@@ -192,7 +207,7 @@ $('list').addEventListener('click', async (e) => {
 $('del').onclick = async () => { if (!confirm('¿Eliminar este objeto? Si alguien ya lo compró, mejor desactivalo.')) return;
   const r = await api('/delete', {json: {id: $('id').value}}); toast(r.ok ? 'Eliminado' : r.reason === 'in_use' ? 'Ya lo tienen usuarios: desactivalo en vez de eliminarlo' : r.reason); if (r.ok) { await load(); fill(null); } };
 $('reset').onclick = () => fill(null);
-['type', 'inset', 'dim', 'name', 'wide'].forEach(i => $(i).addEventListener('input', sync)); $('file').onchange = () => pick($('file').files[0]);
+['type', 'inset', 'dim', 'name', 'wide', 'rRank'].forEach(i => $(i).addEventListener('input', sync)); $('file').onchange = () => pick($('file').files[0]);
 $('fType').onchange = $('fQ').oninput = renderList; $('go').onclick = enter; $('key').addEventListener('keydown', (e) => { if (e.key === 'Enter') enter(); });
 const bulk = $('bulk'); ['dragover', 'dragenter'].forEach(ev => bulk.addEventListener(ev, (e) => { e.preventDefault(); bulk.classList.add('on'); })); ['dragleave', 'drop'].forEach(ev => bulk.addEventListener(ev, () => bulk.classList.remove('on')));
 bulk.addEventListener('click', () => { const i = document.createElement('input'); i.type = 'file'; i.multiple = true; i.accept = 'image/*'; i.onchange = () => doBulk([...i.files]); i.click(); });
@@ -442,7 +457,7 @@ function rLoad(r) {
 window.rkLoad = async () => {
   if (loaded) return; const j = await api('/rank/list');
   if (!j.ok) return toast(j.reason ? 'Rangos: ' + j.reason : 'No se pudo cargar /rank/list. ¿Agregaste las rutas a la función?');
-  loaded = true; RK = j.items || []; rLoad(null);
+  loaded = true; RK = j.items || []; window.__ranks = RK; window.rkItems = () => RK; rLoad(null);
 };
 const sync = () => { const a = RK.filter(r => r.active); if (a.length) RE.set(a); };
 
@@ -468,6 +483,15 @@ $('rDel').onclick = async () => { if (!cur || !confirm('¿Eliminar este rango? Q
   const r = await api('/rank/delete', {json: {id: cur.id}}); if (!r.ok) return toast(r.reason === 'rank_zero_required' ? 'No puedes eliminar el rango del nivel 0' : r.reason || 'Error');
   RK = RK.filter(x => x.id !== cur.id); sync(); toast('Eliminado'); rLoad(null); };
 $('rNew').onclick = () => rLoad(null);
+$('rToShop').onclick = async () => {
+  if (!cur) return toast('Guarda el rango primero');
+  const r = await api('/upsert', {json: {id: 'badge_' + cur.id, type: 'badge', name: cur.title, description: '', cost: 5000, css_class: '', asset_url: cur.image_url || null, sort: cur.sort || 0, active: false, rank_id: cur.id, meta: {}}});
+  if (!r.ok) return toast(r.reason || 'Error al crear el objeto');
+  toast('Objeto de tienda creado ✔');
+  document.querySelector('[data-tab="objs"]')?.click();
+  await load();
+  fill(ITEMS.find(i => i.id === r.item.id) || r.item);
+};
 $('rList').addEventListener('click', (e) => { const b = e.target.closest('[data-re]'); if (b) rLoad(RK.find(r => String(r.id) === b.dataset.re)); });
 })();
 </script></main></body></html>

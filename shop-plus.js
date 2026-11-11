@@ -135,7 +135,7 @@
 
   document.documentElement.dataset.shopPlus = '3'; console.info('[tienda v3] activa');
   const ST = {type: 'all', q: '', sort: 'new', mine: false, afford: false, sel: null, confirm: null, busy: false,
-    try: {frame: null, name_effect: null, background: null}, tryUser: null, view: 'profile', lvl: null, pause: false, fold: false, adv: false};
+    try: {frame: null, name_effect: null, background: null, badge: null}, tryUser: null, view: 'profile', lvl: null, pause: false, fold: false, adv: false};
   const root = document.querySelector('#shopModal .card');
   root.classList.add('sp');
   root.innerHTML = `
@@ -146,7 +146,7 @@
     </div>
     <div class="sp-toolbar">
       <div class="sp-tabs" id="spTabs" role="tablist" aria-label="Categorías">
-        <button class="chip" data-t="all">Todos</button><button class="chip" data-t="frame">Marcos</button><button class="chip" data-t="name_effect">Nombres</button><button class="chip" data-t="background">Fondos</button>
+        <button class="chip" data-t="all">Todos</button><button class="chip" data-t="frame">Marcos</button><button class="chip" data-t="name_effect">Nombres</button><button class="chip" data-t="background">Fondos</button><button class="chip" data-t="badge">Insignias</button>
       </div>
       <div class="sp-tools">
         <label class="search sp-search"><span class="sr">Buscar objeto</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="spQ" type="search" placeholder="Buscar objeto…" autocomplete="off"></label>
@@ -160,10 +160,10 @@
   const me = () => wallet ? {username: wallet.username, display_name: wallet.display_name, avatar_url: wallet.avatar_url} : {username: 'tu', display_name: 'Tu nombre', avatar_url: null};
   const cat = () => [...COS.values()].filter(c => c.active);
   const visible = () => [...COS.values()].filter(c => c.active || own(c));
-  const own = c => !!wallet?.owned?.includes(c.id), eqd = c => !!wallet && wallet.equipped?.[c.type] === c.id;
+  const own = c => !!wallet?.owned?.includes(c.id), eqd = c => !!wallet && (c.type === 'badge' ? wallet.equipped?.rank === c.id : wallet.equipped?.[c.type] === c.id);
   const isNew = c => c.meta?.new || (c.created_at && Date.now() - new Date(c.created_at) < 10 * 864e5);
   const RL = ['Común', 'Raro', 'Épico', 'Legendario'];
-  const TYPEL = {frame: 'Marco', name_effect: 'Nombre', background: 'Fondo'};
+  const TYPEL = {frame: 'Marco', name_effect: 'Nombre', background: 'Fondo', badge: 'Insignia'};
   const tiers = () => { const cs = cat().map(c => c.cost).sort((a, b) => a - b), q = p => cs[Math.min(cs.length - 1, Math.floor(cs.length * p))] ?? 0; return [q(.4), q(.7), q(.9)]; };
   const rar = (c, t) => c.cost >= t[2] && t[2] > t[0] ? 3 : c.cost >= t[1] && t[1] > t[0] ? 2 : c.cost > t[0] ? 1 : 0;
   const bgSt = c => c.url ? `background-image:url('${esc(c.url)}');background-size:cover;background-position:center bottom;image-rendering:pixelated` : '';
@@ -172,6 +172,7 @@
 
   const tile = (c, u) => c.type === 'frame' ? avatarF({...u, frame_id: c.id}, 64)
     : c.type === 'name_effect' ? `<span class="sp-tile-name" style="font-size:1.45rem;font-family:var(--display);font-weight:700">${nameHtml({...u, name_id: c.id})}</span>`
+    : c.type === 'badge' ? (() => { const rk = window.RankEngine && window.RankEngine.byId ? window.RankEngine.byId(c.rank_id) : null; return rk ? window.RankEngine.sprite(rk.key, 64) : (c.asset_url ? `<img src="${esc(c.asset_url)}" width="64" height="64" style="object-fit:contain;image-rendering:pixelated">` : '<span style="font-size:2rem">🏅</span>'); })()
     : `<div class="swatch ${c.css}" style="${bgSt(c)}"></div>`;
 
   function primary(c) {
@@ -212,23 +213,25 @@
   }
 
   // ---- visor de prueba ----
-  const TL = {frame: 'Marco', name_effect: 'Nombre', background: 'Fondo'};
+  const TL = {frame: 'Marco', name_effect: 'Nombre', background: 'Fondo', badge: 'Insignia'};
   const lvOf = xp => Math.floor(Math.pow(Math.max(Number(xp) || 0, 0) / 100, 1 / 1.5));
   const baseU = () => ST.tryUser || me();
   const baseLv = () => ST.tryUser ? (Number(ST.tryUser.level) || 0) : wallet ? lvOf(wallet.xp) : 5;
   const curLv = () => ST.lvl ?? baseLv();
   const pickT = t => ST.try[t] || (ST.tryUser ? '' : wallet?.equipped?.[t] || '');
   const tried = id => Object.values(ST.try).includes(id);
-  const triedList = () => ['frame', 'name_effect', 'background'].map(t => COS.get(ST.try[t])).filter(Boolean);
+  const triedList = () => ['frame', 'name_effect', 'background', 'badge'].map(t => COS.get(ST.try[t])).filter(Boolean);
 
   function stageHtml() {
-    const u = {...baseU(), frame_id: pickT('frame') || '', name_id: pickT('name_effect') || ''}, l = curLv(), title = rankOf(l)[1];
-    if (ST.view === 'chat') return `<div class="sp-chat" aria-label="Vista previa en el chat"><div class="cl"><small>12:34</small>${sprite(rankKey(l), 18)}<b>${nameHtml(u)}</b><span>:</span><span style="font-weight:600">¡Qué buen directo, vamos!</span></div><div class="cl"><small>12:34</small><b style="color:#7fb4ff">viewer123</b><span>:</span><span style="font-weight:600">jajaja GG</span></div></div>`;
+    const u = {...baseU(), frame_id: pickT('frame') || '', name_id: pickT('name_effect') || ''}, l = curLv();
+    const _bc = COS.get(ST.try.badge), _br = _bc && window.RankEngine && window.RankEngine.byId ? window.RankEngine.byId(_bc.rank_id) : null;
+    const title = _br ? _br.title : rankOf(l)[1]; const rKey = _br ? _br.key : rankKey(l);
+    if (ST.view === 'chat') return `<div class="sp-chat" aria-label="Vista previa en el chat"><div class="cl"><small>12:34</small>${sprite(rKey, 18)}<b>${nameHtml(u)}</b><span>:</span><span style="font-weight:600">¡Qué buen directo, vamos!</span></div><div class="cl"><small>12:34</small><b style="color:#7fb4ff">viewer123</b><span>:</span><span style="font-weight:600">jajaja GG</span></div></div>`;
     const xp = ST.tryUser?.xp ?? wallet?.xp ?? 1234;
     if (ST.view === 'rank') return `<div class="sp-pod" aria-label="Vista previa del podio">${avatarF(u, 72)}<span class="nm" style="font-family:var(--display);font-size:1.2rem">${nameHtml(u)}</span><span class="cost">${nf(xp)} XP</span></div>
-      <div class="row" style="padding:.4rem .2rem"><span class="rk">1</span>${avatarF(u, 40)}<span class="info"><b>${nameHtml(u)}<span class="lvl">Nv. ${l}</span></b><small class="rk2">${sprite(rankKey(l), 14)}<span>${esc(title)} · ahora mismo</span></small></span><span class="total">${nf(xp)} XP</span></div>`;
+      <div class="row" style="padding:.4rem .2rem"><span class="rk">1</span>${avatarF(u, 40)}<span class="info"><b>${nameHtml(u)}<span class="lvl">Nv. ${l}</span></b><small class="rk2">${sprite(rKey, 14)}<span>${esc(title)} · ahora mismo</span></small></span><span class="total">${nf(xp)} XP</span></div>`;
     const bg = COS.get(pickT('background')), cls = bg ? bg.css + (bg.url ? ' pb-img' + (bg.meta?.border ? ' pb-own' : '') : '') : '', st = bg?.url ? ` style="--pbimg:url('${esc(bg.url)}');--pbdim:${bg.meta?.dim ?? .15}"` : '';
-    return `<div class="card sp-mini ${cls}"${st}><div class="mh">${avatarF(u, 64)}<div><h2>${nameHtml(u)}</h2><p>@${esc(u.username)} · Nv. ${l}</p></div></div><div class="rankrow">${sprite(rankKey(l), 28)}<b>${esc(title)}</b></div><div class="pair"><div><span>XP total</span><b>${nf(xp)}</b></div><div><span>Puesto en XP</span><b>#1</b></div></div></div>`;
+    return `<div class="card sp-mini ${cls}"${st}><div class="mh">${avatarF(u, 64)}<div><h2>${nameHtml(u)}</h2><p>@${esc(u.username)} · Nv. ${l}</p></div></div><div class="rankrow">${sprite(rKey, 28)}<b>${esc(title)}</b></div><div class="pair"><div><span>XP total</span><b>${nf(xp)}</b></div><div><span>Puesto en XP</span><b>#1</b></div></div></div>`;
   }
   const stage = () => { const e = $('spStage'); if (e) e.innerHTML = stageHtml(); };
 
@@ -236,7 +239,7 @@
     const p = $('spPrev'), sel = ST.sel && COS.get(ST.sel), t = tiers(), listT = triedList(), buys = listT.filter(c => !own(c)), total = buys.reduce((s, c) => s + c.cost, 0);
     const a = document.activeElement, key = a && p.contains(a) ? (a.dataset.view ? `[data-view="${a.dataset.view}"]` : a.dataset.pv ? `[data-pv="${a.dataset.pv}"]${a.dataset.type ? `[data-type="${a.dataset.type}"]` : ''}` : '') : '';
     p.classList.toggle('fold', ST.fold); p.classList.toggle('sp-paused', ST.pause);
-    const triedChips = ['frame', 'name_effect', 'background'].map(k => { const c = COS.get(ST.try[k]); return `<div class="sp-trychip"><span><small>${TL[k]}</small><b>${c ? esc(c.name) : 'Sin probar'}</b></span>${c ? `<button type="button" data-pv="rm" data-type="${k}" aria-label="Quitar prueba de ${TL[k]}">&times;</button>` : ''}</div>`; }).join('');
+    const triedChips = ['frame', 'name_effect', 'background', 'badge'].map(k => { const c = COS.get(ST.try[k]); return `<div class="sp-trychip"><span><small>${TL[k]}</small><b>${c ? esc(c.name) : 'Sin probar'}</b></span>${c ? `<button type="button" data-pv="rm" data-type="${k}" aria-label="Quitar prueba de ${TL[k]}">&times;</button>` : ''}</div>`; }).join('');
     p.innerHTML = `<div class="sp-pv-head"><div class="sp-vt" role="group" aria-label="Vista previa">${[['profile', 'Perfil'], ['chat', 'Chat'], ['rank', 'Ranking']].map(([v, l]) => `<button type="button" class="chip${ST.view === v ? ' on' : ''}" data-view="${v}" aria-pressed="${ST.view === v}">${l}</button>`).join('')}</div>
         <div class="sp-pv-tools"><button type="button" class="chip" data-pv="pause" aria-pressed="${ST.pause}">${ST.pause ? 'Reanudar' : 'Pausar anim.'}</button><button type="button" class="chip sp-foldbtn" data-pv="fold" aria-expanded="${!ST.fold}">${ST.fold ? 'Mostrar' : 'Plegar'}</button></div></div>
       <div id="spStage" class="sp-stage">${stageHtml()}</div>
@@ -265,7 +268,7 @@
     if (a === 'pause') ST.pause = !ST.pause;
     else if (a === 'fold') ST.fold = !ST.fold;
     else if (a === 'rm') ST.try[type] = null;
-    else if (a === 'clear') ST.try = {frame: null, name_effect: null, background: null};
+    else if (a === 'clear') ST.try = {frame: null, name_effect: null, background: null, badge: null};
     else if (a === 'me') { ST.tryUser = null; ST.lvl = null; }
     markTry(); renderPrev();
   }
@@ -281,7 +284,7 @@
       : wallet ? `<div class="wallet sp-wallet"><div class="sp-wallet-id">${avatarF(wallet, 32)}<div><b>${esc(wallet.display_name)}</b><small>@${esc(wallet.username || sess.user || '')}</small></div></div><div class="sp-wallet-bal"><span class="bal">${nf(wallet.balance)} XP</span><small>disponibles · ganada ${nf(wallet.xp)} · gastada ${nf(wallet.xp_spent)}</small></div><button class="btn ghost" id="logoutBtn">Cerrar sesión</button></div>`
       : `<div class="wallet sp-wallet"><div><b>Sesión: ${esc(sess.user)}</b><small>Todavía no estás en el ranking. Escribe en el chat durante un directo.</small></div><button class="btn ghost" id="logoutBtn">Cerrar sesión</button></div>`;
     $('spEq').hidden = !wallet;
-    $('spEq').innerHTML = [['frame', 'Marco'], ['name_effect', 'Nombre'], ['background', 'Fondo']].map(([t, l]) => { const c = wallet && COS.get(wallet.equipped?.[t]);
+    $('spEq').innerHTML = [['frame', 'Marco'], ['name_effect', 'Nombre'], ['background', 'Fondo'], ['badge', 'Insignia']].map(([t, l]) => { const eqKey = t === 'badge' ? 'rank' : t; const c = wallet && COS.get(wallet.equipped?.[eqKey]);
       return `<div class="sp-slot${c ? ' on' : ''}"><div><small>${l} equipado</small><b>${c ? esc(c.name) : 'Ninguno'}</b></div>${c ? `<button data-act="unequip" data-type="${t}" aria-label="Quitar ${l}">&times;</button>` : ''}</div>`; }).join('');
     document.querySelectorAll('#spTabs .chip').forEach(b => b.classList.toggle('on', b.dataset.t === ST.type));
     $('spMine').classList.toggle('on', ST.mine); $('spAfford').classList.toggle('on', ST.afford);
@@ -376,7 +379,7 @@
 
   window.renderShop = render;
   window.openShop = async () => {
-    typeof modalOn === 'function' ? modalOn($('shopModal')) : $('shopModal').classList.add('open'); $('shopClose').focus(); msg(''); ST.sel = null; ST.confirm = null; ST.try = {frame: null, name_effect: null, background: null}; ST.tryUser = null; ST.lvl = null; ST.adv = false; render();
+    typeof modalOn === 'function' ? modalOn($('shopModal')) : $('shopModal').classList.add('open'); $('shopClose').focus(); msg(''); ST.sel = null; ST.confirm = null; ST.try = {frame: null, name_effect: null, background: null, badge: null}; ST.tryUser = null; ST.lvl = null; ST.adv = false; render();
     await loadCosmetics(); if (sess) { const ok = await shopApi('/shop/session'); if (ok.ok) await loadWallet(); }
     render();
   };
