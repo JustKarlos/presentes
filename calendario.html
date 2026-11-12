@@ -191,7 +191,7 @@ function renderNext(){
 function banner(){
   const hoy = BDS.filter(b => b.m === T[1] && bdDay(b, T[0]) === T[2]);
   $('today').hidden = !hoy.length;
-  if (hoy.length) $('today').innerHTML = `🎉 Hoy ${hoy.length > 1 ? 'cumplen años' : 'cumple*+años'}: <b>${hoy.map(b => esc(b.name)).join(', ')}</b>`;
+  if (hoy.length) $('today').innerHTML = `🎉 Hoy ${hoy.length > 1 ? 'cumplen años' : 'cumpleaños de '}: <b>${hoy.map(b => esc(b.name)).join(', ')}</b>`;
 }
 const go = (k) => { sel = k; view = { y: Math.floor(k / 10000), m: Math.floor(k / 100) % 100 - 1 }; render(); };
 $('grid').addEventListener('click', (e) => { const c = e.target.closest('[data-k]'); if (c){ sel = +c.dataset.k; render(); $('grid').querySelector('.sel')?.focus(); } });
