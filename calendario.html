@@ -99,7 +99,7 @@ h1{font:800 clamp(2.2rem,6vw,3.4rem)/1 var(--display);color:var(--gold);text-sha
         </div>
         <div class="chips" id="filters" role="group" aria-label="Filtrar">
           <button class="chip on" data-f="all" aria-pressed="true">Todo</button>
-          <button class="chip" data-f="bd" aria-pressed="false">Cumpleaños</button>
+          <button class="chip" data-f="bd" aria-pressed="false">años</button>
           <button class="chip" data-f="ev" aria-pressed="false">Eventos</button>
         </div>
       </div>
@@ -177,7 +177,7 @@ function evLine(e, bar){
 function renderDetail(){
   const y = Math.floor(sel / 10000), m = Math.floor(sel / 100) % 100 - 1, d = sel % 100, data = dayMap(y, m)[d] || { b: [], e: [] };
   $('dTitle').textContent = longDay(sel).replace(/^./, c => c.toUpperCase());
-  $('detail').innerHTML = data.b.map(b => `<div class="item">${avatar(b, 40)}<span><b>${esc(b.name)}</b><small>Cumple años${b.m === 2 && b.d === 29 && !leap(y) ? ' (nació un 29/2)' : ''}${b.note ? ' · ' + esc(b.note) : ''}</small></span></div>`).join('')
+  $('detail').innerHTML = data.b.map(b => `<div class="item">${avatar(b, 40)}<span><b>${esc(b.name)}</b><small>Cumpleaños${b.m === 2 && b.d === 29 && !leap(y) ? ' (nació un 29/2)' : ''}${b.note ? ' · ' + esc(b.note) : ''}</small></span></div>`).join('')
     + data.e.map(e => evLine(e)).join('') || '<p class="empty">No hay nada este día.</p>';
 }
 function renderNext(){
@@ -191,7 +191,7 @@ function renderNext(){
 function banner(){
   const hoy = BDS.filter(b => b.m === T[1] && bdDay(b, T[0]) === T[2]);
   $('today').hidden = !hoy.length;
-  if (hoy.length) $('today').innerHTML = `🎉 Hoy ${hoy.length > 1 ? 'cumplen años' : 'cumple años'}: <b>${hoy.map(b => esc(b.name)).join(', ')}</b>`;
+  if (hoy.length) $('today').innerHTML = `🎉 Hoy ${hoy.length > 1 ? 'cumplen años' : 'cumple*+años'}: <b>${hoy.map(b => esc(b.name)).join(', ')}</b>`;
 }
 const go = (k) => { sel = k; view = { y: Math.floor(k / 10000), m: Math.floor(k / 100) % 100 - 1 }; render(); };
 $('grid').addEventListener('click', (e) => { const c = e.target.closest('[data-k]'); if (c){ sel = +c.dataset.k; render(); $('grid').querySelector('.sel')?.focus(); } });
