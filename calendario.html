@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calendario · Ranking de presentes</title>
+<meta name="description" content="Cumpleaños y eventos de la comunidad.">
+<meta name="theme-color" content="#0d2013">
+<meta name="color-scheme" content="dark">
+<link rel="icon" type="image/png" href="assets/pointer2.png">
+<style>
+@font-face{font-family:"Barlow Condensed";font-weight:700;font-display:swap;src:url("assets/fonts/barlow-condensed-700-latin.woff2") format("woff2")}
+@font-face{font-family:"Barlow Condensed";font-weight:800;font-display:swap;src:url("assets/fonts/barlow-condensed-800-latin.woff2") format("woff2")}
+@font-face{font-family:Nunito;font-weight:400 800;font-display:swap;src:url("assets/fonts/nunito-var-latin.woff2") format("woff2")}
+:root{--cream:#f3e7c4;--tan:#cdb98a;--gold:#ffc21a;--leaf:#3fd01f;--leaf2:#8dff6a;--rim:#50564f;--line:#3a3d38;--edge:#150a03;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;--body:Nunito,system-ui,sans-serif;
+  --ol:2px 2px 0 #150a03,-1px -1px 0 #150a03,1px -1px 0 #150a03,-1px 1px 0 #150a03}
+*{box-sizing:border-box;margin:0}
+body{color:var(--cream);font:600 1rem/1.5 var(--body);min-height:100vh;
+  background:linear-gradient(rgba(6,16,9,.55),rgba(6,16,9,.88)),url("assets/bg.jpg") center top/cover fixed #0d2013}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--leaf);outline-offset:2px;border-radius:6px}
+[hidden]{display:none!important}
+.wrap{max-width:1180px;margin:0 auto;padding:1rem 1.1rem 3rem}
+.top{display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;margin-bottom:.9rem}
+h1{font:800 clamp(2.2rem,6vw,3.4rem)/1 var(--display);color:var(--gold);text-shadow:var(--ol)}
+.plank{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 .5rem;text-decoration:none;white-space:nowrap;
+  font:700 1.1rem/1.1 var(--display);color:#fff;text-shadow:var(--ol);
+  border:12px solid transparent;border-image:url("assets/tab.png") 14 fill/12px stretch;filter:drop-shadow(0 4px 4px rgba(0,0,0,.45));
+  transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.plank:active{transform:translateY(2px)}
+.plank.on{border-image-source:url("assets/tab-on.png");color:#0f2a08;text-shadow:0 1px 0 rgba(255,255,255,.3)}
+@media (hover:hover) and (pointer:fine){.plank:hover{filter:brightness(1.15) drop-shadow(0 4px 4px rgba(0,0,0,.45))}}
+.board{border:20px solid transparent;border-image:url("assets/frame.png") 56/20px stretch;padding:.1rem .5rem .6rem;
+  background:linear-gradient(rgba(24,16,9,.62),rgba(24,16,9,.78)),url("assets/tab.png") left top/auto 100% repeat-x padding-box,linear-gradient(#3a2b1a,#241b12) padding-box;
+  box-shadow:0 10px 26px rgba(0,0,0,.45)}
+.today{margin-bottom:.9rem;padding:.6rem .9rem;border:3px solid var(--edge);border-radius:6px;background:linear-gradient(#4a4d44,#33362f);font:700 1.25rem/1.2 var(--display);text-shadow:var(--ol)}
+.today b{color:var(--gold)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:1.1rem;align-items:start}
+.bar{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:space-between;margin:-.3rem 0 .6rem}
+.mnav{display:flex;align-items:center;gap:.3rem}
+.mnav h2{font:800 1.9rem/1 var(--display);min-width:11ch;text-align:center;text-shadow:var(--ol);text-transform:capitalize}
+.chips{display:flex;gap:.35rem;flex-wrap:wrap}
+.chip{min-height:44px;padding:.3rem .85rem;border:2px solid var(--rim);border-radius:999px;background:#3d3122;font:600 1rem var(--display);display:inline-flex;align-items:center}
+.chip.on{border-color:#7fe044;color:var(--leaf2);background:#2c3a20}
+.dow,.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.dow span{text-align:center;font:700 1rem var(--display);color:var(--tan);padding-bottom:.2rem}
+.cell{position:relative;min-height:96px;padding:.25rem .3rem;display:flex;flex-direction:column;gap:3px;overflow:hidden;
+  background:#241b12;border:2px solid #463829;border-radius:4px;box-shadow:inset 0 2px 0 rgba(255,255,255,.05)}
+.cell.void{background:transparent;border-color:transparent;box-shadow:none;pointer-events:none}
+.cell.we{background:#2c2318}
+.cell.now{border-color:var(--gold)}
+.cell.sel{border-color:var(--leaf);box-shadow:0 0 0 2px var(--leaf)}
+.cell .n{font:700 1.05rem/1 var(--display);color:var(--tan)}
+.cell.now .n{color:var(--gold)}
+.avs{display:flex;flex-wrap:wrap;gap:2px;align-items:center}
+.av{width:24px;height:24px;border-radius:50%;object-fit:cover;display:inline-grid;place-items:center;flex:none;
+  font:700 .7rem var(--display);color:var(--cream);background:#3a2413;border:2px solid var(--edge);image-rendering:auto}
+.more{font:700 .8rem var(--display);color:var(--tan)}
+.tag{display:block;padding:0 .3rem;border-radius:3px;font:700 .78rem/1.35 var(--display);color:#150a03;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.k-directo{background:var(--leaf)}.k-evento{background:var(--gold)}.k-especial{background:#b46bff}.k-feriado{background:#ff8a6a}
+.cell.bd .n::after{content:" 🎂";font-size:.8rem}
+.cell.bd.now .n::after{animation:hop 1s steps(2) infinite}
+@keyframes hop{50%{transform:translateY(-2px)}}
+.side{display:grid;gap:1.1rem}
+.side h3{font:700 1.5rem/1 var(--display);text-align:center;text-shadow:var(--ol);margin:-.8rem 0 .5rem}
+.item{display:flex;gap:.6rem;align-items:center;width:100%;padding:.45rem .3rem;border-bottom:1px solid var(--line);min-height:44px}
+.item:last-child{border-bottom:0}
+.item .av{width:40px;height:40px;font-size:.9rem}
+.item b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:800}
+.item small{display:block;color:var(--tan);font-size:.8rem;line-height:1.3}
+.item .when{margin-left:auto;font:700 1.05rem var(--display);color:var(--gold);white-space:nowrap}
+.evdot{width:12px;height:40px;border-radius:3px;flex:none}
+.empty{color:var(--tan);padding:.6rem .3rem;font-size:.9rem}
+.err{margin-bottom:.9rem;padding:.7rem 1rem;border:2px solid #7a3a30;border-radius:8px;background:#2b1a16;color:#ffb4a8}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:700px){
+  .cell{min-height:64px;padding:.2rem}.av{width:18px;height:18px;font-size:.55rem;border-width:1px}
+  .tag{font-size:0;height:5px;padding:0}.board{border-width:14px;border-image-width:14px}
+  .mnav h2{font-size:1.5rem;min-width:9ch}.dow span{font-size:.85rem}
+}
+@media (prefers-reduced-motion:reduce){.cell.bd.now .n::after{animation:none}.plank{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>Calendario</h1><a class="plank" href="./">Volver al ranking</a></div>
+  <p id="err" class="err" role="alert" hidden></p>
+  <p id="today" class="today" hidden></p>
+  <div class="layout">
+    <main class="board" aria-label="Calendario del mes">
+      <div class="bar">
+        <div class="mnav">
+          <button class="plank" id="prev" aria-label="Mes anterior">‹</button>
+          <h2 id="title" aria-live="polite"></h2>
+          <button class="plank" id="next" aria-label="Mes siguiente">›</button>
+          <button class="plank on" id="goto">Hoy</button>
+        </div>
+        <div class="chips" id="filters" role="group" aria-label="Filtrar">
+          <button class="chip on" data-f="all" aria-pressed="true">Todo</button>
+          <button class="chip" data-f="bd" aria-pressed="false">Cumpleaños</button>
+          <button class="chip" data-f="ev" aria-pressed="false">Eventos</button>
+        </div>
+      </div>
+      <div class="dow" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div>
+      <div class="grid" id="grid"></div>
+    </main>
+    <aside class="side">
+      <section class="board" aria-live="polite"><h3 id="dTitle">Día elegido</h3><div id="detail"></div></section>
+      <section class="board"><h3>Próximos cumpleaños</h3><div id="nextBd"></div></section>
+      <section class="board"><h3>Próximos eventos</h3><div id="nextEv"></div></section>
+    </aside>
+  </div>
+</div>
+<script>
+const CFG = {
+  SUPABASE_URL: "https://nlgkpoomhgehuabrkwhp.supabase.co",
+  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sZ2twb29taGdlaHVhYnJrd2hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE3NjE3NzAsImV4cCI6MjEwNzMzNzc3MH0.DM1cUzclLbu8ej8m7PAQEja6X20gBadNiuqMEzbk-_g"
+};
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const KIND = { directo:'Directo', evento:'Evento', especial:'Especial', feriado:'Feriado' };
+const leap = (y) => y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0);
+const dim = (y, m) => [31, leap(y) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m];
+const hue = (s) => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) % 360; return h; };
+const key = (y, m, d) => y * 10000 + (m + 1) * 100 + d;                 // m: 0-11
+const utc = (k) => Date.UTC(Math.floor(k / 10000), Math.floor(k / 100) % 100 - 1, k % 100);
+const T = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date()).split('-').map(Number);
+const TODAY = key(T[0], T[1] - 1, T[2]);
+let view = { y: T[0], m: T[1] - 1 }, sel = TODAY, filter = 'all', BDS = [], EVS = [];
+
+const bdDay = (b, y) => b.m === 2 && b.d === 29 && !leap(y) ? 28 : b.d;   // 29/2 se festeja el 28 en años no bisiestos
+function evRange(e, y){                                                   // [inicio, fin] como número aaaammdd
+  const p = (s) => String(s).split('-').map(Number), a = p(e.day), z = e.end_day ? p(e.end_day) : a;
+  const ya = e.yearly ? y : a[0], yz = e.yearly ? y + (z[0] - a[0]) : z[0];
+  return [ya * 10000 + a[1] * 100 + a[2], yz * 10000 + z[1] * 100 + z[2]];
+}
+function avatar(u, px){
+  const ini = esc((u.name || '?').trim().slice(0, 2).toUpperCase()), h = hue(u.u || u.name);
+  if (u.avatar && /^https:\/\//.test(u.avatar)) return `<img class="av" style="width:${px}px;height:${px}px" src="${esc(u.avatar)}" alt="" loading="lazy" referrerpolicy="no-referrer" data-i="${ini}" data-h="${h}">`;
+  return `<span class="av" style="width:${px}px;height:${px}px;background:hsl(${h} 30% 24%)">${ini}</span>`;
+}
+document.addEventListener('error', (e) => {
+  const t = e.target; if (t.tagName !== 'IMG' || !t.classList.contains('av')) return;
+  const s = document.createElement('span'); s.className = 'av'; s.style.cssText = t.style.cssText + `;background:hsl(${t.dataset.h} 30% 24%)`; s.textContent = t.dataset.i; t.replaceWith(s);
+}, true);
+
+function dayMap(y, m){
+  const map = {}; for (let d = 1; d <= dim(y, m); d++) map[d] = { b: [], e: [] };
+  if (filter !== 'ev') BDS.filter(b => b.m === m + 1 && bdDay(b, y) <= dim(y, m)).forEach(b => map[bdDay(b, y)].b.push(b));
+  if (filter !== 'bd') EVS.forEach(e => { const [s, z] = evRange(e, y);
+    for (let d = 1; d <= dim(y, m); d++){ const k = key(y, m, d); if (k >= s && k <= z) map[d].e.push(e); } });
+  return map;
+}
+const longDay = (k) => new Date(utc(k)).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
+const whenTxt = (k) => { const n = Math.round((utc(k) - utc(TODAY)) / 864e5); return n === 0 ? 'Hoy' : n === 1 ? 'Mañana' : `en ${n} días`; };
+
+function render(){
+  $('title').textContent = `${MESES[view.m]} ${view.y}`;
+  const map = dayMap(view.y, view.m), first = (new Date(Date.UTC(view.y, view.m, 1)).getUTCDay() + 6) % 7;
+  let h = '<span class="cell void"></span>'.repeat(first);
+  for (let d = 1; d <= dim(view.y, view.m); d++){
+    const { b, e } = map[d], k = key(view.y, view.m, d), col = (first + d - 1) % 7;
+    const label = `${longDay(k)}${b.length ? `, ${b.length} cumpleaños` : ''}${e.length ? `, ${e.length} eventos` : ''}`;
+    h += `<button class="cell${col > 4 ? ' we' : ''}${k === TODAY ? ' now' : ''}${k === sel ? ' sel' : ''}${b.length ? ' bd' : ''}" data-k="${k}" aria-label="${esc(label)}" aria-pressed="${k === sel}">
+      <span class="n">${d}</span>${b.length ? `<span class="avs">${b.slice(0, 3).map(x => avatar(x, 24)).join('')}${b.length > 3 ? `<span class="more">+${b.length - 3}</span>` : ''}</span>` : ''}
+      ${e.slice(0, 2).map(x => `<span class="tag k-${esc(x.kind)}">${esc(x.title)}</span>`).join('')}${e.length > 2 ? `<span class="more">+${e.length - 2}</span>` : ''}</button>`;
+  }
+  $('grid').innerHTML = h;
+  renderDetail(); renderNext();
+}
+function evLine(e, bar){
+  return `<div class="item"><span class="evdot k-${esc(e.kind)}"></span><span><b>${esc(e.title)}</b><small>${KIND[e.kind] || 'Evento'}${e.time ? ' · ' + esc(e.time) : ''}${e.description ? ' · ' + esc(e.description) : ''}</small></span>${bar || ''}</div>`;
+}
+function renderDetail(){
+  const y = Math.floor(sel / 10000), m = Math.floor(sel / 100) % 100 - 1, d = sel % 100, data = dayMap(y, m)[d] || { b: [], e: [] };
+  $('dTitle').textContent = longDay(sel).replace(/^./, c => c.toUpperCase());
+  $('detail').innerHTML = data.b.map(b => `<div class="item">${avatar(b, 40)}<span><b>${esc(b.name)}</b><small>Cumple años${b.m === 2 && b.d === 29 && !leap(y) ? ' (nació un 29/2)' : ''}${b.note ? ' · ' + esc(b.note) : ''}</small></span></div>`).join('')
+    + data.e.map(e => evLine(e)).join('') || '<p class="empty">No hay nada este día.</p>';
+}
+function renderNext(){
+  const nb = BDS.map(b => { let y = T[0], k = key(y, b.m - 1, bdDay(b, y)); if (k < TODAY){ y++; k = key(y, b.m - 1, bdDay(b, y)); } return { b, k }; })
+    .sort((a, z) => a.k - z.k).slice(0, 8);
+  $('nextBd').innerHTML = nb.map(({ b, k }) => `<button class="item" data-k="${k}">${avatar(b, 40)}<span><b>${esc(b.name)}</b><small>${k % 100} de ${MESES[Math.floor(k / 100) % 100 - 1]}</small></span><span class="when">${whenTxt(k)}</span></button>`).join('') || '<p class="empty">Todavía no hay cumpleaños cargados.</p>';
+  const ne = EVS.flatMap(e => [T[0], T[0] + 1].map(y => ({ e, r: evRange(e, e.yearly ? y : T[0]) })).filter((x, i) => (e.yearly || i === 0) && x.r[1] >= TODAY))
+    .map(x => ({ e: x.e, k: Math.max(x.r[0], TODAY) })).sort((a, z) => a.k - z.k).slice(0, 5);
+  $('nextEv').innerHTML = ne.map(({ e, k }) => `<button class="item" data-k="${k}" style="padding:0"><span style="flex:1">${evLine(e, `<span class="when">${whenTxt(k)}</span>`)}</span></button>`).join('') || '<p class="empty">No hay eventos próximos.</p>';
+}
+function banner(){
+  const hoy = BDS.filter(b => b.m === T[1] && bdDay(b, T[0]) === T[2]);
+  $('today').hidden = !hoy.length;
+  if (hoy.length) $('today').innerHTML = `🎉 Hoy ${hoy.length > 1 ? 'cumplen años' : 'cumple años'}: <b>${hoy.map(b => esc(b.name)).join(', ')}</b>`;
+}
+const go = (k) => { sel = k; view = { y: Math.floor(k / 10000), m: Math.floor(k / 100) % 100 - 1 }; render(); };
+$('grid').addEventListener('click', (e) => { const c = e.target.closest('[data-k]'); if (c){ sel = +c.dataset.k; render(); $('grid').querySelector('.sel')?.focus(); } });
+document.querySelector('.side').addEventListener('click', (e) => { const c = e.target.closest('[data-k]'); if (c) go(+c.dataset.k); });
+const step = (n) => { view.m += n; if (view.m < 0){ view.m = 11; view.y--; } if (view.m > 11){ view.m = 0; view.y++; } render(); };
+$('prev').onclick = () => step(-1); $('next').onclick = () => step(1); $('goto').onclick = () => go(TODAY);
+$('filters').addEventListener('click', (e) => { const c = e.target.closest('[data-f]'); if (!c) return; filter = c.dataset.f;
+  document.querySelectorAll('#filters .chip').forEach(x => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', x === c); }); render(); });
+
+async function load(){
+  try {
+    const r = await fetch(`${CFG.SUPABASE_URL}/rest/v1/rpc/get_calendar`, { method: 'POST', headers: { apikey: CFG.SUPABASE_ANON_KEY, Authorization: 'Bearer ' + CFG.SUPABASE_ANON_KEY, 'content-type': 'application/json' }, body: '{}' });
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json(), seen = new Map();
+    (j.birthdays || []).sort((a, z) => (a.src === 'user') - (z.src === 'user')).forEach(b => {   // si está en los dos lados, gana lo que cargó la persona
+      const k = b.u ? 'u:' + b.u : `n:${String(b.name).toLowerCase()}${b.m}${b.d}`; seen.set(k, b); });
+    BDS = [...seen.values()]; EVS = j.events || []; $('err').hidden = true;
+  } catch (e) { $('err').hidden = false; $('err').textContent = 'No se pudo cargar el calendario. Revisa tu conexión o que calendario.sql esté ejecutado en Supabase.'; }
+  banner(); render();
+}
+load(); setInterval(load, 5 * 60 * 1000);
+</script>
+</body>
+</html>
