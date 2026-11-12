@@ -3,7 +3,7 @@
 (() => {
   if (!document.getElementById('sp-css')) { const st = document.createElement('style'); st.id = 'sp-css'; st.textContent = `/* Tienda v3 + soporte de marcos y fondos con imagen */
 .frame.fr-img::after{inset:var(--fin,-35.7%);background-image:var(--fi);background-size:100% 100%;animation:none}
-.modal .card.pb-img{border-color:transparent;image-rendering:pixelated;background-color:#0a0a12;background-size:cover;background-position:center bottom;background-repeat:no-repeat;
+.modal .card.pb-img{border-color:transparent;image-rendering:pixelated;background-color:#241b12;background-size:cover;background-position:center bottom;background-repeat:no-repeat;
   background-image:linear-gradient(rgba(0,0,0,var(--pbdim,.15)),rgba(0,0,0,var(--pbdim,.15))),var(--pbimg)}
 .modal .card.pb-img.pb-own{border-image:none;background-clip:border-box;background-origin:border-box}
 
@@ -20,7 +20,7 @@
 .sp-wallet-bal .bal{display:block;font-family:var(--display);font-weight:700;font-size:1.45rem;color:var(--gold);text-shadow:var(--ol);line-height:1}
 .sp-wallet .btn{margin-left:0}
 .sp-eq{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem}
-.sp-slot{display:flex;align-items:center;gap:.45rem;padding:.35rem .6rem;background:#1a1c1a;border:2px solid var(--rim);border-radius:10px;min-width:0}
+.sp-slot{display:flex;align-items:center;gap:.45rem;padding:.35rem .6rem;background:#241b12;border:2px solid var(--rim);border-radius:10px;min-width:0}
 .sp-slot.on{border-color:#4a6b3f}
 .sp-slot>div{min-width:0}.sp-slot small{display:block;color:var(--tan);font-size:.7rem;line-height:1}
 .sp-slot b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.92rem}
@@ -30,12 +30,12 @@
 .sp-tabs,.sp-filters{display:flex;flex-wrap:wrap;gap:.35rem}
 .sp-tools{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center}
 .sp-search{min-width:180px;flex:1 1 220px}
-.sp-sel{background:#1a1c1a;border:2px solid var(--rim);border-radius:999px;color:var(--cream);padding:.32rem .8rem;font:inherit;text-shadow:none}
+.sp-sel{background:#241b12;border:2px solid var(--rim);border-radius:999px;color:var(--cream);padding:.32rem .8rem;font:inherit;text-shadow:none;min-height:44px}
 .shopmsg{min-height:1.2rem;margin:.15rem 0 .35rem;font-weight:800}
 
 .sp-body{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:.8rem;align-items:start}
 .sp-catalog{align-content:start}
-.sp-aside{position:sticky;top:0;display:grid;gap:.55rem;padding:.65rem;background:#1a1c1a;border:2px solid var(--rim);border-radius:12px}
+.sp-aside{position:sticky;top:0;display:grid;gap:.55rem;padding:.65rem;background:#241b12;border:2px solid var(--rim);border-radius:12px}
 .sp-aside.fold>*:not(.sp-pv-head){display:none}
 .sp-pv-head{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;justify-content:space-between}
 .sp-vt,.sp-pv-tools{display:flex;flex-wrap:wrap;gap:.3rem}
@@ -47,7 +47,7 @@
 .linkbtn{background:none;border:0;color:var(--tan);font:inherit;font-size:.82rem;cursor:pointer;text-decoration:underline}
 .linkbtn:hover{color:#fff}
 .sp-tried{display:grid;gap:.3rem}
-.sp-trychip{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.3rem .5rem;background:#161816;border:1px solid var(--line);border-radius:8px}
+.sp-trychip{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.3rem .5rem;background:#1e1710;border:1px solid var(--line);border-radius:8px}
 .sp-trychip small{display:block;color:var(--tan);font-size:.7rem;line-height:1}
 .sp-trychip b{display:block;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sp-trychip button{color:var(--tan);font-size:1.2rem;line-height:1}
@@ -57,13 +57,13 @@
 .sp-buyrow{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.3rem 0;border-top:1px dashed var(--line)}
 .sp-buyrow small{display:block;color:var(--tan);font-size:.72rem}
 .sp-sec-adv{padding-top:.45rem}
-.sp-sec-adv summary{cursor:pointer;color:var(--cream);font-weight:800;list-style:none}
+.sp-sec-adv summary{cursor:pointer;color:var(--cream);font-weight:800;list-style:none;min-height:44px;display:flex;align-items:center}
 .sp-sec-adv summary::-webkit-details-marker{display:none}
 .sp-sec-adv summary::before{content:"▸ ";color:var(--tan)}
 .sp-sec-adv[open] summary::before{content:"▾ "}
 .sp-adv-body{display:grid;gap:.5rem;margin-top:.4rem}
-.sp-lv{display:grid;gap:.1rem;font-size:.82rem;color:var(--tan)}.sp-lv input{accent-color:#53fc18;width:100%}
-.sp-who input{width:100%;background:#181a18;border:2px solid var(--rim);border-radius:8px;color:var(--cream);padding:.35rem .6rem;font:inherit;text-shadow:none}
+.sp-lv{display:grid;gap:.1rem;font-size:.82rem;color:var(--tan)}.sp-lv input{accent-color:#53fc18;width:100%;min-height:44px}
+.sp-who input{width:100%;background:#221a11;border:2px solid var(--rim);border-radius:8px;color:var(--cream);padding:.35rem .6rem;font:inherit;text-shadow:none;min-height:44px}
 .sp-sel-info{display:grid;gap:.25rem}
 .sp-sel-actions{display:flex;flex-wrap:wrap;gap:.4rem}
 .sp-hint{color:var(--tan);font-size:.8rem}
@@ -72,7 +72,7 @@
 
 /* Catálogo / tarjetas */
 .sp-card{position:relative;cursor:pointer;display:flex;flex-direction:column;gap:.4rem;padding:.55rem;transition:transform var(--dur-press) var(--ease-out),border-color .15s ease,box-shadow .15s ease}
-@media (hover:hover) and (pointer:fine){.sp-card:hover{transform:translateY(-2px);border-color:#575c55}}
+@media (hover:hover) and (pointer:fine){.sp-card:hover{transform:translateY(-2px);border-color:#6a563a}}
 .sp-card:active{transform:scale(.985)}
 .sp-card:focus-visible{outline:2px solid var(--leaf);outline-offset:2px}
 .sp-card.sel{outline:3px solid var(--gold);outline-offset:1px}
@@ -81,7 +81,7 @@
 .sp-card.retired{opacity:.92}
 .sp-card.r1{border-color:#4aa0e0}.sp-card.r2{border-color:#b46bff}.sp-card.r3{border-color:var(--gold)}
 .sp-card.eq.r1,.sp-card.eq.r2,.sp-card.eq.r3{border-color:#4be01a}
-.sp-prevbox{min-height:118px;overflow:visible;background:radial-gradient(ellipse at center,#222622 0%,#161816 70%);border:1px solid #2a2e2a}
+.sp-prevbox{min-height:118px;overflow:visible;background:radial-gradient(ellipse at center,#2c2318 0%,#1e1710 70%);border:1px solid #33291c}
 .sp-card-body{display:grid;gap:.15rem}
 .sp-card-body .in{font-size:1.12rem;line-height:1.1}
 .sp-card-body small{min-height:2.1em;line-height:1.3}
@@ -89,23 +89,23 @@
 .sp-type{font-size:.7rem;color:var(--tan)}
 .sp-badge{font-size:.68rem;font-weight:800;border-radius:5px;padding:.05rem .4rem}
 .sp-badge-eq{color:#0f2a08;background:#7fe044}
-.sp-badge-own{color:var(--cream);background:#3a403a;border:1px solid var(--rim)}
+.sp-badge-own{color:var(--cream);background:#463829;border:1px solid var(--rim)}
 .sp-flag{position:absolute;top:.4rem;right:.4rem;z-index:2;font-size:.64rem;font-weight:800;border-radius:5px;padding:.05rem .4rem}
 .sp-newf{color:#0f2a08;background:#7fe044}
 .sp-ret{color:#fff;background:#8a7650}
-.sp-rar{font-size:.68rem;padding:0 .4rem;border-radius:5px;background:#353934;color:var(--tan)}
+.sp-rar{font-size:.68rem;padding:0 .4rem;border-radius:5px;background:#3d3122;color:var(--tan)}
 .sp-rar.r1{background:#1d4a7a;color:#bfe3ff}.sp-rar.r2{background:#4a2a7a;color:#e0ccff}.sp-rar.r3{background:#7a5a0a;color:#fff0a0}
 .sp-card-actions{display:flex;flex-wrap:wrap;gap:.35rem}
 .sp-card-actions .btn{padding:.2rem .55rem;font-size:.9rem}
 .sp-try.on{border-color:#4be01a;color:#7dff4a}
 .sp-card-foot{margin-top:auto;padding-top:.25rem;border-top:1px solid var(--line)}
 .sp-card-foot .btn{padding:.3rem .7rem}
-.sp-empty{display:grid;justify-items:center;gap:.5rem;padding:2rem 1rem;text-align:center;color:var(--tan);background:#1a1c1a;border:2px dashed var(--rim);border-radius:12px}
+.sp-empty{display:grid;justify-items:center;gap:.5rem;padding:2rem 1rem;text-align:center;color:var(--tan);background:#241b12;border:2px dashed var(--rim);border-radius:12px}
 .sp-tile-name{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sp-chat{background:#0b0e0f;border-radius:8px;padding:.6rem;display:grid;gap:.35rem;font-family:system-ui,sans-serif;font-size:.85rem;font-weight:700;text-shadow:none;color:#e6e6e6}
-.sp-chat .cl{display:flex;align-items:center;gap:.3rem;flex-wrap:wrap}.sp-chat small{color:#6b7370;font-weight:600}
-.sp-pod{display:grid;justify-items:center;gap:.2rem;padding:1.6rem 0 .6rem;background:#161816;border-radius:8px}
-.sp-sk{min-height:230px;background:linear-gradient(100deg,#1a1c1a 30%,#262926 50%,#1a1c1a 70%) 0 0/200% 100%;animation:spsk 1.2s linear infinite;border-color:var(--rim)}
+.sp-chat{background:#1e1710;border-radius:8px;padding:.6rem;display:grid;gap:.35rem;font-family:var(--body);font-size:.85rem;font-weight:700;text-shadow:none;color:var(--cream)}
+.sp-chat .cl{display:flex;align-items:center;gap:.3rem;flex-wrap:wrap}.sp-chat small{color:#a8946a;font-weight:600}
+.sp-pod{display:grid;justify-items:center;gap:.2rem;padding:1.6rem 0 .6rem;background:#1e1710;border-radius:8px}
+.sp-sk{min-height:230px;background:linear-gradient(100deg,#241b12 30%,#262926 50%,#241b12 70%) 0 0/200% 100%;animation:spsk 1.2s linear infinite;border-color:var(--rim)}
 @keyframes spsk{to{background-position:-200% 0}}
 @keyframes sp-buy-pop{0%{transform:scale(1)}35%{transform:scale(1.12)}100%{transform:scale(1)}}
 .wallet .bal.sp-pop{animation:sp-buy-pop 420ms var(--ease-out)}
@@ -226,7 +226,7 @@
     const u = {...baseU(), frame_id: pickT('frame') || '', name_id: pickT('name_effect') || ''}, l = curLv();
     const _bc = COS.get(ST.try.badge), _br = _bc && window.RankEngine && window.RankEngine.byId ? window.RankEngine.byId(_bc.rank_id) : null;
     const title = _br ? _br.title : rankOf(l)[1]; const rKey = _br ? _br.key : rankKey(l);
-    if (ST.view === 'chat') return `<div class="sp-chat" aria-label="Vista previa en el chat"><div class="cl"><small>12:34</small>${sprite(rKey, 18)}<b>${nameHtml(u)}</b><span>:</span><span style="font-weight:600">¡Qué buen directo, vamos!</span></div><div class="cl"><small>12:34</small><b style="color:#7fb4ff">viewer123</b><span>:</span><span style="font-weight:600">jajaja GG</span></div></div>`;
+    if (ST.view === 'chat') return `<div class="sp-chat" aria-label="Vista previa en el chat"><div class="cl"><small>12:34</small>${sprite(rKey, 18)}<b>${nameHtml(u)}</b><span>:</span><span style="font-weight:600">¡Qué buen directo, vamos!</span></div><div class="cl"><small>12:34</small><b style="color:var(--tan)">viewer123</b><span>:</span><span style="font-weight:600">jajaja GG</span></div></div>`;
     const xp = ST.tryUser?.xp ?? wallet?.xp ?? 1234;
     if (ST.view === 'rank') return `<div class="sp-pod" aria-label="Vista previa del podio">${avatarF(u, 72)}<span class="nm" style="font-family:var(--display);font-size:1.2rem">${nameHtml(u)}</span><span class="cost">${nf(xp)} XP</span></div>
       <div class="row" style="padding:.4rem .2rem"><span class="rk">1</span>${avatarF(u, 40)}<span class="info"><b>${nameHtml(u)}<span class="lvl">Nv. ${l}</span></b><small class="rk2">${sprite(rKey, 14)}<span>${esc(title)} · ahora mismo</span></small></span><span class="total">${nf(xp)} XP</span></div>`;

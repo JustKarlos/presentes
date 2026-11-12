@@ -1,19 +1,23 @@
-/* Tienda v2 + soporte de marcos y fondos con imagen. Cargalo DESPUÉS del <style> de index.html. */
+/* Tienda v2 + soporte de marcos y fondos con imagen. Cargalo DESPUÉS del <style> de index.html.
+   ATENCIÓN: este archivo está SIN USO (ver AGENTS.md). Los estilos vivos de la tienda
+   viajan dentro de shop-plus.js, que es la única fuente de verdad. Esta copia se mantiene
+   solo por histórico y debe permanecer sincronizada con shop-plus.js: si alguien la
+   reviviera por error, no debe reintroducir la paleta fría anterior. */
 .frame.fr-img::after{inset:var(--fin,-35.7%);background-image:var(--fi);background-size:100% 100%;animation:none}
-.card.pb-img{border-color:transparent;image-rendering:pixelated;background-color:#0a0a12;background-size:cover;background-position:center bottom;background-repeat:no-repeat;
+.card.pb-img{border-color:transparent;image-rendering:pixelated;background-color:#241b12;background-size:cover;background-position:center bottom;background-repeat:no-repeat;
   background-image:linear-gradient(rgba(0,0,0,var(--pbdim,.15)),rgba(0,0,0,var(--pbdim,.15))),var(--pbimg)}
 .card.pb-img.pb-own{border-image:none;background-clip:border-box}
 .shopcard.sp{max-width:1040px}
 .sp-eq{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem;margin-bottom:.4rem}
-.sp-slot{display:flex;align-items:center;gap:.4rem;padding:.3rem .6rem;background:#1a1c1a;border:2px solid var(--rim);border-radius:10px;min-width:0}
+.sp-slot{display:flex;align-items:center;gap:.45rem;padding:.35rem .6rem;background:#241b12;border:2px solid var(--rim);border-radius:10px;min-width:0}
 .sp-slot>div{min-width:0}.sp-slot small{display:block;color:var(--tan);font-size:.7rem;line-height:1}
 .sp-slot b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.9rem}
 .sp-slot button{margin-left:auto;font-size:1.3rem;line-height:1;color:var(--tan)}.sp-slot button:hover{color:#fff}
 .sp-tools{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.5rem 0}
 .sp-tools .search{min-width:150px}
-.sp-sel{background:#1a1c1a;border:2px solid var(--rim);border-radius:999px;color:var(--cream);padding:.3rem .8rem;font:inherit;text-shadow:none}
+.sp-sel{background:#241b12;border:2px solid var(--rim);border-radius:999px;color:var(--cream);padding:.32rem .8rem;font:inherit;text-shadow:none;min-height:44px}
 .sp-body{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:.8rem;align-items:start}
-.sp-prev{position:sticky;top:0;display:grid;gap:.5rem;padding:.6rem;background:#1a1c1a;border:2px solid var(--rim);border-radius:12px}
+.sp-prev{position:sticky;top:0;display:grid;gap:.5rem;padding:.65rem;background:#241b12;border:2px solid var(--rim);border-radius:12px}
 .sp-prev .sp-mini{max-width:none;min-height:150px}
 .sp-hint{color:var(--tan);font-size:.8rem}
 .sp-item{position:relative;cursor:pointer;transition:transform .15s}.sp-item:hover{transform:translateY(-2px)}
@@ -22,7 +26,7 @@
 .sp-rar{font-size:.7rem;padding:0 .4rem;border-radius:5px;background:#353934;color:var(--tan)}
 .sp-rar.r1{background:#1d4a7a;color:#bfe3ff}.sp-rar.r2{background:#4a2a7a;color:#e0ccff}.sp-rar.r3{background:#7a5a0a;color:#fff0a0}
 .sp-new{position:absolute;top:.35rem;right:.35rem;z-index:2;font-size:.65rem;font-weight:800;color:#0f2a08;background:#7fe044;border-radius:5px;padding:0 .4rem}
-.sp-sk{min-height:190px;background:linear-gradient(100deg,#1a1c1a 30%,#262926 50%,#1a1c1a 70%) 0 0/200% 100%;animation:spsk 1.2s linear infinite}
+.sp-sk{min-height:230px;background:linear-gradient(100deg,#241b12 30%,#262926 50%,#241b12 70%) 0 0/200% 100%;animation:spsk 1.2s linear infinite;border-color:var(--rim)}
 @keyframes spsk{to{background-position:-200% 0}}
 .sp-conf p{font-size:.85rem;margin-bottom:.4rem}.sp-conf .acts{display:flex;gap:.4rem}
 @media (max-width:760px){.sp-body{grid-template-columns:1fr}.sp-eq{grid-template-columns:1fr}
