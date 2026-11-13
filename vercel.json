@@ -1,5 +1,8 @@
 {
   "cleanUrls": true,
+  "rewrites": [
+    { "source": "/@:u", "destination": "/perfil.html?u=:u" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -11,6 +14,18 @@
     },
     {
       "source": "/overlay/(.*)",
+      "headers": [ { "key": "X-Robots-Tag", "value": "noindex, nofollow" } ]
+    },
+    {
+      "source": "/@(.*)",
+      "headers": [ { "key": "X-Robots-Tag", "value": "noindex, nofollow" } ]
+    },
+    {
+      "source": "/perfil",
+      "headers": [ { "key": "X-Robots-Tag", "value": "noindex, nofollow" } ]
+    },
+    {
+      "source": "/mi-perfil",
       "headers": [ { "key": "X-Robots-Tag", "value": "noindex, nofollow" } ]
     },
     {

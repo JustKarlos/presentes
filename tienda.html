@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tienda de cosméticos · Ranking de presentes</title>
+<meta name="description" content="Tienda de cosméticos de la comunidad: marcos de avatar, efectos de nombre e insignias de rango. Se pagan con XP y podés probarlos antes de comprar.">
+<link rel="canonical" href="https://presentescoci.vercel.app/tienda">
+<meta name="theme-color" content="#0d2013">
+<meta name="color-scheme" content="dark">
+<link rel="icon" type="image/png" href="assets/pointer2.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ranking de presentes">
+<meta property="og:locale" content="es_LA">
+<meta property="og:url" content="https://presentescoci.vercel.app/tienda">
+<meta property="og:title" content="Tienda de cosméticos · Ranking de presentes">
+<meta property="og:description" content="Marcos, efectos de nombre e insignias para tu perfil. Se pagan con XP y gastarla no baja tu nivel.">
+<meta property="og:image" content="https://presentescoci.vercel.app/assets/og.jpg">
+<meta property="og:image:alt" content="Tienda de cosméticos del ranking de presentes">
+<meta name="twitter:card" content="summary_large_image">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="paint-engine.js"></script>
+<script src="rank-engine.js"></script>
+<script src="site-core.js"></script>
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<a class="skip" href="#spRoot">Saltar al contenido</a>
+<noscript><p class="nojs">La tienda necesita JavaScript. Para comprar cosméticos, activalo y volvé a entrar.</p></noscript>
+
+<header class="pagenav">
+  <a class="pagenav-brand" href="/" aria-label="Ranking de presentes"><img class="paw" src="assets/pointer2.png" alt="" width="22" height="22"><span class="pagenav-name">Ranking de presentes</span></a>
+  <nav class="pagenav-links" aria-label="Secciones">
+    <a href="/">Ranking</a>
+    <a href="/tienda" aria-current="page">Tienda</a>
+    <a href="/mi-perfil">Mi perfil</a>
+  </nav>
+</header>
+
+<main id="main">
+  <div id="spRoot"></div>
+</main>
+
+<script src="shop-page.js"></script>
+</body>
+</html>

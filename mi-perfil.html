@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi perfil · Ranking de presentes</title>
+<meta name="description" content="Personalizá tu perfil: insignia de rango, marcos, efectos de nombre, privacidad, regalos y cumpleaños.">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://presentescoci.vercel.app/mi-perfil">
+<meta name="theme-color" content="#0d2013">
+<meta name="color-scheme" content="dark">
+<link rel="icon" type="image/png" href="assets/pointer2.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="paint-engine.js"></script>
+<script src="rank-engine.js"></script>
+<script src="site-core.js"></script>
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="mi-perfil.css">
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<noscript><p class="nojs">Mi perfil necesita JavaScript. Activalo y volvé a entrar.</p></noscript>
+
+<header class="pagenav">
+  <a class="pagenav-brand" href="/" aria-label="Ranking de presentes"><img class="paw" src="assets/pointer2.png" alt="" width="22" height="22"><span class="pagenav-name">Ranking de presentes</span></a>
+  <nav class="pagenav-links" aria-label="Secciones">
+    <a href="/">Ranking</a>
+    <a href="/tienda">Tienda</a>
+    <a href="/mi-perfil" aria-current="page">Mi perfil</a>
+  </nav>
+</header>
+
+<main class="pagemain" id="main">
+  <p id="mpMsg" class="mp-status" role="status" aria-live="polite"></p>
+  <div id="miperfil-body"></div>
+</main>
+
+<script src="mi-perfil.js"></script>
+</body>
+</html>

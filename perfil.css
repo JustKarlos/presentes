@@ -1,0 +1,81 @@
+/* perfil.css — ficha pública /@usuario.
+   Dos columnas en escritorio (identidad y stats / colección y misiones), una en móvil.
+   Sin fondo cosmético: el material es el de la casa (panel de madera). */
+
+.pf-page{
+  display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);
+  gap:1rem;align-items:start
+}
+.pf-col{display:grid;gap:1rem;min-width:0;align-content:start}
+@media (max-width:960px){.pf-page{grid-template-columns:1fr}}
+
+.pf-card{padding:.35rem .85rem .9rem}
+.pf-id .mh{padding-right:0;margin:.35rem 0 .55rem;align-items:flex-start}
+.pf-name{
+  font-family:var(--display);font-weight:700;font-size:2rem;line-height:1.05;color:var(--gold);
+  text-shadow:var(--ol);overflow-wrap:anywhere;word-break:break-word
+}
+.pf-name .ne{color:inherit}
+.pf-handle{color:var(--tan);font-size:.92rem;margin-top:.15rem;overflow-wrap:anywhere}
+.pf-handle .today{color:var(--gold)}
+.pf-chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.55rem}
+.pf-acts{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.75rem}
+.pf-acts .btn{text-decoration:none}
+.pf-acts .btn[disabled]{opacity:.5;cursor:not-allowed}
+
+.pf-h{
+  font-family:var(--display);font-weight:700;font-size:1.35rem;color:#fff;text-shadow:var(--ol);
+  margin:.3rem 0 .55rem;display:flex;flex-wrap:wrap;gap:.45rem;align-items:baseline
+}
+.pf-h small{font-family:var(--body);font-size:.78rem;font-weight:600;color:var(--tan);text-shadow:none}
+.pf-sub{
+  font-family:var(--display);font-weight:700;font-size:1.05rem;color:var(--tan);
+  margin:.7rem 0 .3rem;text-shadow:var(--ol-soft)
+}
+.pf-sub:first-child{margin-top:.15rem}
+.pf-groups{display:grid;gap:.8rem}
+.pf-pairs{display:grid;gap:.45rem}
+.pf-note{color:var(--tan);font-size:.82rem;line-height:1.4;margin:.3rem 0 0}
+.pf-note a{color:var(--leaf2)}
+
+.pf-status{min-height:1.25rem;margin:.15rem 0 0;color:var(--leaf);font-size:.82rem;font-weight:800}
+.pf-status:empty{display:none}
+
+/* Estados: cargando, vacío y error */
+.pf-state{display:grid;gap:.6rem;justify-items:start;padding:.6rem .2rem .4rem}
+.pf-state h1,.pf-state h2{font-family:var(--display);font-weight:700;font-size:1.8rem;color:var(--gold);text-shadow:var(--ol);line-height:1.1}
+.pf-state p{color:var(--tan);line-height:1.45;max-width:56ch}
+.pf-search{display:flex;flex-wrap:wrap;gap:.45rem;width:100%;max-width:460px}
+.pf-search input{
+  flex:1 1 180px;min-width:0;min-height:44px;padding:.35rem .65rem;border:2px solid var(--rim);border-radius:8px;
+  background:#221a11;color:var(--cream);font:inherit;text-shadow:none
+}
+.pf-search .btn{flex:none}
+.pf-load{display:grid;gap:.55rem;padding:.6rem .2rem}
+.pf-load i{
+  display:block;height:18px;border-radius:6px;background:linear-gradient(100deg,#241b12 30%,#2c2f28 50%,#241b12 70%) 0 0/200% 100%;
+  animation:pfload 1.2s linear infinite
+}
+.pf-load i:nth-child(2){width:70%}
+.pf-load i:nth-child(3){width:88%}
+.pf-load i:nth-child(4){width:55%}
+@keyframes pfload{to{background-position:-200% 0}}
+
+/* Colección */
+.pf-coll .cosgrid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+.pf-coll .xpnote{margin:0 0 .35rem}
+.pf-coll .cos{cursor:default}
+.pf-empty-note{
+  padding:.7rem .8rem;border:2px dashed var(--rim);border-radius:10px;color:var(--tan);
+  font-size:.84rem;line-height:1.4
+}
+
+@media (max-width:600px){
+  .pf-id .mh{gap:.75rem}
+  .pf-name{font-size:1.7rem}
+  .pf-acts .btn{flex:1 1 auto;text-align:center}
+  .pf-coll .cosgrid{grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}
+}
+@media (prefers-reduced-motion:reduce){
+  .pf-load i{animation:none}
+}

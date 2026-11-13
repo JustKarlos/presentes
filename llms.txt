@@ -9,12 +9,16 @@ La página muestra datos en vivo: los números del ranking se cargan al abrirla 
 - La racha cuenta los días seguidos con al menos un presente.
 - Cada mensaje en el chat da 5 XP (uno cada 30 segundos). El nivel sube con la XP y define el rango: Fruta Wumpa, Cazador de Gemas, Guardián Aku Aku, Rompe Cajas y Maestro del Tiempo.
 - Las misiones diarias y semanales dan XP extra al completarse.
-- Con la XP se compran marcos de avatar, efectos de nombre y fondos de perfil en la tienda. Gastar XP no baja el nivel. Para comprar se inicia sesión con la cuenta de Kick.
+- Con la XP se compran marcos de avatar, efectos de nombre e insignias de rango en la tienda. Gastar XP no baja el nivel. Para comprar se inicia sesión con la cuenta de Kick.
 
 ## Páginas
-- [Ranking en vivo](https://presentescoci.vercel.app/): clasificación por presentes, mensajes, tiempo activo, rachas y nivel; misiones; actividad reciente; tienda.
+- [Ranking en vivo](https://presentescoci.vercel.app/): clasificación por presentes, mensajes, tiempo activo, rachas y nivel; misiones; actividad reciente.
+- [Tienda](https://presentescoci.vercel.app/tienda): marcos, efectos de nombre e insignias; probador, compra, equipado y regalos.
+- Perfil público: `https://presentescoci.vercel.app/@usuario` (enlace para compartir; no se indexa).
+- Mi perfil: `https://presentescoci.vercel.app/mi-perfil` (requiere sesión de Kick; no se indexa).
 - [Mapa del sitio](https://presentescoci.vercel.app/sitemap.xml)
 
 ## Notas
 - Los widgets para OBS bajo /overlay/ son privados y no están pensados para lectores ni buscadores.
 - Solo se registran presentes y mensajes mientras el canal está en vivo.
+- Los fondos de perfil están en pausa mientras se rediseña la ficha pública.
