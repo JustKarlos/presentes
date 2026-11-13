@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Perfil · Ranking de presentes</title>
+<meta name="description" content="Perfil público de la comunidad: nivel, rango, presentes, racha, mensajes, tiempo activo y colección de cosméticos.">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://presentescoci.vercel.app/">
+<meta name="theme-color" content="#0d2013">
+<meta name="color-scheme" content="dark">
+<link rel="icon" type="image/png" href="assets/pointer2.png">
+<meta property="og:type" content="profile">
+<meta property="og:site_name" content="Ranking de presentes">
+<meta property="og:locale" content="es_LA">
+<meta property="og:url" content="https://presentescoci.vercel.app/">
+<meta property="og:title" content="Perfil · Ranking de presentes">
+<meta property="og:description" content="Nivel, rango, presentes, racha y colección de cosméticos de la comunidad.">
+<meta property="og:image" content="https://presentescoci.vercel.app/assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="paint-engine.js"></script>
+<script src="rank-engine.js"></script>
+<script src="site-core.js"></script>
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="perfil.css">
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<noscript><p class="nojs">El perfil necesita JavaScript para mostrar los datos. Activalo y volvé a entrar.</p></noscript>
+
+<header class="pagenav">
+  <a class="pagenav-brand" href="/" aria-label="Ranking de presentes"><img class="paw" src="assets/pointer2.png" alt="" width="22" height="22"><span class="pagenav-name">Ranking de presentes</span></a>
+  <nav class="pagenav-links" aria-label="Secciones">
+    <a href="/">Ranking</a>
+    <a href="/tienda">Tienda</a>
+    <a href="/mi-perfil">Mi perfil</a>
+  </nav>
+</header>
+
+<main class="pagemain" id="main">
+  <div id="pfRoot"></div>
+</main>
+
+<script src="perfil.js"></script>
+</body>
+</html>
