@@ -6,7 +6,11 @@
   if (!root) return;
 
   const params = new URLSearchParams(location.search);
-  const requested = (params.get('u') || '').trim();
+  let requested = (params.get('u') || '').trim();
+  if (!requested) {
+    const m = location.pathname.match(/^\/@(.+?)\/?$/);
+    if (m) requested = decodeURIComponent(m[1]).trim();
+  }
   const username = normUser(requested);
   const fondosOn = !(window.FEATURES && window.FEATURES.fondos === false);
   const TIPOS = { frame: 'Marcos', name_effect: 'Efectos de nombre', badge: 'Insignias', background: 'Fondos' };
