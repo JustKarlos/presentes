@@ -1,7 +1,7 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/@:u", "destination": "/perfil.html?u=:u" }
+    { "source": "/@([^/]+)", "destination": "/perfil?u=$1" }
   ],
   "headers": [
     {

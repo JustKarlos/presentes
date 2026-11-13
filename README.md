@@ -2,7 +2,7 @@
 
 Ranking de asistencia para un canal de [Kick](https://kick.com). Los espectadores escriben `!presente` en el chat (una vez por hora, solo con el stream en vivo) y suman puntos y rachas diarias. El ranking se muestra en una página estática con actualización en tiempo real.
 
-- **Frontend:** un solo `index.html` (Tailwind por CDN + `supabase-js`). Se aloja gratis en GitHub Pages o Vercel.
+- **Frontend:** HTML/CSS/JS estático servido tal cual. Se aloja en Vercel (con rewrite `/@usuario` → perfil público). No hay bundler ni dependencias nuevas.
 - **Base de datos:** Supabase (Postgres) con Row Level Security.
 - **Chat:** webhooks oficiales de Kick, recibidos por una Edge Function de Supabase. No hace falta ningún servidor propio.
 
@@ -39,7 +39,7 @@ Chat de Kick → webhook de Kick → Edge Function (kick-webhook) → register_p
 - **XP y niveles:** cada `!presente` registrado da +100 XP y cada mensaje +5 XP (uno cada 30 segundos por usuario). Nivel = `floor((XP / 100) ^ (1 / 1.5))`, así que el nivel 1 se alcanza con 100 XP, el 5 con 1.118 XP y el 10 con 3.163 XP. Quien tenga menos de 100 XP está en el nivel 0.
 - **Rangos:** niveles 0-4 Fruta Wumpa, 5-9 Cazador de Gemas, 10-19 Guardián Aku Aku, 20-34 Rompe Cajas y 35 o más Maestro del Tiempo. Cada rango tiene su insignia pixel-art, visible en el ranking y en el perfil.
 - **Misiones:** hay 3 diarias y 3 semanales (mensajes, presentes, minutos activos y racha). Al completarlas dan XP extra. Se editan desde la tabla `quest_defs` en Supabase (título, meta, recompensa, activa). Los mensajes que cuentan para misiones son los que dan XP, para que el spam no sirva.
-- **Tienda:** con XP se compran marcos de avatar, efectos de nombre y fondos de perfil. Se pagan con el saldo `xp - xp_spent`, así que gastar no baja el nivel. Los marcos son imágenes pixel-art de `assets/frames/` y los fondos de perfil son ilustraciones de `assets/backgrounds/` (hay que subir ambas carpetas junto con `index.html`). Hay 9 marcos, 11 fondos y 5 efectos de nombre, incluida una edición Halloween y los efectos de nombre son CSS. Los objetos equipados se ven en el ranking, el podio, la actividad en vivo y el perfil. Para comprar hay que iniciar sesión con Kick.
+- **Tienda:** en `/tienda`, con XP se compran marcos de avatar, efectos de nombre e insignias de rango. Se pagan con el saldo `xp - xp_spent`, así que gastar no baja el nivel. Los marcos son imágenes pixel-art de `assets/frames/` y los fondos de perfil están en pausa mientras se rediseña la ficha pública. Hay 9 marcos, 5 efectos de nombre y las insignias de rango, incluida una edición Halloween. Los objetos equipados se ven en el ranking, el podio, la actividad en vivo y el perfil. Para comprar hay que iniciar sesión con Kick. Los perfiles públicos viven en `/@usuario` y la edición propia en `/mi-perfil`.
 - **Avisos:** al subir de nivel aparece un aviso en la página en tiempo real y el bot lo anuncia en el chat, igual que las misiones completadas.
 - **Puntos:** cada `!presente` válido suma +1 a `total_checkins`.
 - **Cooldown:** 1 hora entre check-ins por usuario. Se verifica en el servidor, dentro de una transacción con bloqueo de fila.
