@@ -264,4 +264,3 @@ git push -u origin main
 - La API de webhooks de Kick no está bajo mi control y puede cambiar. Este proyecto se escribió contra librerías de terceros y no contra una prueba real con tu canal.
 - Los proyectos gratuitos de Supabase se pausan tras aproximadamente una semana sin actividad.
 - Los nombres de usuario se normalizan a minúsculas con el `channel_slug` de Kick.
-- 
