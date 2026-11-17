@@ -24,36 +24,44 @@
 <meta name="twitter:description" content="Escribe !presente en el chat durante el directo, suma XP, sube de nivel y consigue cosméticos para tu perfil.">
 <meta name="twitter:image" content="https://presentescoci.vercel.app/assets/og.jpg">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Ranking de presentes","url":"https://presentescoci.vercel.app/","inLanguage":"es","description":"Ranking de la comunidad de un canal de Kick: presentes, mensajes, rachas, XP, niveles, misiones y tienda de cosméticos."}</script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "./assets/vendor/three/three.module.js"
+  }
+}
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="paint-engine.js"></script>
 <script src="rank-engine.js"></script>
 <script src="site-core.js"></script>
 <link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="index-hero.css">
 </head>
-<body>
+<body class="home-hero">
 <a class="skip" href="#main">Saltar al contenido</a>
 <noscript><p class="nojs">Este ranking necesita JavaScript para mostrar los datos en vivo. Para participar, escribe !presente en el chat del canal mientras está en directo.</p></noscript>
 
-<header class="hero">
-  <div class="hero-art" aria-hidden="true"></div>
-  <div class="hero-in">
-    <div class="hero-top">
-      <div class="status" role="status"><span class="dot" id="dot"></span><span id="statusTxt">Conectando…</span></div>
-      <div class="hright"><a class="shopbtn" href="calendario.html" style="text-decoration:none" aria-label="Calendario de cumpleaños y eventos" title="Calendario">📅</a><a class="shopbtn" href="/tienda" style="text-decoration:none">Tienda</a><a class="shopbtn" href="/mi-perfil" style="text-decoration:none">Mi perfil</a></div>
-    </div>
+<section id="hero">
+  <header id="hero-header">
+    <div class="status-pill" role="status"><span class="dot" id="dot"></span><span id="statusTxt">Conectando…</span></div>
+    <a class="tab-btn" href="calendario.html" aria-label="Calendario de cumpleaños y eventos" title="Calendario">📅</a>
+    <a class="tab-btn" href="/tienda">Tienda</a>
+    <a class="tab-btn" href="/mi-perfil">Mi perfil</a>
+  </header>
 
-    <div class="hero-main">
-      <div class="hero-box">
-        <div class="sign"><img src="assets/sign.png" alt="Ranking de presentes" width="1250" height="390" fetchpriority="high"><h1 id="chan" class="sr">Ranking de presentes</h1></div>
-        <div class="slab">
-          <p class="hero-lead">Escribe <code>!presente</code> en el chat durante el directo. Sumas 1 punto cada hora y tu racha crece por cada día seguido que participes.</p>
-          <div class="hero-acts">
-            <a class="kicklink" id="kickLink" href="#" target="_blank" rel="noopener" hidden>Ir al chat</a>
-            <a class="kicklink hero-alt" href="#main">Ver la clasificación</a>
-          </div>
-        </div>
-      </div>
-      <section id="podium" class="podium" aria-label="Los tres primeros puestos"></section>
+  <canvas id="scene-canvas"></canvas>
+  <div id="overlay-root"></div>
+
+  <div id="hero-top">
+    <img id="sign" src="assets/sign.png" alt="Ranking de presentes" width="1250" height="390" fetchpriority="high">
+    <h1 id="chan" class="sr">Ranking de presentes</h1>
+    <div id="info-frame">
+      <p class="frame-text">Escribe <code>!presente</code> en el chat durante el directo. Sumas 1 punto cada hora y tu racha crece por cada día seguido que participes.</p>
+    </div>
+    <div id="hero-actions">
+      <a class="tab-on-btn" id="kickLink" href="#" target="_blank" rel="noopener" hidden>Ir al chat</a>
+      <a class="tab-on-btn" href="#main">Ver la clasificación</a>
     </div>
     <div class="hero-stats">
       <section class="stats" aria-label="Resumen">
@@ -64,7 +72,7 @@
       </section>
     </div>
   </div>
-</header>
+</section>
 
 <div class="wrap">
   <div class="layout">
@@ -136,17 +144,17 @@
 
 <div id="toasts" aria-live="polite"></div>
 
+<script type="module" src="hero-podium.js"></script>
 <script>
 /* ---------- portada ---------- */
 function setStatus(t, c){ $('statusTxt').textContent = t; $('dot').style.background = c; }
 window.onRpcError = () => setStatus('Error al cargar datos','#ef4444');
 
 $('chan').textContent = `Ranking de presentes de ${CONFIG.CHANNEL_NAME}`;
-document.querySelector('.sign img').alt = CONFIG.CHANNEL_NAME;
-if(CONFIG.BACKGROUND_IMAGE) document.body.style.setProperty('--bg-img', `url("${CONFIG.BACKGROUND_IMAGE}")`);
+document.getElementById('sign').alt = CONFIG.CHANNEL_NAME;
 document.title = `Ranking de presentes · ${CONFIG.CHANNEL_NAME}`;
 const KICK = String(CONFIG.KICK_CHANNEL || '').trim().replace(/^@/, '').replace(/[^\w-]/g, '');
-if(KICK){                                                        // botón al chat + datos estructurados del canal
+if(KICK){
   const a = $('kickLink');
   a.href = `https://kick.com/${KICK}`; a.hidden = false;
   a.setAttribute('aria-label', `Ir al chat de ${CONFIG.CHANNEL_NAME} en Kick (se abre en otra pestaña)`);
@@ -184,12 +192,6 @@ async function loadBoard(){
   rows = data; render();
 }
 
-function podiumTile(u){
-  return `<a class="pod p${u.rank}" href="/@${encodeURIComponent(u.username)}">
-    ${avatarF(u, u.rank===1 ? 84 : 64)}
-    <span class="pts">${fmtVal(st.metric,u.value)}</span>
-    <span class="nm">${nameHtml(u)}</span></a>`;
-}
 function rowItem(u){
   const sub = st.metric === 'streaks' ? `Mejor racha: ${u.best_streak} ${plural(u.best_streak,'día','días')}` : ago(u.last_seen);
   const title = u.rank_title || rankOf(u.level)[1];
@@ -203,10 +205,13 @@ function render(notFound){
   const q = $('search').value.trim().toLowerCase();
   const all = rows.map((u,i) => ({...u, rank:i+1}));
 
-  const pod = $('podium');
   const top = all.slice(0,3);
-  pod.hidden = top.length === 0;
-  pod.innerHTML = `<div class="pstage"><img src="assets/podium.png" alt="" width="1090" height="400">${top.map(podiumTile).join('')}</div>`;
+  const top3 = top.map(u => ({ ...u, _fmtValue: fmtVal(st.metric, u.value) }));
+  const payload = { users: top3, metric: st.metric };
+  window.__pendingHeroTop3 = payload;
+  if(window.HeroPodium && typeof window.HeroPodium.setTop === 'function'){
+    window.HeroPodium.setTop(top3, st.metric);
+  }
 
   const list = q ? all.filter(u => u.username.includes(q) || u.display_name.toLowerCase().includes(q)) : all.slice(3);
   $('board').innerHTML = list.map(rowItem).join('');
@@ -303,7 +308,7 @@ $('qUser').addEventListener('input', () => {
 try { $('qUser').value = localStorage.getItem('kickUser') || ''; } catch {}
 
 /* ---------- accesibilidad: pestañas con teclado ---------- */
-$('tabs').addEventListener('keydown', (e) => {                      // flechas, Inicio y Fin entre pestañas
+$('tabs').addEventListener('keydown', (e) => {
   if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
   const tabs = [...document.querySelectorAll('.tab')]; let i = tabs.indexOf(document.activeElement); if(i < 0) return;
   i = e.key === 'ArrowRight' ? (i + 1) % tabs.length : e.key === 'ArrowLeft' ? (i - 1 + tabs.length) % tabs.length : e.key === 'Home' ? 0 : tabs.length - 1;
@@ -336,10 +341,10 @@ db.channel('level-ups')
     refreshSoon();
   })
   .subscribe();
-setInterval(() => { loadSummary(); loadBoard(); loadFeed(); if(!$('questView').hidden) loadQuests(); }, 30000);   // mensajes y tiempo activo se refrescan así
+setInterval(() => { loadSummary(); loadBoard(); loadFeed(); if(!$('questView').hidden) loadQuests(); }, 30000);
 
 loadCosmetics().finally(() => { loadSummary(); loadBoard(); loadFeed(); });
-RankEngine.init(db, () => { try { render(); renderFeed(); } catch {} });   // caché de 1 h; vuelve a dibujar si cambió algún rango
+RankEngine.init(db, () => { try { render(); renderFeed(); } catch {} });
 </script>
 </body>
 </html>
