@@ -55,9 +55,21 @@ import * as THREE from 'three';
   const textureLoader = new THREE.TextureLoader();
   const crateTexture = textureLoader.load('assets/caja.png');
   crateTexture.colorSpace = THREE.SRGBColorSpace;
+  const crashTexture = textureLoader.load('assets/crashcaja.png');
+  crashTexture.colorSpace = THREE.SRGBColorSpace;
+
+  function crateMaterial(map) {
+    return new THREE.MeshStandardMaterial({ map, color: 0xffffff, roughness: 0.7, metalness: 0.1 });
+  }
+  const crateMat = crateMaterial(crateTexture);
+  const crashMat = crateMaterial(crashTexture);
 
   function makeCrate(rank) {
-    const mat = new THREE.MeshStandardMaterial({ map: crateTexture, color: 0xffffff, roughness: 0.7, metalness: 0.1 });
+    // BoxGeometry: grupos en orden +x, -x, +y, -y, +z, -z
+    // Para el top 1, las 4 caras laterales usan crashcaja.png y arriba/abajo caja.png
+    const mat = rank === 1
+      ? [crashMat, crashMat, crateMat, crateMat, crashMat, crashMat]
+      : crateMat;
     const mesh = new THREE.Mesh(crateGeo, mat);
     mesh.castShadow = true;
     mesh.visible = false;
