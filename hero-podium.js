@@ -24,11 +24,12 @@ import * as THREE from 'three';
   const camera = new THREE.PerspectiveCamera(isMobile() ? 55 : 45, hero.clientWidth / hero.clientHeight, 0.1, 100);
   camera.position.set(0, 1.1, isMobile() ? 7.5 : 6);
 
-  const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.75);
   scene.add(ambient);
 
-  const sun = new THREE.DirectionalLight(0xfff2d6, 1.2);
-  sun.position.set(4, 6, 3);
+  // Luz más “adelante” (más cercana a cámara) y más intensa para que las texturas no se vean oscuras
+  const sun = new THREE.DirectionalLight(0xfff2d6, 1.55);
+  sun.position.set(2.5, 4.5, 6);
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
   sun.shadow.camera.near = 0.5;
@@ -38,6 +39,11 @@ import * as THREE from 'three';
   sun.shadow.camera.top = 6;
   sun.shadow.camera.bottom = -6;
   scene.add(sun);
+
+  // Relleno frontal suave para levantar las caras que miran a cámara
+  const fill = new THREE.DirectionalLight(0xffffff, 0.45);
+  fill.position.set(-2, 2.5, 5);
+  scene.add(fill);
 
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(30, 30),
@@ -162,7 +168,7 @@ import * as THREE from 'three';
         o.el.style.opacity = '0';
         continue;
       }
-      const above = c.mesh.position.clone().add(new THREE.Vector3(0, 0.78, 0));
+      const above = c.mesh.position.clone().add(new THREE.Vector3(0, 0.62, 0));
       const pos = worldToScreen(above);
       o.el.style.transform = `translate(${pos.x}px, ${pos.y}px) translate(-50%, -100%)`;
       const opacity = clamp01(tRank / 0.18);
