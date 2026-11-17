@@ -229,7 +229,7 @@ body.home-hero .hero-stats .stat small i { font-style: normal; color: #b7ff7a; f
   flex-direction: column;
   align-items: center;
   gap: .3rem;
-  padding: .1rem .45rem .35rem;
+  padding: .1rem .45rem .50rem;
   text-decoration: none;
   color: #fff;
   filter: drop-shadow(0 4px 10px rgba(0,0,0,.55));
@@ -238,7 +238,8 @@ body.home-hero .hero-stats .stat small i { font-style: normal; color: #b7ff7a; f
 .hero3d-name {
   font-family: "Barlow Condensed", "Nunito", sans-serif;
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 1.9rem;
+  margin-top:1.2rem;
   text-shadow: 0 2px 6px #000, 0 0 2px #000;
   max-width: 180px;
   white-space: nowrap;
