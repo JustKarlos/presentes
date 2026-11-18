@@ -1,7 +1,6 @@
 /* perfil.js — perfil público en /@usuario (rewrite de Vercel a perfil.html?u=…).
-   Tablero de 2 columnas adaptado: hero y misiones a ancho completo, estadísticas y
-   colección en columnas. Sin fondo cosmético y sin fondos en la colección mientras
-   estén en pausa. */
+   Secciones a ancho completo: hero, estadísticas (4 categorías), colección y misiones.
+   Sin fondo cosmético y sin fondos en la colección mientras estén en pausa. */
 (() => {
   const root = document.getElementById('pfRoot');
   if (!root) return;
@@ -254,12 +253,12 @@
         <p id="pfMsg" class="pf-status" role="status" aria-live="polite"></p>
       </section>
 
-      <section class="panel pf-card pf-stats" aria-labelledby="pfStats">
+      <section class="panel pf-card pf-stats pf-span" aria-labelledby="pfStats">
         <h2 id="pfStats" class="pf-h">Estadísticas</h2>
         <div class="pf-stats-grid">${statsHtml}</div>
       </section>
 
-      <section class="panel pf-card pf-coll" aria-labelledby="pfColl">
+      <section class="panel pf-card pf-coll pf-span" aria-labelledby="pfColl">
         <div class="pf-coll-head"><h2 id="pfColl" class="pf-h pf-h-tight">Colección</h2><span class="pf-role-badge">${esc(title)}</span></div>
         <div class="pf-coll-body">${collectionBody(u, pp)}</div>
       </section>
