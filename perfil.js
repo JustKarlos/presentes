@@ -1,6 +1,7 @@
 /* perfil.js — perfil público en /@usuario (rewrite de Vercel a perfil.html?u=…).
-   Ficha de dos columnas: identidad y stats a la izquierda, colección y misiones a la
-   derecha. Sin fondo cosmético y sin fondos en la colección mientras estén en pausa. */
+   Tablero de 2 columnas adaptado: hero y misiones a ancho completo, estadísticas y
+   colección en columnas. Sin fondo cosmético y sin fondos en la colección mientras
+   estén en pausa. */
 (() => {
   const root = document.getElementById('pfRoot');
   if (!root) return;
@@ -34,16 +35,16 @@
   }
 
   const loading = () => {
-    root.innerHTML = `<div class="pf-page"><div class="pf-col" style="grid-column:1/-1">
-      <section class="panel pf-card" aria-busy="true" aria-label="Cargando perfil">
+    root.innerHTML = `<div class="pf-page">
+      <section class="panel pf-card pf-span" aria-busy="true" aria-label="Cargando perfil">
         <div class="pf-load" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
         <p class="pf-note" role="status">Cargando perfil…</p>
-      </section></div></div>`;
+      </section></div>`;
   };
 
   function searchPanel(title, text){
-    root.innerHTML = `<div class="pf-page"><div class="pf-col" style="grid-column:1/-1">
-      <section class="panel pf-card pf-state">
+    root.innerHTML = `<div class="pf-page">
+      <section class="panel pf-card pf-span pf-state">
         <h1>${title}</h1>
         <p>${text}</p>
         <form class="pf-search" data-search novalidate>
@@ -52,7 +53,7 @@
           <button type="submit" class="btn">Buscar perfil</button>
         </form>
         <p><a class="btn ghost" href="/">Volver al ranking</a></p>
-      </section></div></div>`;
+      </section></div>`;
     const form = root.querySelector('[data-search]');
     form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -63,38 +64,32 @@
   }
 
   function errorPanel(){
-    root.innerHTML = `<div class="pf-page"><div class="pf-col" style="grid-column:1/-1">
-      <section class="panel pf-card pf-state">
+    root.innerHTML = `<div class="pf-page">
+      <section class="panel pf-card pf-span pf-state">
         <h1>No pudimos cargar el perfil</h1>
         <p>Hubo un problema al pedir los datos. Revisá tu conexión y probá de nuevo.</p>
         <p><button type="button" class="btn" data-retry>Reintentar</button> <a class="btn ghost" href="/">Volver al ranking</a></p>
-      </section></div></div>`;
+      </section></div>`;
     root.querySelector('[data-retry]').addEventListener('click', () => load());
   }
 
-  const pair = (l1, v1, l2, v2) => `<div class="pair"><div><span>${l1}</span><b>${v1}</b></div><div><span>${l2}</span><b>${v2}</b></div></div>`;
+  const hasNameEffect = (u) => {
+    const id = u.name_id ?? u.equipped_name_effect_id ?? u.equipped?.name_effect;
+    if(!id) return false;
+    if(window.PaintEngine && COS.get(id)?.meta?.paint) return true;
+    return !!cosClass(id);
+  };
 
-  function cosTile(c, u, on){
-    const v = c.type === 'frame' ? avatarF({ ...u, frame_id: c.id }, 40)
-      : c.type === 'name_effect' ? `<span style="font-size:1rem;font-family:var(--display);font-weight:700">${nameHtml({ ...u, name_id: c.id })}</span>`
-      : c.type === 'badge' ? (() => {
-          const rk = window.RankEngine && RankEngine.byId ? RankEngine.byId(c.rank_id) : null;
-          return rk ? sprite(rk.key, 40) : (c.url ? `<img src="${esc(c.url)}" width="40" height="40" style="object-fit:contain;image-rendering:pixelated" alt="">` : '<span style="font-size:1.4rem">🏅</span>');
-        })()
-      : `<div class="swatch ${c.css}" style="${c.url ? `background-image:url('${esc(c.url)}');background-size:cover;background-position:center bottom;image-rendering:pixelated` : ''}"></div>`;
-    return `<div class="cos${on ? ' on' : ''}" title="${esc(c.name)}"><span class="cosv">${v}</span><small>${esc(c.name)}${on ? ' · puesto' : ''}</small></div>`;
+  function heroName(u){
+    if(hasNameEffect(u)) return `<h1 id="pfName" class="pf-name">${nameHtml(u)}</h1>`;
+    return `<h1 id="pfName" class="pf-name pf-name-plain">${esc(u.display_name || u.username || '')}</h1>`;
   }
 
-  function collectionHtml(u, pp){
-    if(!pp) return '<p class="pf-empty-note">La colección no está disponible en este momento.</p>';
-    if(pp.owned == null) return '<p class="pf-empty-note">🔒 Esta persona mantiene su colección de cosméticos en privado.</p>';
-    const items = (pp.owned || []).map(id => COS.get(id)).filter(c => c && collTypes.includes(c.type));
-    if(!items.length) return '<p class="pf-empty-note">Todavía no tiene cosméticos.</p>';
-    const eq = new Set([u.frame_id, u.name_id]);
-    return collTypes.map(t => {
-      const l = items.filter(c => c.type === t); if(!l.length) return '';
-      return `<h3 class="pf-sub">${TIPOS[t]}</h3><div class="cosgrid">${l.map(c => cosTile(c, u, eq.has(c.id))).join('')}</div>`;
-    }).join('');
+  function bdayPill(pp){
+    const bd = pp?.birthday;
+    if(!bd) return '';
+    const label = bdayToday(bd) ? `🎉 ${esc(fmtBday(bd))}` : `🎂 ${esc(fmtBday(bd))}`;
+    return `<span class="pf-bday">${label}</span>`;
   }
 
   function rankBlock(u){
@@ -104,19 +99,101 @@
     const pct = Math.max(0, Math.min(100, Math.round((Number(u.xp) - start) / span * 100)));
     const nt = nextTier(u.level);
     const falta = Math.max(0, next - Number(u.xp));
-    return `<div class="m-progress">
-      <div class="rankrow">${sprite(RankEngine.keyOfUser(u), 44)}<div><b>${esc(title)}</b><span>Nivel ${u.level}</span></div></div>
-      <div class="xpbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:${pct}%"></i><em>${nf(u.xp)} / ${nf(u.xp_next)} XP</em></div>
-      <p class="xpnote">${falta === 1 ? 'Falta' : 'Faltan'} ${nf(falta)} XP para el nivel ${u.level + 1}.${nt ? ` Siguiente rango: ${esc(nt[1])} (nivel ${nt[0]}).` : ' Alcanzaste el rango máximo.'}</p>
+    return `<div class="pf-rank-card">
+      <div class="pf-rank-head">${sprite(RankEngine.keyOfUser(u), 44)}<div class="pf-rank-titles"><b>${esc(title)}</b><span>Nivel ${nf(u.level)}</span></div></div>
+      <div class="xpbar pf-xpbar" role="progressbar" aria-label="Progreso de XP" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:${pct}%"></i><em>${nf(u.xp)} / ${nf(u.xp_next)} XP</em></div>
+      <p class="pf-xpnote">${falta === 1 ? 'Falta' : 'Faltan'} ${nf(falta)} XP para el nivel ${nf(u.level + 1)}.${nt ? ` Siguiente rango: ${esc(nt[1])} (nivel ${nf(nt[0])}).` : ' Alcanzaste el rango máximo.'}</p>
     </div>`;
   }
 
-  function bdayLine(pp){
-    const bd = pp?.birthday;
-    if(!bd) return '';
-    return bdayToday(bd)
-      ? ' · <span class="today">🎉 ¡Hoy cumple años!</span>'
-      : ` · 🎂 ${esc(fmtBday(bd))}`;
+  const isTop1 = (raw) => Number(raw) === 1 || String(raw) === '1' || String(raw) === '#1';
+  function metric(label, value, top){
+    const cls = top ? 'pf-metric-val is-top1' : 'pf-metric-val';
+    return `<div class="pf-metric"><span class="pf-metric-label">${label}</span><b class="${cls}">${value}</b></div>`;
+  }
+  function statCard(title, items){
+    return `<article class="pf-stat-card"><h3 class="pf-stat-title">${title}</h3><div class="pf-metric-grid">${items.map(i => metric(i[0], i[1], i[2])).join('')}</div></article>`;
+  }
+
+  function collectionBody(u, pp){
+    if(!pp) return '<p class="pf-empty-note">La colección no está disponible en este momento.</p>';
+    if(pp.owned == null) return '<p class="pf-empty-note">🔒 Esta persona mantiene su colección de cosméticos en privado.</p>';
+    const items = (pp.owned || []).map(id => COS.get(id)).filter(c => c && collTypes.includes(c.type));
+    if(!items.length) return '<p class="pf-empty-note">Todavía no tiene cosméticos.</p>';
+    const eq = new Set([u.frame_id, u.name_id, u.badge_id, u.equipped_badge_id, u.equipped?.badge].filter(Boolean));
+    const groups = collTypes.map(t => ({ t, label: TIPOS[t], list: items.filter(c => c.type === t) })).filter(g => g.list.length);
+    if(!groups.length) return '<p class="pf-empty-note">Todavía no tiene cosméticos.</p>';
+
+    const tabs = `<div class="pf-tabs" role="tablist" aria-label="Tipos de colección">${groups.map((g, i) =>
+      `<button type="button" role="tab" class="pf-tab${i===0?' is-on':''}" id="pf-tab-${g.t}" aria-controls="pf-panel-${g.t}" aria-selected="${i===0?'true':'false'}" tabindex="${i===0?'0':'-1'}">${g.label}<span class="pf-tab-count">${g.list.length}</span></button>`
+    ).join('')}</div>`;
+
+    const panels = groups.map((g, i) => {
+      const grid = `<div class="pf-coll-grid">${g.list.map(c => collItem(c, u, eq.has(c.id))).join('')}</div>`;
+      return `<div role="tabpanel" class="pf-tabpanel${i===0?'':'[hidden]'}" id="pf-panel-${g.t}" aria-labelledby="pf-tab-${g.t}" ${i===0?'':'hidden'}>${grid}</div>`;
+    }).join('').replace(/\[hidden\]/g, ' is-hidden');
+    return tabs + panels;
+  }
+
+  function collItem(c, u, on){
+    const badge = on ? '<span class="pf-equipped-badge">Equipado</span>' : '';
+    if(c.type === 'name_effect'){
+      const preview = `<span class="pf-ne-preview" style="font-size:1.35rem;font-family:var(--display);font-weight:700">${nameHtml({ ...u, name_id: c.id })}</span>`;
+      return `<article class="pf-coll-item pf-coll-ne${on?' is-equipped':''}" title="${esc(c.name)}">${badge}<span class="pf-coll-vis">${preview}</span><span class="pf-coll-name">${esc(c.name)}</span></article>`;
+    }
+    let vis = '';
+    if(c.type === 'frame'){
+      vis = avatarF({ ...u, frame_id: c.id }, 56);
+    } else if(c.type === 'badge'){
+      const rk = window.RankEngine && RankEngine.byId ? RankEngine.byId(c.rank_id) : null;
+      vis = rk ? sprite(rk.key, 48) : (c.url ? `<img src="${esc(c.url)}" width="48" height="48" style="object-fit:contain;image-rendering:pixelated" alt="">` : '<span style="font-size:1.6rem">🏅</span>');
+    } else {
+      vis = `<div class="swatch ${c.css}" style="${c.url ? `background-image:url('${esc(c.url)}');background-size:cover;background-position:center bottom;image-rendering:pixelated` : ''}"></div>`;
+    }
+    return `<article class="pf-coll-item${on?' is-equipped':''}" title="${esc(c.name)}">${badge}<span class="pf-coll-vis">${vis}</span><span class="pf-coll-name">${esc(c.name)}</span></article>`;
+  }
+
+  function pfQuestCard(q){
+    const prog = Math.min(q.progress, q.target), pct = q.target ? Math.round(prog / q.target * 100) : 0;
+    const done = !!q.completed;
+    const status = done ? '¡Completada!' : `${nf(prog)}/${nf(q.target)}`;
+    return `<article class="pf-quest${done ? ' is-done' : ''}">
+      <div class="pf-quest-top"><span class="pf-quest-title">${esc(q.title)}</span><span class="pf-quest-xp">+${nf(q.xp_reward)} XP</span></div>
+      <div class="xpbar pf-xpbar pf-xpbar-sm" role="progressbar" aria-label="${esc(q.title)}" aria-valuemin="0" aria-valuemax="${q.target}" aria-valuenow="${prog}"><i style="width:${pct}%"></i><em>${status}</em></div>
+    </article>`;
+  }
+
+  function wireTabs(rootEl){
+    const tabs = Array.from(rootEl.querySelectorAll('[role="tab"]'));
+    const panels = Array.from(rootEl.querySelectorAll('[role="tabpanel"]'));
+    if(tabs.length < 2) return;
+    const activate = (tab, focus) => {
+      tabs.forEach(t => {
+        const on = t === tab;
+        t.classList.toggle('is-on', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+      });
+      panels.forEach(p => {
+        const on = p.id === tab.getAttribute('aria-controls');
+        p.hidden = !on;
+        p.classList.toggle('is-hidden', !on);
+      });
+      if(focus) tab.focus();
+    };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => activate(tab, false));
+      tab.addEventListener('keydown', (e) => {
+        let ni = i;
+        if(e.key === 'ArrowRight') ni = (i + 1) % tabs.length;
+        else if(e.key === 'ArrowLeft') ni = (i - 1 + tabs.length) % tabs.length;
+        else if(e.key === 'Home') ni = 0;
+        else if(e.key === 'End') ni = tabs.length - 1;
+        else return;
+        e.preventDefault();
+        activate(tabs[ni], true);
+      });
+    });
   }
 
   function render(u, qs, pp){
@@ -124,61 +201,76 @@
     const own = !!sess && normUser(sess.user) === normUser(u.username);
     const title = u.rank_title || rankOf(u.level)[1];
     const quests = Array.isArray(qs) ? qs : [];
-    const stats = [
-      ['Presentes y rachas', [
-        pair('Presentes totales', nf(u.total_presentes), 'Puesto en presentes', `#${nf(u.presentes_rank)}`),
-        pair('Racha actual', `${u.streak} ${plural(u.streak, 'día', 'días')}`, 'Mejor racha', `${u.best_streak} ${plural(u.best_streak, 'día', 'días')}`),
-      ]],
-      ['Chat y comunidad', [
-        pair('Mensajes totales', nf(u.total_messages), 'Puesto en el chat', `#${nf(u.chat_rank)}`),
-        pair('Mensajes hoy', nf(u.messages_today), 'Mensajes últimos 7 días', nf(u.messages_7d)),
-      ]],
-      ['Tiempo activo', [
-        pair('Tiempo activo total', fmtMin(u.active_total), 'Puesto en tiempo activo', `#${nf(u.active_rank)}`),
-        pair('Tiempo activo hoy', fmtMin(u.active_today), 'Tiempo activo últimos 7 días', fmtMin(u.active_7d)),
-      ]],
-      ['Cuenta', [
-        pair('XP total', nf(u.xp), 'Puesto en XP', `#${nf(u.xp_rank)}`),
-        pair('Miembro desde', fmtDay(u.member_since), 'Último presente', ago(u.last_presente_at)),
-      ]],
-    ].map(([h, pairs]) => `<div><h3 class="pf-sub">${h}</h3><div class="pf-pairs">${pairs.join('')}</div></div>`).join('');
+
+    const statsHtml = [
+      statCard('Presentes y rachas', [
+        ['Presentes totales', nf(u.total_presentes), false],
+        ['Puesto en presentes', `#${nf(u.presentes_rank)}`, Number(u.presentes_rank) === 1],
+        ['Racha actual', `${nf(u.streak)} ${plural(u.streak, 'día', 'días')}`, false],
+        ['Mejor racha', `${nf(u.best_streak)} ${plural(u.best_streak, 'día', 'días')}`, false],
+      ]),
+      statCard('Chat y comunidad', [
+        ['Mensajes totales', nf(u.total_messages), false],
+        ['Puesto en el chat', `#${nf(u.chat_rank)}`, Number(u.chat_rank) === 1],
+        ['Mensajes hoy', nf(u.messages_today), false],
+        ['Mensajes últimos 7 días', nf(u.messages_7d), false],
+      ]),
+      statCard('Tiempo activo', [
+        ['Tiempo activo total', fmtMin(u.active_total), false],
+        ['Puesto en tiempo activo', `#${nf(u.active_rank)}`, Number(u.active_rank) === 1],
+        ['Tiempo activo hoy', fmtMin(u.active_today), false],
+        ['Tiempo activo últimos 7 días', fmtMin(u.active_7d), false],
+      ]),
+      statCard('Cuenta', [
+        ['XP total', nf(u.xp), false],
+        ['Puesto en XP', `#${nf(u.xp_rank)}`, Number(u.xp_rank) === 1],
+        ['Miembro desde', fmtDay(u.member_since), false],
+        ['Último presente', ago(u.last_presente_at), false],
+      ]),
+    ].join('');
+
+    const bday = bdayPill(pp);
 
     root.innerHTML = `<div class="pf-page">
-      <div class="pf-col">
-        <section class="panel pf-card pf-id" aria-labelledby="pfName">
-          <div class="mh">${avatarF(u, 96)}<div class="mh-info">
-            <h1 id="pfName" class="pf-name">${nameHtml(u)}</h1>
-            <p class="pf-handle">@${esc(u.username)}${bdayLine(pp)}</p>
-            <div class="pf-chips" aria-label="Resumen">
-              <span class="m-chip gold"><b>Nv. ${u.level}</b></span>
-              <span class="m-chip"><b>${nf(u.total_presentes)}</b> presentes</span>
-              <span class="m-chip green"><b>${u.streak}</b> de racha</span>
+      <section class="panel pf-card pf-hero pf-span" aria-labelledby="pfName">
+        <div class="pf-hero-inner">
+          <div class="pf-hero-avatar">${avatarF(u, 110)}</div>
+          <div class="pf-hero-id">
+            <div class="pf-name-row">${heroName(u)}${bday}</div>
+            <p class="pf-handle">@${esc(u.username)}</p>
+            <div class="pf-summary-pills" aria-label="Resumen">
+              <span class="pf-hero-pill">Nv. ${nf(u.level)}</span>
+              <span class="pf-hero-pill">${nf(u.total_presentes)} presentes</span>
+              <span class="pf-hero-pill">${nf(u.streak)} de racha</span>
             </div>
-          </div></div>
-          ${rankBlock(u)}
-          <div class="pf-acts">
-            <button type="button" class="btn" data-share>Compartir perfil</button>
-            ${own ? '<a class="btn ghost" href="/mi-perfil">Editar mi perfil</a>' : ''}
-            <a class="btn ghost" href="/">Ver el ranking</a>
           </div>
-          <p id="pfMsg" class="pf-status" role="status" aria-live="polite"></p>
-        </section>
-        <section class="panel pf-card pf-stats" aria-labelledby="pfStats">
-          <h2 id="pfStats" class="pf-h">Estadísticas</h2>
-          <div class="pf-groups">${stats}</div>
-        </section>
-      </div>
-      <div class="pf-col">
-        <section class="panel pf-card pf-coll" aria-labelledby="pfColl">
-          <h2 id="pfColl" class="pf-h">Colección <small>${esc(title)}</small></h2>
-          ${collectionHtml(u, pp)}
-        </section>
-        <section class="panel pf-card pf-quests" aria-labelledby="pfQuests">
-          <h2 id="pfQuests" class="pf-h">Misiones <small>hoy y esta semana</small></h2>
-          <div class="quests">${quests.length ? quests.map(q => questCard(q, true)).join('') : '<p class="pf-note">No hay misiones para mostrar.</p>'}</div>
-        </section>
-      </div>
+        </div>
+        ${rankBlock(u)}
+        <div class="pf-acts">
+          <button type="button" class="btn" data-share>Compartir perfil</button>
+          ${own ? '<a class="btn ghost" href="/mi-perfil">Editar mi perfil</a>' : ''}
+          <a class="btn ghost" href="/">Ver el ranking</a>
+        </div>
+        <p id="pfMsg" class="pf-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="panel pf-card pf-stats" aria-labelledby="pfStats">
+        <h2 id="pfStats" class="pf-h">Estadísticas</h2>
+        <div class="pf-stats-grid">${statsHtml}</div>
+      </section>
+
+      <section class="panel pf-card pf-coll" aria-labelledby="pfColl">
+        <div class="pf-coll-head"><h2 id="pfColl" class="pf-h pf-h-tight">Colección</h2><span class="pf-role-badge">${esc(title)}</span></div>
+        <div class="pf-coll-body">${collectionBody(u, pp)}</div>
+      </section>
+
+      <section class="panel pf-card pf-quests pf-span" aria-labelledby="pfQuests">
+        <div class="pf-quests-head"><h2 id="pfQuests" class="pf-h pf-h-tight">Misiones</h2><p class="pf-quests-sub">hoy y esta semana</p></div>
+        <div class="pf-quests-grid">${quests.length ? quests.map(pfQuestCard).join('') : '<p class="pf-empty-note">No hay misiones para mostrar.</p>'}</div>
+      </section>
     </div>`;
+
+    wireTabs(root);
 
     const shareBtn = root.querySelector('[data-share]');
     const msg = root.querySelector('#pfMsg');
