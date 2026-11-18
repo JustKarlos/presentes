@@ -310,6 +310,10 @@
         return;
       }
       render(stats.data, quests, pub);
+      if (typeof preloadPaintImages === 'function') {
+        const paintIds = [stats.data.name_id, ...(pub && Array.isArray(pub.owned) ? pub.owned : [])].filter(Boolean);
+        preloadPaintImages(paintIds.length ? paintIds : null);
+      }
     } catch(err){
       console.error(err);
       errorPanel();

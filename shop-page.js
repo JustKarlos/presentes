@@ -536,6 +536,7 @@
     render();                                   // esqueleto + barra
     if (window.RankEngine) RankEngine.init(db, () => { try { render(); } catch {} });
     await loadCosmetics();
+    if (typeof preloadPaintImages === 'function') preloadPaintImages();
     if (sess) { try { await ensureSession(); } catch (err) { console.error(err); } }
     render();
   })();

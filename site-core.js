@@ -120,11 +120,40 @@
     const c = id && COS.get(id);
     return c?.meta?.paint && window.PaintEngine ? PaintEngine.register(c.id, c.meta.paint) : '';
   }
+  const paintPreloaded = new Set();
+  function paintImageUrls(input){
+    const out = [];
+    const pushDef = (def) => {
+      if(!def || !Array.isArray(def.layers)) return;
+      def.layers.forEach(l => {
+        if(l && l.type === 'url' && typeof l.url === 'string' && /^https:\/\//i.test(l.url)) out.push(l.url);
+      });
+    };
+    const list = input == null ? Array.from(COS.values()) : (Array.isArray(input) ? input : [input]);
+    list.forEach(item => {
+      if(item == null) return;
+      const c = (typeof item === 'string' || typeof item === 'number') ? COS.get(item) : item;
+      if(c && c.meta && c.meta.paint) pushDef(c.meta.paint);
+    });
+    return Array.from(new Set(out));
+  }
+  function preloadPaintImages(input){
+    const urls = paintImageUrls(input);
+    urls.forEach(url => {
+      if(paintPreloaded.has(url)) return;
+      paintPreloaded.add(url);
+      const img = new Image();
+      img.decoding = 'async';
+      img.referrerPolicy = 'no-referrer';
+      img.src = url;
+    });
+    return urls.length;
+  }
   const nameHtml = (u) => {
     const p = paintClsOf(u.name_id ?? u.equipped_name_effect_id ?? u.equipped?.name_effect);
     return `<span class="ne ${p || nameFxOf(u)}">${esc(u.display_name || u.username || '')}</span>`;
   };
-  Object.assign(window, { COS, loadCosmetics, cosClass, frameOf, nameFxOf, avatarF, paintClsOf, nameHtml });
+  Object.assign(window, { COS, loadCosmetics, cosClass, frameOf, nameFxOf, avatarF, paintClsOf, paintImageUrls, preloadPaintImages, nameHtml });
 
   /* ---------- misiones ---------- */
   function questCard(q, compact){
