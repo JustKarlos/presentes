@@ -34,6 +34,21 @@ test('messageHtml pinta, escapa el nombre y deja los emotes a deps', () => {
   assert.match(html, /<em>hola<\/em>/);
 });
 
+test('badgeHtml sirve los SVG de Kicklet desde ../assets/badges/', () => {
+  const html = K.badgeHtml(['moderator', 'sub_gift_25', 'default_subscriber']);
+  assert.match(html, /<img class="bi" src="\.\.\/assets\/badges\/moderator\.svg"/);
+  assert.match(html, /<img class="bi" src="\.\.\/assets\/badges\/sub_gift_25\.svg"/);
+  assert.match(html, /<img class="bi" src="\.\.\/assets\/badges\/default_subscriber\.svg"/);
+  assert.equal((html.match(/onerror=/g) || []).length, 3);
+  assert.doesNotMatch(html, /<svg/);
+});
+
+test('badgeHtml ignora tipos inválidos y muestra hasta 6', () => {
+  const html = K.badgeHtml(['vip', 'moderator', 'a', 'b', 'c', 'd', '../ruta', '', 'x'.repeat(25), 'e']);
+  assert.equal((html.match(/class="bi"/g) || []).length, 6);
+  assert.doesNotMatch(html, /src="\.\.\/assets\/badges\/\.\./);
+});
+
 test('messageHtml usa el color de Kick cuando no hay cosméticos', () => {
   const html = K.messageHtml({ name: 'Ana', color: '#123456', badges: [], content: 'hola' }, null, deps);
   assert.match(html, /style="color:#123456"/);
@@ -49,6 +64,18 @@ test('createLookup agrupa, cachea y comparte pedidos', async () => {
   assert.equal(a.nid, 'x');
   assert.equal(b.u, 'bob');
   assert.equal(a2, a);
+});
+
+test('createLookup drena los lotes restantes sin mensajes nuevos', async () => {
+  const calls = [];
+  const rpc = async (names) => { calls.push(names.length); return names.map((n) => ({ u: n, nid: 'x', np: {} })); };
+  const lookup = K.createLookup(rpc, { windowMs: 0, sleep: async () => {}, now: () => 0 });
+  const pedidos = Array.from({ length: 150 }, (_, i) => lookup.get('u' + i));
+  const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('lote sin drenar')), 300));
+  const results = await Promise.race([Promise.all(pedidos), timeout]);
+  assert.deepEqual(calls, [100, 50]);
+  assert.equal(results.length, 150);
+  assert.ok(results.every((r) => r && r.nid === 'x'));
 });
 
 test('createLookup cachea misses y tolera errores del RPC', async () => {

@@ -8,12 +8,13 @@
 #chat.pos-tl{left:2vw;top:2vh;justify-content:flex-start}#chat.pos-tr{right:2vw;top:2vh;justify-content:flex-start}
 .msg{font-family:var(--display);font-weight:500;font-size:var(--fs,2.2vh);color:var(--text,#fff);text-shadow:0 1px 3px rgba(0,0,0,.95);line-height:1.3;word-break:break-word}
 .nm{font-weight:700}.sep{opacity:.85}
-.bi{width:1em;height:1em;vertical-align:-.12em;margin-right:.25em;filter:drop-shadow(0 1px 1px #000)}
+.bi{width:1em;height:1em;object-fit:contain;vertical-align:-.12em;margin-right:.25em;filter:drop-shadow(0 1px 1px #000)}
 </style></head><body>
 <div id="chat"></div>
 <script>
 /* Parámetros: ?key= &pos=bl|br|tl|tr &w=32 (ancho en vw) &fs=2.2 (alto de letra en vh, ≈24 px a 1080p)
-   &font=NombreGoogleFonts &kickid= &pixel=1 &debug=1 &sim=1 (mensajes de ejemplo, sin clave) */
+   &font=NombreGoogleFonts &kickid= &pixel=1 &debug=1 &sim=1 (mensajes de ejemplo, sin clave)
+   Insignias: ../assets/badges/<nombre>.svg, los mismos SVG que Kicklet */
 const { P, num, esc, listen, load7tv, parseParts, partsHtml, colorOf, db } = OV;
 const el = document.getElementById('chat');
 el.className = 'pos-' + (P.get('pos') || 'bl');
@@ -31,22 +32,23 @@ const deps = {
   register: (id, def) => window.PaintEngine ? PaintEngine.register(id, def) : '',
 };
 
-async function onChat(p) {
-  await load7tv(p.broadcaster_id);
+function onChat(p) {
   if (DEBUG) console.log('chat payload', p);
   const n = document.createElement('div');
   n.className = 'msg';
   el.append(n);
   const draw = (data) => { n.innerHTML = KICKLET_CHAT.messageHtml(p, data, deps); };
   draw(null);
-  try { draw(await lookup.get((p.user || p.name || '').toLowerCase())); }
-  catch (e) { console.error('cosméticos del chat', e); }
+  let data = null;
+  lookup.get((p.user || p.name || '').toLowerCase())
+    .then((d) => { data = d; draw(data); }, (e) => console.error('cosméticos del chat', e));
+  load7tv(p.broadcaster_id).then(() => draw(data), (e) => console.error('7TV', e));
 }
 
 if (P.get('sim') === '1') {
-  onChat({ name: 'Karlitoxss', user: 'karlitoxss', color: '#75fd46', badges: ['moderator'], content: '¡hola!', broadcaster_id: null });
-  onChat({ name: 'usuario-nuevo', user: 'usuario-nuevo', color: '#ff9a1f', badges: [], content: 'sin pintura', broadcaster_id: null });
-  onChat({ name: 'T<&>Wiki', user: 'twiki', color: '#53fc18', badges: [], content: 'hola [emote:37225:KEKLEO]', broadcaster_id: null });
+  onChat({ name: 'Karlitoxss', user: 'karlitoxss', color: '#75fd46', badges: ['moderator', 'sub_gift_25'], content: '¡hola!', broadcaster_id: null });
+  onChat({ name: 'usuario-nuevo', user: 'usuario-nuevo', color: '#ff9a1f', badges: ['default_subscriber'], content: 'sin pintura', broadcaster_id: null });
+  onChat({ name: 'T<&>Wiki', user: 'twiki', color: '#53fc18', badges: ['vip', 'verified'], content: 'hola [emote:37225:KEKLEO]', broadcaster_id: null });
 } else {
   listen({ chat: onChat });
 }
