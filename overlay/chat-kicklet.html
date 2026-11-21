@@ -1,0 +1,53 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>Widget: chat con pinturas</title>
+<link rel="stylesheet" href="common.css"><link rel="stylesheet" href="cosmetics.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="../paint-engine.js"></script><script src="config.js"></script><script src="common.js"></script><script src="chat-kicklet.js"></script>
+<style>
+#chat{position:fixed;width:var(--w,32vw);height:96vh;display:flex;flex-direction:column;justify-content:flex-end;gap:.25vh;overflow:hidden}
+#chat.pos-bl{left:2vw;bottom:2vh}#chat.pos-br{right:2vw;bottom:2vh}
+#chat.pos-tl{left:2vw;top:2vh;justify-content:flex-start}#chat.pos-tr{right:2vw;top:2vh;justify-content:flex-start}
+.msg{font-family:var(--display);font-weight:500;font-size:var(--fs,2.2vh);color:var(--text,#fff);text-shadow:0 1px 3px rgba(0,0,0,.95);line-height:1.3;word-break:break-word}
+.nm{font-weight:700}.sep{opacity:.85}
+.bi{width:1em;height:1em;vertical-align:-.12em;margin-right:.25em;filter:drop-shadow(0 1px 1px #000)}
+</style></head><body>
+<div id="chat"></div>
+<script>
+/* Parámetros: ?key= &pos=bl|br|tl|tr &w=32 (ancho en vw) &fs=2.2 (alto de letra en vh, ≈24 px a 1080p)
+   &font=NombreGoogleFonts &kickid= &pixel=1 &debug=1 &sim=1 (mensajes de ejemplo, sin clave) */
+const { P, num, esc, listen, load7tv, parseParts, partsHtml, colorOf, db } = OV;
+const el = document.getElementById('chat');
+el.className = 'pos-' + (P.get('pos') || 'bl');
+document.documentElement.style.setProperty('--w', num('w', 32) + 'vw');
+document.documentElement.style.setProperty('--fs', num('fs', 2.2) + 'vh');
+if (P.get('pixel') === '1') document.body.classList.add('pixel');
+const DEBUG = P.get('debug') === '1';
+if (!P.get('font')) { OV.loadFont('Poppins', '400;600;700'); document.documentElement.style.setProperty('--display', '"Poppins",sans-serif'); }
+
+const rpc = (names) => db.rpc('get_chat_cosmetics', { p_usernames: names })
+  .then(({ data, error }) => { if (error) throw error; return data || []; });
+const lookup = KICKLET_CHAT.createLookup(rpc);
+const deps = {
+  esc, colorOf, parseParts, partsHtml,
+  register: (id, def) => window.PaintEngine ? PaintEngine.register(id, def) : '',
+};
+
+async function onChat(p) {
+  await load7tv(p.broadcaster_id);
+  if (DEBUG) console.log('chat payload', p);
+  const n = document.createElement('div');
+  n.className = 'msg';
+  el.append(n);
+  const draw = (data) => { n.innerHTML = KICKLET_CHAT.messageHtml(p, data, deps); };
+  draw(null);
+  try { draw(await lookup.get((p.user || p.name || '').toLowerCase())); }
+  catch (e) { console.error('cosméticos del chat', e); }
+}
+
+if (P.get('sim') === '1') {
+  onChat({ name: 'Karlitoxss', user: 'karlitoxss', color: '#75fd46', badges: ['moderator'], content: '¡hola!', broadcaster_id: null });
+  onChat({ name: 'usuario-nuevo', user: 'usuario-nuevo', color: '#ff9a1f', badges: [], content: 'sin pintura', broadcaster_id: null });
+  onChat({ name: 'T<&>Wiki', user: 'twiki', color: '#53fc18', badges: [], content: 'hola [emote:37225:KEKLEO]', broadcaster_id: null });
+} else {
+  listen({ chat: onChat });
+}
+</script></body></html>
