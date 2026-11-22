@@ -159,9 +159,12 @@
      Un cosmético `profile_set` guarda su estética en `meta`. Estos helpers validan
      ese meta y lo traducen a variables CSS (--pf-*), sin inyectar CSS arbitrario. */
   const SET_TYPE = 'profile_set';
+  /* Ids de las piezas con estilo propio; el resto hereda el arte global del set. */
+  const SET_PIECES = ['pill_level','pill_presentes','pill_racha','card_presentes','card_chat','card_tiempo','card_cuenta'];
   const SET_VARS = [
     '--pf-accent', '--pf-accent-bg', '--pf-bar-a', '--pf-bar-b', '--pf-bg-dim',
-    '--pf-pill-img', '--pf-pill-slice', '--pf-card-img', '--pf-card-slice',
+    '--pf-pill-img', '--pf-pill-slice', '--pf-card-img', '--pf-card-slice', '--pf-bar-img',
+    ...SET_PIECES.flatMap(id => [`--pf-${id}-img`, `--pf-${id}-color`, `--pf-${id}-bg`]),
   ];
   const isSet = (c) => !!c && c.type === SET_TYPE;
   const setOf = (u) => {
@@ -203,7 +206,22 @@
     const pillImg = setImg(meta.button_image);
     const cardImg = setImg(meta.card_image);
     const dim = setDim(meta.bg_dim);
-    if(!accent && !tones && !pillImg && !cardImg && dim == null) return out;
+    const pieces = meta.pieces && typeof meta.pieces === 'object' ? meta.pieces : {};
+    SET_PIECES.forEach(id => {
+      const p = pieces[id];
+      if(!p || typeof p !== 'object') return;
+      const c = isHex(p.color) ? p.color.toLowerCase() : '';
+      const img = setImg(p.image);
+      if(c){
+        const [r, g, b] = hexRgb(c);
+        out[`--pf-${id}-color`] = c;
+        out[`--pf-${id}-bg`] = `rgba(${r},${g},${b},.9)`;
+      }
+      if(img) out[`--pf-${id}-img`] = img;
+    });
+    const barImg = setImg(meta.bar_image);
+    if(barImg) out['--pf-bar-img'] = barImg;
+    if(!accent && !tones && !pillImg && !cardImg && dim == null && !Object.keys(out).length) return out;
     if(accent){
       const [r, g, b] = hexRgb(accent);
       out['--pf-accent'] = accent;

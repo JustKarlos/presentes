@@ -63,6 +63,20 @@ button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}but
   background-size:100% 100%;background-position:center}
 .sprev-bar{height:14px;border-radius:6px;background:#14110e;border:1px solid #3d2e1e;overflow:hidden}
 .sprev-bar i{display:block;height:100%;width:42%;background:repeating-linear-gradient(90deg,var(--pv-bar-a) 0 6px,var(--pv-bar-b) 6px 12px)}
+.spreview.has-bar-art .sprev-bar i{background-image:linear-gradient(rgba(6,16,9,.12),rgba(6,16,9,.12)),var(--pv-bar-img);background-size:100% 100%,64px 100%;background-repeat:no-repeat,repeat-x;animation:spzbar-shift 1.2s linear infinite}
+@keyframes spzbar-shift{from{background-position:0 0,0 0}to{background-position:0 0,-64px 0}}
+@media (prefers-reduced-motion:reduce){.spreview.has-bar-art .sprev-bar i{animation:none}}
+.spreview .sprev-card[data-piece],.spreview .sprev-pills span[data-piece]{
+  border:1px solid var(--pv-piece-c,var(--pv-accent));background-color:var(--pv-piece-bg,var(--pv-accent-bg));
+  background-size:100% 100%;background-position:center}
+.spreview .sprev-card[data-piece]{background-image:linear-gradient(rgba(6,16,9,var(--pv-dim)),rgba(6,16,9,.55)),var(--pv-piece-img,none)}
+.spreview .sprev-pills span[data-piece]{background-image:linear-gradient(rgba(6,16,9,var(--pv-dim)),rgba(6,16,9,.35)),var(--pv-piece-img,none);border-radius:999px}
+.pz-row{display:flex;flex-wrap:wrap;gap:.4rem .7rem;align-items:end;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.pz-row>label{margin:0;flex:1 1 150px;min-width:0;font-size:.75rem}
+.pz-row input[type=file]{font-size:.72rem;max-width:100%}
+.pz-row .pz-name{flex:1 1 100%;font-size:.78rem;color:var(--cream)}
+.pz-row input[type=color]{width:100%;height:32px;padding:0}
+.pz-row .pz-inherit{flex:0 1 auto;min-width:0;font-size:.72rem;white-space:nowrap}
 </style></head><body><main>
 <script src="paint-engine.js"></script>
 <script src="rank-engine.js"></script>
@@ -171,16 +185,29 @@ button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}but
     <div id="sPrev" class="spreview" role="group" aria-label="Vista previa del set">
       <div class="sprev-title">Estadísticas</div>
       <div class="sprev-grid">
-        <article class="sprev-card"><h3>Presentes y rachas</h3><div><span>Presentes totales</span><b>147</b></div><div><span>Puesto en presentes</span><b>#2</b></div></article>
-        <article class="sprev-card"><h3>Chat y comunidad</h3><div><span>Mensajes totales</span><b>8.240</b></div><div><span>Puesto en el chat</span><b>#1</b></div></article>
+        <article class="sprev-card" data-piece="card_presentes"><h3>Presentes y rachas</h3><div><span>Presentes totales</span><b>147</b></div><div><span>Puesto en presentes</span><b>#2</b></div></article>
+        <article class="sprev-card" data-piece="card_chat"><h3>Chat y comunidad</h3><div><span>Mensajes totales</span><b>8.240</b></div><div><span>Puesto en el chat</span><b>#1</b></div></article>
+        <article class="sprev-card" data-piece="card_tiempo"><h3>Tiempo activo</h3><div><span>Tiempo total</span><b>412 h</b></div><div><span>Puesto en activo</span><b>#3</b></div></article>
+        <article class="sprev-card" data-piece="card_cuenta"><h3>Cuenta</h3><div><span>XP total</span><b>12.480</b></div><div><span>Miembro desde</span><b>2024</b></div></article>
       </div>
-      <div class="sprev-pills"><span>Nv. 5</span><span>12 presentes</span><span>3 de racha</span></div>
+      <div class="sprev-pills"><span data-piece="pill_level">Nv. 5</span><span data-piece="pill_presentes">12 presentes</span><span data-piece="pill_racha">3 de racha</span></div>
       <div class="sprev-bar"><i></i></div>
     </div>
     <label>Textura de pills (opcional, vacío = conservar la actual)<input id="sBtnFile" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label>
     <input id="sBtn" type="hidden">
     <label>Textura de cards (opcional, vacío = conservar el actual)<input id="sCardFile" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label>
     <input id="sCard" type="hidden">
+    <label>Textura de la barra (opcional, se repite en X)<input id="sBarFile" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label>
+    <input id="sBarImg" type="hidden">
+    <div class="sec">Personalizar piezas</div>
+    <p class="pnote">Cada pieza tiene su propio id. Si la dejás vacía, hereda la textura y el color del set.</p>
+    <div class="pz-row" data-pz="pill_level"><span class="pz-name">Pill · Nv.</span><label>Color<input id="pz-pill_level-color" type="color" value="#c9a227" aria-label="Color del pill Nv."></label><label class="chk pz-inherit"><input id="pz-pill_level-inherit" type="checkbox" checked> Heredar color</label><label>Imagen<input id="pz-pill_level-file" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label><input id="pz-pill_level" type="hidden"></div>
+    <div class="pz-row" data-pz="pill_presentes"><span class="pz-name">Pill · Presentes</span><label>Color<input id="pz-pill_presentes-color" type="color" value="#c9a227" aria-label="Color del pill Presentes"></label><label class="chk pz-inherit"><input id="pz-pill_presentes-inherit" type="checkbox" checked> Heredar color</label><label>Imagen<input id="pz-pill_presentes-file" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label><input id="pz-pill_presentes" type="hidden"></div>
+    <div class="pz-row" data-pz="pill_racha"><span class="pz-name">Pill · Racha</span><label>Color<input id="pz-pill_racha-color" type="color" value="#c9a227" aria-label="Color del pill Racha"></label><label class="chk pz-inherit"><input id="pz-pill_racha-inherit" type="checkbox" checked> Heredar color</label><label>Imagen<input id="pz-pill_racha-file" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label><input id="pz-pill_racha" type="hidden"></div>
+    <div class="pz-row" data-pz="card_presentes"><span class="pz-name">Card · Presentes y rachas</span><label>Color<input id="pz-card_presentes-color" type="color" value="#c9a227" aria-label="Color de la card Presentes y rachas"></label><label class="chk pz-inherit"><input id="pz-card_presentes-inherit" type="checkbox" checked> Heredar color</label><label>Imagen<input id="pz-card_presentes-file" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label><input id="pz-card_presentes" type="hidden"></div>
+    <div class="pz-row" data-pz="card_chat"><span class="pz-name">Card · Chat y comunidad</span><label>Color<input id="pz-card_chat-color" type="color" value="#c9a227" aria-label="Color de la card Chat y comunidad"></label><label class="chk pz-inherit"><input id="pz-card_chat-inherit" type="checkbox" checked> Heredar color</label><label>Imagen<input id="pz-card_chat-file" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label><input id="pz-card_chat" type="hidden"></div>
+    <div class="pz-row" data-pz="card_tiempo"><span class="pz-name">Card · Tiempo activo</span><label>Color<input id="pz-card_tiempo-color" type="color" value="#c9a227" aria-label="Color de la card Tiempo activo"></label><label class="chk pz-inherit"><input id="pz-card_tiempo-inherit" type="checkbox" checked> Heredar color</label><label>Imagen<input id="pz-card_tiempo-file" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label><input id="pz-card_tiempo" type="hidden"></div>
+    <div class="pz-row" data-pz="card_cuenta"><span class="pz-name">Card · Cuenta</span><label>Color<input id="pz-card_cuenta-color" type="color" value="#c9a227" aria-label="Color de la card Cuenta"></label><label class="chk pz-inherit"><input id="pz-card_cuenta-inherit" type="checkbox" checked> Heredar color</label><label>Imagen<input id="pz-card_cuenta-file" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label><input id="pz-card_cuenta" type="hidden"></div>
     <label class="chk"><input id="sActive" type="checkbox" checked> Activo en la tienda</label>
     <label class="chk"><input id="sNew" type="checkbox"> Marcar como “Nuevo”</label>
     <div class="acts"><button type="submit">Guardar</button><button type="button" class="ghost" id="sReset">Nuevo</button><button type="button" class="del" id="sDel" hidden>Eliminar</button></div>
@@ -554,10 +581,12 @@ $('rList').addEventListener('click', (e) => { const b = e.target.closest('[data-
 /* ===== Pestaña Sets (Fase 5) ===== */
 (() => {
 const MAX = 4 * 1024 * 1024, HEX = /^#[0-9a-f]{6}$/i;
+const MIME = ['image/png','image/webp','image/jpeg','image/gif'];
 let cur = null;
 const fileOf = (id) => $(id).files[0] || null;
 const sets = () => ITEMS.filter(c => c.type === 'profile_set');
 const hexOr = (v, def) => HEX.test(v || '') ? v : def;
+const PZ = ['pill_level','pill_presentes','pill_racha','card_presentes','card_chat','card_tiempo','card_cuenta'];
 
 /* Preview en vivo del set, sin subir nada: usa la imagen elegida como object URL.
    Se crea un blob por File, no por render, para no reiniciar los GIF al mover el velo. */
@@ -589,9 +618,29 @@ function renderSetPreview(){
   p.style.setProperty('--pv-bg', bg === 'none' ? 'url("assets/hero-bg.jpg")' : bg);
   p.style.setProperty('--pv-pill-img', pvImg('sBtnFile', 'sBtn'));
   p.style.setProperty('--pv-card-img', pvImg('sCardFile', 'sCard'));
+  PZ.forEach(id => {
+    const el = p.querySelector(`[data-piece="${id}"]`); if(!el) return;
+    if($(`pz-${id}-inherit`).checked){
+      el.style.removeProperty('--pv-piece-c');
+      el.style.removeProperty('--pv-piece-bg');
+    } else {
+      const c = hexOr($(`pz-${id}-color`).value, accent), [cr, cg, cb] = rgbOf(c);
+      el.style.setProperty('--pv-piece-c', c);
+      el.style.setProperty('--pv-piece-bg', `rgba(${cr},${cg},${cb},.9)`);
+    }
+    el.style.setProperty('--pv-piece-img', pvImg(`pz-${id}-file`, `pz-${id}`));
+  });
+  const barImg = pvImg('sBarFile', 'sBarImg');
+  p.classList.toggle('has-bar-art', barImg !== 'none');
+  p.style.setProperty('--pv-bar-img', barImg === 'none' ? 'none' : barImg);
 }
-['sBgFile','sBtnFile','sCardFile'].forEach(id => $(id).addEventListener('change', renderSetPreview));
+['sBgFile','sBtnFile','sCardFile','sBarFile'].forEach(id => $(id).addEventListener('change', renderSetPreview));
 ['sDim','sPill','sBar'].forEach(id => $(id).addEventListener('input', renderSetPreview));
+PZ.forEach(id => {
+  $(`pz-${id}-file`).addEventListener('change', renderSetPreview);
+  $(`pz-${id}-color`).addEventListener('input', renderSetPreview);
+  $(`pz-${id}-inherit`).addEventListener('change', renderSetPreview);
+});
 
 function renderSets() {
   $('setList').innerHTML = sets().map(c => `<div class="it ${c.active ? '' : 'off'} ${cur && cur.id === c.id ? 'sel' : ''}"><div class="th" style="${c.asset_url ? `background-image:url('${esc(c.asset_url)}')` : ''}">${c.asset_url ? '' : 'Sin fondo'}</div>
@@ -604,10 +653,16 @@ function fillSet(c) {
   $('sName').value = c?.name || ''; $('sDesc').value = c?.description || ''; $('sCost').value = c?.cost ?? 12000;
   $('sSort').value = c?.sort ?? Math.max(100, ...ITEMS.map(i => (i.sort || 0) + 1));
   $('sBg').value = c?.asset_url || ''; $('sBtn').value = c?.meta?.button_image || ''; $('sCard').value = c?.meta?.card_image || '';
+  $('sBarImg').value = c?.meta?.bar_image || '';
+  PZ.forEach(id => {
+    $(`pz-${id}`).value = c?.meta?.pieces?.[id]?.image || '';
+    $(`pz-${id}-inherit`).checked = c?.meta?.pieces?.[id]?.color == null;
+    $(`pz-${id}-color`).value = hexOr(c?.meta?.pieces?.[id]?.color, '#c9a227');
+  });
   $('sDim').value = c?.meta?.bg_dim ?? .15; $('sPill').value = hexOr(c?.meta?.pill_color, '#c9a227'); $('sBar').value = hexOr(c?.meta?.bar_color, '#6ad93a');
   $('sActive').checked = c ? c.active : true; $('sNew').checked = !!c?.meta?.new; $('sDel').hidden = !c;
   releasePv();
-  ['sBgFile', 'sBtnFile', 'sCardFile'].forEach(i => $(i).value = '');
+  ['sBgFile', 'sBtnFile', 'sCardFile', 'sBarFile', ...PZ.map(id => `pz-${id}-file`)].forEach(i => $(i).value = '');
   $('sDimV').textContent = $('sDim').value;
   renderSetPreview();
   renderSets();
@@ -620,20 +675,52 @@ $('sf').addEventListener('submit', async (e) => {
   if (!HEX.test(pill) || !HEX.test(bar)) return toast('Los colores tienen que ser #rrggbb');
   const dim = parseFloat($('sDim').value);
   if (!(dim >= 0 && dim <= .6)) return toast('El velo tiene que ir de 0 a 0,6');
-  const fBg = fileOf('sBgFile'), fBtn = fileOf('sBtnFile'), fCard = fileOf('sCardFile');
-  for (const f of [fBg, fBtn, fCard]) if (f && f.size > MAX) return toast('El archivo «' + f.name + '» supera los 4 MB');
+  const fBg = fileOf('sBgFile'), fBtn = fileOf('sBtnFile'), fCard = fileOf('sCardFile'), fBar = fileOf('sBarFile');
+  const pzFiles = PZ.map(id => ({id, f: fileOf(`pz-${id}-file`)}));
+  for (const f of [fBg, fBtn, fCard, fBar, ...pzFiles.map(x => x.f)].filter(Boolean)) {
+    if (f.size > MAX) return toast('El archivo «' + f.name + '» supera los 4 MB');
+    if (!MIME.includes(f.type)) return toast('Formato no válido: «' + f.name + '» (PNG, WEBP, JPG o GIF)');
+  }
   if (!$('sBg').value && !fBg) return toast('Falta la imagen de fondo');
   const base = slug(name) || 'set';
-  let bg = $('sBg').value, btn = $('sBtn').value, card = $('sCard').value;
-  if (fBg) { const r = await upload(fBg, 'background', base + '-fondo'); if (!r.ok) return toast(r.reason || 'No se pudo subir el fondo'); bg = r.url; }
-  if (fBtn) { const r = await upload(fBtn, 'background', base + '-pills'); if (!r.ok) return toast(r.reason || 'No se pudo subir la textura de pills'); btn = r.url; }
-  if (fCard) { const r = await upload(fCard, 'background', base + '-cards'); if (!r.ok) return toast(r.reason || 'No se pudo subir la textura de cards'); card = r.url; }
-  if (!bg) return toast('Falta la imagen de fondo');
-  const id = $('sId').value || base, old = cur || ITEMS.find(i => i.id === id);
-  const meta = {set: true, pill_color: pill.toLowerCase(), bar_color: bar.toLowerCase(), bg_dim: dim, button_image: btn || null, card_image: card || null, new: $('sNew').checked, collection: old?.meta?.collection || ''};
-  const r = await api('/upsert', {json: {id, type: 'profile_set', name, description: $('sDesc').value, cost: Math.max(0, +$('sCost').value || 0), css_class: '', asset_url: bg, sort: +$('sSort').value || 0, active: $('sActive').checked, meta}});
-  if (!r.ok) return toast(r.reason || 'Error al guardar');
-  toast('Guardado ✔'); await load(); renderSets(); fillSet(r.item);
+  const uploaded = [];
+  const put = async (f, suffix, label) => {
+    const r = await upload(f, 'background', base + '-' + suffix);
+    if (!r.ok) throw new Error(r.reason || 'No se pudo subir ' + label);
+    uploaded.push(r.url);
+    return r.url;
+  };
+  try {
+    let bg = $('sBg').value, btn = $('sBtn').value, card = $('sCard').value;
+    if (fBg) bg = await put(fBg, 'fondo', 'el fondo');
+    if (fBtn) btn = await put(fBtn, 'pills', 'la textura de pills');
+    if (fCard) card = await put(fCard, 'cards', 'la textura de cards');
+    let barImg = $('sBarImg').value;
+    if (fBar) barImg = await put(fBar, 'barra', 'la textura de la barra');
+    const pieces = {};
+    for (const {id: pid, f} of pzFiles) {
+      const heredar = $(`pz-${pid}-inherit`).checked;
+      const color = $(`pz-${pid}-color`).value;
+      if (heredar && !f) continue;
+      if (!heredar && !HEX.test(color)) throw new Error('El color de ' + pid + ' tiene que ser #rrggbb');
+      let image = $(`pz-${pid}`).value;
+      if (f) image = await put(f, pid, 'la imagen de ' + pid);
+      const entry = {};
+      if (!heredar && HEX.test(color)) entry.color = color.toLowerCase();
+      if (image) entry.image = image;
+      if (Object.keys(entry).length) pieces[pid] = entry;
+    }
+    if (!bg) throw new Error('Falta la imagen de fondo');
+    const id = $('sId').value || base, old = cur || ITEMS.find(i => i.id === id);
+    const meta = {set: true, pill_color: pill.toLowerCase(), bar_color: bar.toLowerCase(), bg_dim: dim, button_image: btn || null, card_image: card || null, bar_image: barImg || null, pieces, new: $('sNew').checked, collection: old?.meta?.collection || ''};
+    const r = await api('/upsert', {json: {id, type: 'profile_set', name, description: $('sDesc').value, cost: Math.max(0, +$('sCost').value || 0), css_class: '', asset_url: bg, sort: +$('sSort').value || 0, active: $('sActive').checked, meta}});
+    if (!r.ok) throw new Error(r.reason || 'Error al guardar');
+    uploaded.length = 0;
+    toast('Guardado ✔'); await load(); renderSets(); fillSet(r.item);
+  } catch (err) {
+    for (const url of uploaded) await api('/delete-file', {json: {url}});
+    toast(err?.message || 'Error al guardar');
+  }
 });
 $('sReset').onclick = () => fillSet(null);
 $('sDel').onclick = async () => { if (!cur || !confirm('¿Eliminar este set? Si alguien ya lo tiene equipado, mejor desactivalo.')) return;

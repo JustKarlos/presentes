@@ -195,6 +195,19 @@
 .sp-setbar{position:relative;height:22px;border-radius:8px;background:#14110e;border:1px solid #3d2e1e;overflow:hidden}
 .sp-setbar i{position:absolute;inset:0 auto 0 0;width:0;background:repeating-linear-gradient(90deg,var(--pf-bar-a,#6ad93a) 0 8px,var(--pf-bar-b,#3f8a17) 8px 16px);
   box-shadow:inset 0 3px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,0,0,.3)}
+/* Piezas con estilo propio en el probador, igual que en la ficha pública. */
+.sp-setstage [data-piece="pill_level"]{--pf-piece-c:var(--pf-pill_level-color,var(--pf-accent,#22c55e));--pf-piece-bg:var(--pf-pill_level-bg,var(--pf-accent-bg,rgba(20,83,45,.9)));--pf-piece-img:var(--pf-pill_level-img,var(--pf-pill-img,none))}
+.sp-setstage [data-piece="pill_presentes"]{--pf-piece-c:var(--pf-pill_presentes-color,var(--pf-accent,#22c55e));--pf-piece-bg:var(--pf-pill_presentes-bg,var(--pf-accent-bg,rgba(20,83,45,.9)));--pf-piece-img:var(--pf-pill_presentes-img,var(--pf-pill-img,none))}
+.sp-setstage [data-piece="pill_racha"]{--pf-piece-c:var(--pf-pill_racha-color,var(--pf-accent,#22c55e));--pf-piece-bg:var(--pf-pill_racha-bg,var(--pf-accent-bg,rgba(20,83,45,.9)));--pf-piece-img:var(--pf-pill_racha-img,var(--pf-pill-img,none))}
+.sp-setstage [data-piece="card_presentes"]{--pf-piece-c:var(--pf-card_presentes-color,var(--pf-accent,#22c55e));--pf-piece-bg:var(--pf-card_presentes-bg,var(--pf-accent-bg,rgba(20,83,45,.9)));--pf-piece-img:var(--pf-card_presentes-img,var(--pf-card-img,none))}
+.sp-setstage .sp-setpill[data-piece],.sp-setstage .sp-mini[data-piece]{border:1px solid var(--pf-piece-c);background-color:var(--pf-piece-bg);
+  background-image:linear-gradient(rgba(6,16,9,var(--pf-bg-dim,.15)),rgba(6,16,9,.35)),var(--pf-piece-img);
+  background-size:100% 100%;background-position:center;border-radius:999px}
+.sp-setstage .sp-mini[data-piece]{border-radius:8px;background-image:linear-gradient(rgba(6,16,9,var(--pf-bg-dim,.15)),rgba(6,16,9,.55)),var(--pf-piece-img)}
+.sp-setstage.has-bar-art .sp-setbar i{background-image:linear-gradient(rgba(6,16,9,.12),rgba(6,16,9,.12)),var(--pf-bar-img);
+  background-size:100% 100%,64px 100%;background-repeat:no-repeat,repeat-x;
+  animation:spbar-shift 1.2s linear infinite}
+@keyframes spbar-shift{from{background-position:0 0,0 0}to{background-position:0 0,-64px 0}}
 
 /* ---------- pantallas chicas ---------- */
 @media (max-width:760px){
@@ -236,6 +249,7 @@
   .sp-card,.sp-money,.sp-drawer,.sp-drawer.on,.sp-scrim{transition:none}
   .sp-card:hover,.sp-money:active{transform:none}
   .wallet .bal.sp-pop,.sp-money b.sp-pop{animation:none}
+  .sp-setstage.has-bar-art .sp-setbar i{animation:none}
 }
 `; document.head.append(st); }
 
@@ -371,13 +385,13 @@
     if (ST.view === 'rank') return `<div class="sp-pod" aria-label="Vista previa del podio">${avatarF(u, 72)}<span class="nm" style="font-family:var(--display);font-size:1.2rem">${nameHtml(u)}</span><span class="cost">${nf(xp)} XP</span></div>
       <div class="row" style="padding:.4rem .2rem"><span class="rk">1</span>${avatarF(u, 40)}<span class="info"><b>${nameHtml(u)}<span class="lvl">Nv. ${l}</span></b><small class="rk2">${sprite(rKey, 14)}<span>${esc(title)} · ahora mismo</span></small></span><span class="total">${nf(xp)} XP</span></div>`;
     const bg = bgOn ? COS.get(pickT('background')) : null, cls = bg ? bg.css + (bg.url ? ' pb-img' + (bg.meta?.border ? ' pb-own' : '') : '') : '', st = bg?.url ? ` style="--pbimg:url('${esc(bg.url)}');--pbdim:${bg.meta?.dim ?? .15}"` : '';
-    const card = `<div class="card sp-mini ${cls}"${st}><div class="mh">${avatarF(u, 64)}<div><h2>${nameHtml(u)}</h2><p>@${esc(u.username)} · Nv. ${l}</p></div></div><div class="rankrow">${sprite(rKey, 28)}<b>${esc(title)}</b></div><div class="pair"><div><span>XP total</span><b>${nf(xp)}</b></div><div><span>Puesto en XP</span><b>#1</b></div></div></div>`;
+    const card = `<div class="card sp-mini ${cls}" data-piece="card_presentes"${st}><div class="mh">${avatarF(u, 64)}<div><h2>${nameHtml(u)}</h2><p>@${esc(u.username)} · Nv. ${l}</p></div></div><div class="rankrow">${sprite(rKey, 28)}<b>${esc(title)}</b></div><div class="pair"><div><span>XP total</span><b>${nf(xp)}</b></div><div><span>Puesto en XP</span><b>#1</b></div></div></div>`;
     const set = setOf({equipped: {profile_set: pickT('profile_set')}});
     if (!set) return card;
     const sv = setVars(set.meta), img = set.url ? `url("${set.url}")` : '';
     const setStyle = [...Object.entries(sv), ...(img ? [['--bg-img', img]] : [])].map(([k, v]) => `${k}:${v}`).join(';');
-    const setCls = `sp-setstage has-set${sv['--pf-pill-img'] ? ' has-pill-art' : ''}${sv['--pf-card-img'] ? ' has-card-art' : ''}`;
-    return `<div class="${setCls}"${setStyle ? ` style="${esc(setStyle)}"` : ''}>${card}<div class="sp-setrow"><span class="sp-setpill">Nv. 5</span><span class="sp-setpill">12 presentes</span><span class="sp-setpill">3 de racha</span></div><div class="sp-setbar" role="progressbar" aria-label="Progreso de XP" aria-valuemin="0" aria-valuemax="100" aria-valuenow="42"><i style="width:42%"></i></div></div>`;
+    const setCls = `sp-setstage has-set${sv['--pf-pill-img'] ? ' has-pill-art' : ''}${sv['--pf-card-img'] ? ' has-card-art' : ''}${sv['--pf-bar-img'] ? ' has-bar-art' : ''}`;
+    return `<div class="${setCls}"${setStyle ? ` style="${esc(setStyle)}"` : ''}>${card}<div class="sp-setrow"><span class="sp-setpill" data-piece="pill_level">Nv. 5</span><span class="sp-setpill" data-piece="pill_presentes">12 presentes</span><span class="sp-setpill" data-piece="pill_racha">3 de racha</span></div><div class="sp-setbar" role="progressbar" aria-label="Progreso de XP" aria-valuemin="0" aria-valuemax="100" aria-valuenow="42"><i style="width:42%"></i></div></div>`;
   }
 
   function renderDrawer() {

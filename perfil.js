@@ -110,8 +110,8 @@
     const cls = top ? 'pf-metric-val is-top1' : 'pf-metric-val';
     return `<div class="pf-metric"><span class="pf-metric-label">${label}</span><b class="${cls}">${value}</b></div>`;
   }
-  function statCard(title, items){
-    return `<article class="pf-stat-card"><h3 class="pf-stat-title">${title}</h3><div class="pf-metric-grid">${items.map(i => metric(i[0], i[1], i[2])).join('')}</div></article>`;
+  function statCard(title, items, id){
+    return `<article class="pf-stat-card" data-piece="${id}"><h3 class="pf-stat-title">${title}</h3><div class="pf-metric-grid">${items.map(i => metric(i[0], i[1], i[2])).join('')}</div></article>`;
   }
 
   function collectionBody(u, pp){
@@ -208,25 +208,25 @@
         ['Puesto en presentes', `#${nf(u.presentes_rank)}`, Number(u.presentes_rank) === 1],
         ['Racha actual', `${nf(u.streak)} ${plural(u.streak, 'día', 'días')}`, false],
         ['Mejor racha', `${nf(u.best_streak)} ${plural(u.best_streak, 'día', 'días')}`, false],
-      ]),
+      ], 'card_presentes'),
       statCard('Chat y comunidad', [
         ['Mensajes totales', nf(u.total_messages), false],
         ['Puesto en el chat', `#${nf(u.chat_rank)}`, Number(u.chat_rank) === 1],
         ['Mensajes hoy', nf(u.messages_today), false],
         ['Mensajes últimos 7 días', nf(u.messages_7d), false],
-      ]),
+      ], 'card_chat'),
       statCard('Tiempo activo', [
         ['Tiempo activo total', fmtMin(u.active_total), false],
         ['Puesto en tiempo activo', `#${nf(u.active_rank)}`, Number(u.active_rank) === 1],
         ['Tiempo activo hoy', fmtMin(u.active_today), false],
         ['Tiempo activo últimos 7 días', fmtMin(u.active_7d), false],
-      ]),
+      ], 'card_tiempo'),
       statCard('Cuenta', [
         ['XP total', nf(u.xp), false],
         ['Puesto en XP', `#${nf(u.xp_rank)}`, Number(u.xp_rank) === 1],
         ['Miembro desde', fmtDay(u.member_since), false],
         ['Último presente', ago(u.last_presente_at), false],
-      ]),
+      ], 'card_cuenta'),
     ].join('');
 
     const bday = bdayPill(pp);
@@ -239,9 +239,9 @@
             <div class="pf-name-row">${heroName(u)}${bday}</div>
             <p class="pf-handle">@${esc(u.username)}</p>
             <div class="pf-summary-pills" aria-label="Resumen">
-              <span class="pf-hero-pill">Nv. ${nf(u.level)}</span>
-              <span class="pf-hero-pill">${nf(u.total_presentes)} presentes</span>
-              <span class="pf-hero-pill">${nf(u.streak)} de racha</span>
+              <span class="pf-hero-pill" data-piece="pill_level">Nv. ${nf(u.level)}</span>
+              <span class="pf-hero-pill" data-piece="pill_presentes">${nf(u.total_presentes)} presentes</span>
+              <span class="pf-hero-pill" data-piece="pill_racha">${nf(u.streak)} de racha</span>
             </div>
           </div>
         </div>
@@ -280,6 +280,7 @@
     bodyCls.toggle('has-set', !!set);
     bodyCls.toggle('has-pill-art', !!setVarsMap['--pf-pill-img']);
     bodyCls.toggle('has-card-art', !!setVarsMap['--pf-card-img']);
+    bodyCls.toggle('has-bar-art', !!setVarsMap['--pf-bar-img']);
 
     wireTabs(root);
 

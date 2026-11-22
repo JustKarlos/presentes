@@ -16,6 +16,12 @@ body.page-perfil{
 body.page-perfil.has-set{
   background-image:linear-gradient(rgba(6,16,9,var(--pf-bg-dim,.15)),rgba(6,16,9,.88)),var(--bg-img,url("assets/hero-bg.jpg"))
 }
+/* Con set equipado la barra del sitio se vuelve translúcida: no pelea con el fondo. */
+body.page-perfil.has-set .pagenav{
+  background:linear-gradient(180deg,rgba(6,16,9,.62),rgba(6,16,9,.28));
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border-bottom-color:rgba(255,255,255,.18)
+}
 
 .pf-page{
   display:grid;
@@ -139,6 +145,14 @@ body.page-perfil.has-pill-art .pf-hero-pill{
 .pf-rank-card .pf-xpbar i{
   background:repeating-linear-gradient(90deg,var(--pf-bar-a) 0 8px,var(--pf-bar-b) 8px 16px)
 }
+/* Textura opcional de la barra: se repite en X y se desplaza suavemente. */
+body.page-perfil.has-bar-art .pf-rank-card .pf-xpbar i{
+  background-image:linear-gradient(rgba(6,16,9,.12),rgba(6,16,9,.12)),var(--pf-bar-img);
+  background-size:100% 100%,64px 100%;
+  background-repeat:no-repeat,repeat-x;
+  animation:pfbar-shift 1.2s linear infinite
+}
+@keyframes pfbar-shift{from{background-position:0 0,0 0}to{background-position:0 0,-64px 0}}
 .pf-xpbar em{
   position:absolute;inset:0;z-index:2;
   display:flex;align-items:center;justify-content:center;
@@ -167,6 +181,24 @@ body.page-perfil.has-card-art .pf-rank-card{
   background-size:100% 100%;
   background-position:center;
   border-radius:12px
+}
+/* Piezas con estilo propio. Lo que no se completa cae al arte global del set. */
+body.page-perfil.has-set [data-piece="pill_level"]{--pf-piece-c:var(--pf-pill_level-color,var(--pf-accent));--pf-piece-bg:var(--pf-pill_level-bg,var(--pf-accent-bg));--pf-piece-img:var(--pf-pill_level-img,var(--pf-pill-img,none))}
+body.page-perfil.has-set [data-piece="pill_presentes"]{--pf-piece-c:var(--pf-pill_presentes-color,var(--pf-accent));--pf-piece-bg:var(--pf-pill_presentes-bg,var(--pf-accent-bg));--pf-piece-img:var(--pf-pill_presentes-img,var(--pf-pill-img,none))}
+body.page-perfil.has-set [data-piece="pill_racha"]{--pf-piece-c:var(--pf-pill_racha-color,var(--pf-accent));--pf-piece-bg:var(--pf-pill_racha-bg,var(--pf-accent-bg));--pf-piece-img:var(--pf-pill_racha-img,var(--pf-pill-img,none))}
+body.page-perfil.has-set [data-piece="card_presentes"]{--pf-piece-c:var(--pf-card_presentes-color,var(--pf-accent));--pf-piece-bg:var(--pf-card_presentes-bg,var(--pf-accent-bg));--pf-piece-img:var(--pf-card_presentes-img,var(--pf-card-img,none))}
+body.page-perfil.has-set [data-piece="card_chat"]{--pf-piece-c:var(--pf-card_chat-color,var(--pf-accent));--pf-piece-bg:var(--pf-card_chat-bg,var(--pf-accent-bg));--pf-piece-img:var(--pf-card_chat-img,var(--pf-card-img,none))}
+body.page-perfil.has-set [data-piece="card_tiempo"]{--pf-piece-c:var(--pf-card_tiempo-color,var(--pf-accent));--pf-piece-bg:var(--pf-card_tiempo-bg,var(--pf-accent-bg));--pf-piece-img:var(--pf-card_tiempo-img,var(--pf-card-img,none))}
+body.page-perfil.has-set [data-piece="card_cuenta"]{--pf-piece-c:var(--pf-card_cuenta-color,var(--pf-accent));--pf-piece-bg:var(--pf-card_cuenta-bg,var(--pf-accent-bg));--pf-piece-img:var(--pf-card_cuenta-img,var(--pf-card-img,none))}
+body.page-perfil.has-set .pf-hero-pill[data-piece]{
+  border:1px solid var(--pf-piece-c);background-color:var(--pf-piece-bg);
+  background-image:linear-gradient(rgba(6,16,9,var(--pf-bg-dim,.15)),rgba(6,16,9,.35)),var(--pf-piece-img);
+  background-size:100% 100%;background-position:center;border-radius:999px
+}
+body.page-perfil.has-set .pf-stat-card[data-piece]{
+  border:1px solid var(--pf-piece-c);background-color:var(--pf-piece-bg);
+  background-image:linear-gradient(rgba(6,16,9,var(--pf-bg-dim,.15)),rgba(6,16,9,.55)),var(--pf-piece-img);
+  background-size:100% 100%;background-position:center;border-radius:12px
 }
 .pf-stat-title{
   font-size:1.1rem;color:#fbbf24;margin:0 0 12px;
@@ -296,5 +328,6 @@ body.page-perfil.has-card-art .pf-rank-card{
 @media (prefers-reduced-motion:reduce){
   .pf-load i{animation:none}
   .pf-xpbar i{transition:none}
+  body.page-perfil.has-bar-art .pf-rank-card .pf-xpbar i{animation:none}
   .pf-coll-item.pf-coll-ne{transition:none}
 }
