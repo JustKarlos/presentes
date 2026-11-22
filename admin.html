@@ -53,7 +53,7 @@ button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}but
   <p style="margin-top:.7rem;font-size:.8rem;color:var(--tan)">¿No conecta? Abrí <a id="tl" target="_blank" rel="noopener" style="color:var(--gold)">este enlace</a>: si todo está bien verás <code>{"ok":false,"reason":"unauthorized"}</code>.</p>
 </section>
 <section id="app" hidden>
-  <nav class="tabsA" role="tablist" aria-label="Secciones"><button type="button" role="tab" class="on" data-tab="objs" aria-selected="true">Objetos</button><button type="button" role="tab" data-tab="paints" aria-selected="false">Pinturas</button><button type="button" role="tab" data-tab="ranks" aria-selected="false">Rangos</button></nav>
+  <nav class="tabsA" role="tablist" aria-label="Secciones"><button type="button" role="tab" class="on" data-tab="objs" aria-selected="true">Objetos</button><button type="button" role="tab" data-tab="paints" aria-selected="false">Pinturas</button><button type="button" role="tab" data-tab="ranks" aria-selected="false">Rangos</button><button type="button" role="tab" data-tab="sets" aria-selected="false">Sets</button></nav>
   <div id="tabObjs">
   <div class="drop" id="bulk">Arrastrá varias imágenes acá para crear borradores rápido (cuadradas = marcos, el resto = fondos). Quedan desactivadas para que las revises.</div>
   <div class="cols">
@@ -74,7 +74,7 @@ button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}but
       <div class="acts"><button type="submit">Guardar</button><button type="button" class="ghost" id="reset">Nuevo</button><button type="button" class="del" id="del" hidden>Eliminar</button></div>
     </form>
     <div class="panel"><h2>Objetos</h2>
-      <div class="tools"><select id="fType"><option value="">Todos</option><option value="frame">Marcos</option><option value="background">Fondos</option><option value="name_effect">Nombres</option><option value="badge">Insignias</option></select><input id="fQ" type="search" placeholder="Buscar…"></div>
+      <div class="tools"><select id="fType"><option value="">Todos</option><option value="frame">Marcos</option><option value="background">Fondos</option><option value="name_effect">Nombres</option><option value="badge">Insignias</option><option value="profile_set">Sets</option></select><input id="fQ" type="search" placeholder="Buscar…"></div>
       <div id="list" class="grid"></div></div>
   </div>
 </div>
@@ -131,6 +131,30 @@ button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}but
     <label class="chk"><input id="rActive" type="checkbox" checked> Activo</label>
     <div class="acts"><button type="submit">Guardar</button><button type="button" class="ghost" id="rToShop">Crear objeto de tienda</button><button type="button" class="del" id="rDel" hidden>Eliminar</button></div>
   </form></div></div>
+<div id="tabSets" hidden><div class="cols">
+  <div class="panel"><h2>Sets de perfil</h2>
+    <p class="pnote">El set guarda el fondo en <code>cosmetics/backgrounds/</code>; la textura del botón y el marco de la tarjeta se usan como bordes estirables.</p>
+    <div id="setList" class="grid" style="grid-template-columns:1fr"></div></div>
+  <form id="sf" class="panel">
+    <h2 id="sFt">Nuevo set</h2>
+    <input id="sId" type="hidden">
+    <label>Nombre<input id="sName" required maxlength="60"></label>
+    <label>Descripción<input id="sDesc" maxlength="200"></label>
+    <div class="row"><label>Precio (XP)<input id="sCost" type="number" min="0" value="12000"></label><label>Orden<input id="sSort" type="number" value="100"></label></div>
+    <label>Fondo (PNG, WEBP, JPG o GIF · máx. 4 MB; vacío = conservar el actual)<input id="sBgFile" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label>
+    <input id="sBg" type="hidden">
+    <label>Velo oscuro: <span id="sDimV">0.15</span><input id="sDim" type="range" min="0" max="0.6" step="0.05" value="0.15"></label>
+    <div class="row"><label>Color de pills<span class="cf"><input id="sPill" type="color" value="#c9a227" aria-label="Color de pills"></span></label><label>Color de la barra<span class="cf"><input id="sBar" type="color" value="#6ad93a" aria-label="Color de la barra"></span></label></div>
+    <label>Textura de botón (opcional, vacío = conservar la actual)<input id="sBtnFile" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label>
+    <input id="sBtn" type="hidden">
+    <label>Slice del botón (0–100)<input id="sBtnSlice" type="number" min="0" max="100" value="24"></label>
+    <label>Marco de tarjeta (opcional, vacío = conservar el actual)<input id="sCardFile" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label>
+    <input id="sCard" type="hidden">
+    <label>Slice del marco (0–100)<input id="sCardSlice" type="number" min="0" max="100" value="28"></label>
+    <label class="chk"><input id="sActive" type="checkbox" checked> Activo en la tienda</label>
+    <label class="chk"><input id="sNew" type="checkbox"> Marcar como “Nuevo”</label>
+    <div class="acts"><button type="submit">Guardar</button><button type="button" class="ghost" id="sReset">Nuevo</button><button type="button" class="del" id="sDel" hidden>Eliminar</button></div>
+  </form></div></div>
 </section><div id="toast"></div>
 <script>
 const $ = (id) => document.getElementById(id), FN = CFG.SUPABASE_URL + '/functions/v1/admin-cosmetics';
@@ -157,7 +181,7 @@ function renderList() {
   const t = $('fType').value, q = $('fQ').value.toLowerCase();
   $('list').innerHTML = ITEMS.filter(c => (!t || c.type === t) && (c.name + ' ' + (c.css_class || '')).toLowerCase().includes(q)).map(c => `
     <div class="it ${c.active ? '' : 'off'} ${$('id').value === c.id ? 'sel' : ''}"><div class="th" style="${c.asset_url ? `background-image:url('${esc(c.asset_url)}')` : ''}">${c.asset_url ? '' : esc(c.css_class || '—')}</div>
-      <b title="${esc(c.name)}">${esc(c.name)}</b><small>${{frame: 'Marco', background: 'Fondo', name_effect: 'Nombre', badge: 'Insignia'}[c.type]} · ${Number(c.cost).toLocaleString('es-AR')} XP${c.meta?.collection ? ' · ' + esc(c.meta.collection) : ''}</small>
+      <b title="${esc(c.name)}">${esc(c.name)}</b><small>${{frame: 'Marco', background: 'Fondo', name_effect: 'Nombre', badge: 'Insignia', profile_set: 'Set'}[c.type]} · ${Number(c.cost).toLocaleString('es-AR')} XP${c.meta?.collection ? ' · ' + esc(c.meta.collection) : ''}</small>
       <div class="bar"><label class="chk" style="margin:0"><input type="checkbox" data-tg="${esc(c.id)}" ${c.active ? 'checked' : ''}> Activo</label><button type="button" data-ed="${esc(c.id)}">Editar</button></div></div>`).join('') || '<p style="color:var(--tan)">Todavía no hay objetos.</p>';
 }
 function fill(c) {
@@ -397,7 +421,8 @@ $('pList').addEventListener('click', (e) => { const b = e.target.closest('[data-
 /* ---- pestañas y miniaturas con pintura en «Objetos» ---- */
 document.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('[data-tab]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-selected', on); });
-  $('tabObjs').hidden = b.dataset.tab !== 'objs'; $('tabPaints').hidden = b.dataset.tab !== 'paints'; $('tabRanks').hidden = b.dataset.tab !== 'ranks'; if (b.dataset.tab === 'ranks' && window.rkLoad) rkLoad();
+  $('tabObjs').hidden = b.dataset.tab !== 'objs'; $('tabPaints').hidden = b.dataset.tab !== 'paints'; $('tabRanks').hidden = b.dataset.tab !== 'ranks'; $('tabSets').hidden = b.dataset.tab !== 'sets'; if (b.dataset.tab === 'ranks' && window.rkLoad) rkLoad();
+  if (b.dataset.tab === 'sets') renderSets();
   if (b.dataset.tab === 'paints') { pList(); pPreview(); }
 }));
 const _rl = renderList;
@@ -493,6 +518,72 @@ $('rToShop').onclick = async () => {
   fill(ITEMS.find(i => i.id === r.item.id) || r.item);
 };
 $('rList').addEventListener('click', (e) => { const b = e.target.closest('[data-re]'); if (b) rLoad(RK.find(r => String(r.id) === b.dataset.re)); });
+})();
+</script>
+<script>
+/* ===== Pestaña Sets (Fase 5) ===== */
+(() => {
+const MAX = 4 * 1024 * 1024, HEX = /^#[0-9a-f]{6}$/i;
+let cur = null;
+const fileOf = (id) => $(id).files[0] || null;
+const sets = () => ITEMS.filter(c => c.type === 'profile_set');
+const hexOr = (v, def) => HEX.test(v || '') ? v : def;
+
+function renderSets() {
+  $('setList').innerHTML = sets().map(c => `<div class="it ${c.active ? '' : 'off'} ${cur && cur.id === c.id ? 'sel' : ''}"><div class="th" style="${c.asset_url ? `background-image:url('${esc(c.asset_url)}')` : ''}">${c.asset_url ? '' : 'Sin fondo'}</div>
+    <b title="${esc(c.name)}">${esc(c.name)}</b><small>${Number(c.cost).toLocaleString('es-AR')} XP · velo ${Number(c.meta?.bg_dim ?? .15)}${c.meta?.new ? ' · nuevo' : ''}${c.meta?.button_image ? ' · botón' : ''}${c.meta?.card_image ? ' · tarjeta' : ''}</small>
+    <div class="bar"><label class="chk" style="margin:0"><input type="checkbox" data-stg="${esc(c.id)}" ${c.active ? 'checked' : ''}> Activo</label><button type="button" data-sed="${esc(c.id)}">Editar</button></div></div>`).join('') || '<p style="color:var(--tan)">Todavía no hay sets.</p>';
+}
+function fillSet(c) {
+  cur = c || null;
+  $('sId').value = c?.id || ''; $('sFt').textContent = c ? 'Editar set' : 'Nuevo set';
+  $('sName').value = c?.name || ''; $('sDesc').value = c?.description || ''; $('sCost').value = c?.cost ?? 12000;
+  $('sSort').value = c?.sort ?? Math.max(100, ...ITEMS.map(i => (i.sort || 0) + 1));
+  $('sBg').value = c?.asset_url || ''; $('sBtn').value = c?.meta?.button_image || ''; $('sCard').value = c?.meta?.card_image || '';
+  $('sDim').value = c?.meta?.bg_dim ?? .15; $('sPill').value = hexOr(c?.meta?.pill_color, '#c9a227'); $('sBar').value = hexOr(c?.meta?.bar_color, '#6ad93a');
+  $('sBtnSlice').value = c?.meta?.button_slice ?? 24; $('sCardSlice').value = c?.meta?.card_slice ?? 28;
+  $('sActive').checked = c ? c.active : true; $('sNew').checked = !!c?.meta?.new; $('sDel').hidden = !c;
+  ['sBgFile', 'sBtnFile', 'sCardFile'].forEach(i => $(i).value = '');
+  $('sDimV').textContent = $('sDim').value;
+  renderSets();
+}
+
+$('sf').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = $('sName').value.trim(); if (!name) return toast('Falta el nombre');
+  const pill = $('sPill').value, bar = $('sBar').value;
+  if (!HEX.test(pill) || !HEX.test(bar)) return toast('Los colores tienen que ser #rrggbb');
+  const dim = parseFloat($('sDim').value), bs = parseInt($('sBtnSlice').value, 10), cs = parseInt($('sCardSlice').value, 10);
+  if (!(dim >= 0 && dim <= .6)) return toast('El velo tiene que ir de 0 a 0,6');
+  if (!(bs >= 0 && bs <= 100) || !(cs >= 0 && cs <= 100)) return toast('Los slices tienen que ir de 0 a 100');
+  const fBg = fileOf('sBgFile'), fBtn = fileOf('sBtnFile'), fCard = fileOf('sCardFile');
+  for (const f of [fBg, fBtn, fCard]) if (f && f.size > MAX) return toast('El archivo «' + f.name + '» supera los 4 MB');
+  if (!$('sBg').value && !fBg) return toast('Falta la imagen de fondo');
+  const base = slug(name) || 'set';
+  let bg = $('sBg').value, btn = $('sBtn').value, card = $('sCard').value;
+  if (fBg) { const r = await upload(fBg, 'background', base + '-fondo'); if (!r.ok) return toast(r.reason || 'No se pudo subir el fondo'); bg = r.url; }
+  if (fBtn) { const r = await upload(fBtn, 'background', base + '-boton'); if (!r.ok) return toast(r.reason || 'No se pudo subir la textura del botón'); btn = r.url; }
+  if (fCard) { const r = await upload(fCard, 'background', base + '-tarjeta'); if (!r.ok) return toast(r.reason || 'No se pudo subir el marco de la tarjeta'); card = r.url; }
+  if (!bg) return toast('Falta la imagen de fondo');
+  const id = $('sId').value || base, old = cur || ITEMS.find(i => i.id === id);
+  const meta = {set: true, pill_color: pill.toLowerCase(), bar_color: bar.toLowerCase(), bg_dim: dim, button_image: btn || null, button_slice: bs, card_image: card || null, card_slice: cs, new: $('sNew').checked, collection: old?.meta?.collection || ''};
+  const r = await api('/upsert', {json: {id, type: 'profile_set', name, description: $('sDesc').value, cost: Math.max(0, +$('sCost').value || 0), css_class: '', asset_url: bg, sort: +$('sSort').value || 0, active: $('sActive').checked, meta}});
+  if (!r.ok) return toast(r.reason || 'Error al guardar');
+  toast('Guardado ✔'); await load(); renderSets(); fillSet(r.item);
+});
+$('sReset').onclick = () => fillSet(null);
+$('sDel').onclick = async () => { if (!cur || !confirm('¿Eliminar este set? Si alguien ya lo tiene equipado, mejor desactivalo.')) return;
+  const r = await api('/delete', {json: {id: cur.id}}); toast(r.ok ? 'Eliminado' : r.reason === 'in_use' ? 'Ya lo tienen usuarios: desactivalo en vez de eliminarlo' : r.reason); if (r.ok) { await load(); renderSets(); fillSet(null); } };
+$('setList').addEventListener('click', async (e) => {
+  const ed = e.target.closest('[data-sed]'), tg = e.target.closest('[data-stg]');
+  if (ed) return fillSet(ITEMS.find(i => i.id === ed.dataset.sed));
+  if (tg) { const c = ITEMS.find(i => i.id === tg.dataset.stg); if (!c) return;
+    const r = await api('/upsert', {json: {...c, active: tg.checked}}); toast(r.ok ? (tg.checked ? 'Activado' : 'Desactivado') : r.reason);
+    if (r.ok) { await load(); renderSets(); } else tg.checked = !tg.checked; }
+});
+$('sDim').addEventListener('input', () => { $('sDimV').textContent = $('sDim').value; });
+window.renderSets = renderSets;
+fillSet(null);
 })();
 </script>
 <script src="admin-calendar.js"></script>

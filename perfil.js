@@ -13,8 +13,8 @@
   }
   const username = normUser(requested);
   const fondosOn = !(window.FEATURES && window.FEATURES.fondos === false);
-  const TIPOS = { frame: 'Marcos', name_effect: 'Efectos de nombre', badge: 'Insignias', background: 'Fondos' };
-  const collTypes = fondosOn ? ['frame', 'name_effect', 'background', 'badge'] : ['frame', 'name_effect', 'badge'];
+  const TIPOS = { frame: 'Marcos', name_effect: 'Efectos de nombre', badge: 'Insignias', background: 'Fondos', profile_set: 'Sets de perfil' };
+  const collTypes = fondosOn ? ['frame', 'name_effect', 'background', 'profile_set', 'badge'] : ['frame', 'name_effect', 'profile_set', 'badge'];
 
   const canonical = (u) => `${SITE_URL}/@${encodeURIComponent(u)}`;
   function setMeta(u){
@@ -119,7 +119,7 @@
     if(pp.owned == null) return '<p class="pf-empty-note">🔒 Esta persona mantiene su colección de cosméticos en privado.</p>';
     const items = (pp.owned || []).map(id => COS.get(id)).filter(c => c && collTypes.includes(c.type));
     if(!items.length) return '<p class="pf-empty-note">Todavía no tiene cosméticos.</p>';
-    const eq = new Set([u.frame_id, u.name_id, u.badge_id, u.equipped_badge_id, u.equipped?.badge].filter(Boolean));
+    const eq = new Set([u.frame_id, u.name_id, u.badge_id, u.equipped_badge_id, u.equipped?.badge, setOf(u)?.id].filter(Boolean));
     const groups = collTypes.map(t => ({ t, label: TIPOS[t], list: items.filter(c => c.type === t) })).filter(g => g.list.length);
     if(!groups.length) return '<p class="pf-empty-note">Todavía no tiene cosméticos.</p>';
 
@@ -197,6 +197,7 @@
 
   function render(u, qs, pp){
     setMeta(u);
+    const set = setOf(u) || setOf(pp);
     const own = !!sess && normUser(sess.user) === normUser(u.username);
     const title = u.rank_title || rankOf(u.level)[1];
     const quests = Array.isArray(qs) ? qs : [];
@@ -268,6 +269,17 @@
         <div class="pf-quests-grid">${quests.length ? quests.map(pfQuestCard).join('') : '<p class="pf-empty-note">No hay misiones para mostrar.</p>'}</div>
       </section>
     </div>`;
+
+    /* Set de perfil: fondo, variables --pf-* y toggles de arte. Sin set se limpia
+       cualquier var inline que haya dejado un render anterior en esta página. */
+    const setVarsMap = setVars(set?.meta);
+    if(set && set.url) document.body.style.setProperty('--bg-img', `url("${set.url}")`);
+    else document.body.style.removeProperty('--bg-img');
+    applySetVars(document.body, set?.meta);
+    const bodyCls = document.body.classList;
+    bodyCls.toggle('has-set', !!set);
+    bodyCls.toggle('has-pill-art', !!setVarsMap['--pf-pill-img']);
+    bodyCls.toggle('has-card-art', !!setVarsMap['--pf-card-img']);
 
     wireTabs(root);
 

@@ -1,6 +1,7 @@
 /* mi-perfil.js — edición del perfil propio en /mi-perfil.
    Requiere sesión de Kick; sin ranking explica cómo entrar. Sin modal, sin selector
-   de vista y sin sección de fondos (en pausa): insignia, marcos, efectos, privacidad,
+   de vista y sin sección de fondos (en pausa): la vista previa muestra el set
+   equipado (se elige en la tienda) y, aparte, insignia, marcos, efectos, privacidad,
    regalos y cumpleaños siguen igual que antes. */
 (() => {
   const root = document.getElementById('miperfil-body');
@@ -46,8 +47,13 @@
   }
 
   function previewHtml(){
-    const e = eqOf(), u = {...wallet, frame_id: e.frame || '', name_id: e.name_effect || ''}, d = shownDef(), lvl = wallet.level ?? 0;
+    const e = eqOf(), u = {...wallet, frame_id: e.frame || '', name_id: e.name_effect || ''}, d = shownDef(), lvl = wallet.level ?? 0, set = setOf(wallet);
     return `<div class="mp-prev-stack" aria-label="Vista previa de tu perfil">
+      <div id="mpSet"><div class="mp-mini-label">Set de perfil</div>
+        <div class="mp-pv-card"><div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap">
+          <b>${esc(set?.name || 'Sin set')}</b>
+          ${set ? '<button type="button" class="btn ghost" data-mp="unequip" data-type="profile_set">Quitar set</button>' : ''}
+        </div></div></div>
       <div><div class="mp-mini-label">Perfil</div>
         <div class="mp-pv-card"><div class="mh">${avatarF(u, 64)}<div class="mh-info"><b class="mp-pv-name">${nameHtml(u)}</b><p>@${esc(u.username)} · Nv. ${lvl}</p></div></div>
           <div class="rankrow" style="margin:0">${sprite(d.key, 28)}<b>${esc(d.title)}</b></div></div></div>
@@ -130,14 +136,14 @@
       </div>
       <div class="mp-page">
         <aside class="panel mp-card mp-prev" aria-label="Vista previa">
-          <h2 class="mp-h">Así se ve <small>sin fondo</small></h2>
+          <h2 class="mp-h">Así se ve <small>con tu set</small></h2>
           ${previewHtml()}
           <div class="mp-acts" style="margin-top:.8rem">
             <a class="btn" href="${publicUrl()}">Ver mi perfil público</a>
             <a class="btn ghost" href="/tienda">Ir a la tienda</a>
           </div>
           <div class="mp-box-actions" style="margin-top:.7rem">
-            <p class="mp-note">Los fondos de perfil están en pausa mientras rediseñamos la ficha pública. Si ya compraste alguno, queda guardado y vuelve cuando se active.</p>
+            <p class="mp-note">Los sets de perfil ya cambian el aspecto de tu ficha pública. Los fondos viejos siguen en pausa mientras rediseñamos esa ficha: si compraste alguno, queda guardado y vuelve cuando se active.</p>
             <button type="button" class="linkbtn" data-mp="logout">Cerrar sesión</button>
           </div>
         </aside>
@@ -145,7 +151,7 @@
           ${ranks()}
           <section class="panel mp-card" aria-labelledby="mpCos">
             <h2 id="mpCos" class="mp-h">Cosméticos <small>usá lo que ya tenés</small></h2>
-            <p class="mp-note">Equipá o quitá marcos y efectos de nombre. Para conseguir más, visitá la tienda.</p>
+            <p class="mp-note">Equipá o quitá marcos y efectos de nombre. Los sets de perfil se eligen en la tienda y, si querés, podés quitarlos acá. Para conseguir más, visitá la tienda.</p>
             <div class="mp-form" style="margin-top:.55rem">
               ${tiles('frame', 'Marco de avatar', 'Rodea tu foto en el ranking, el chat y tu perfil.')}
               ${tiles('name_effect', 'Efecto de nombre', 'Cambia cómo se ve tu nombre donde apareces.')}
@@ -156,7 +162,7 @@
       </div>`;
   }
 
-  const eqCount = () => wallet ? ['frame', 'name_effect', 'badge'].filter(t => eqOf()[t === 'badge' ? 'rank' : t]).length : 0;
+  const eqCount = () => wallet ? ['frame', 'name_effect', 'profile_set', 'badge'].filter(t => eqOf()[t === 'badge' ? 'rank' : t]).length : 0;
 
   async function savePS(patch){
     if(busy || !wallet) return; setBusy(true);

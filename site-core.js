@@ -54,7 +54,7 @@
 
   /* ---------- cumpleaños ---------- */
   const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const TIPOS = { frame:'Marcos', name_effect:'Efectos de nombre', background:'Fondos' };
+  const TIPOS = { frame:'Marcos', name_effect:'Efectos de nombre', background:'Fondos', profile_set:'Sets de perfil' };
   const fmtBday = (s) => { const [m, d] = String(s || '').split('-').map(Number); return m ? `${d} de ${MESES[m - 1]}` : ''; };
   const bdayToday = (s) => { const n = new Date(); return s === String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0'); };
   Object.assign(window, { MESES, TIPOS, fmtBday, bdayToday });
@@ -154,6 +154,87 @@
     return `<span class="ne ${p || nameFxOf(u)}">${esc(u.display_name || u.username || '')}</span>`;
   };
   Object.assign(window, { COS, loadCosmetics, cosClass, frameOf, nameFxOf, avatarF, paintClsOf, paintImageUrls, preloadPaintImages, nameHtml });
+
+  /* ---------- sets de perfil ----------
+     Un cosmético `profile_set` guarda su estética en `meta`. Estos helpers validan
+     ese meta y lo traducen a variables CSS (--pf-*), sin inyectar CSS arbitrario. */
+  const SET_TYPE = 'profile_set';
+  const SET_VARS = [
+    '--pf-accent', '--pf-accent-bg', '--pf-bar-a', '--pf-bar-b', '--pf-bg-dim',
+    '--pf-pill-img', '--pf-pill-slice', '--pf-card-img', '--pf-card-slice',
+  ];
+  const isSet = (c) => !!c && c.type === SET_TYPE;
+  const setOf = (u) => {
+    const id = u?.equipped?.profile_set || u?.profile_set_id || u?.set_id;
+    return (id && COS.get(id)) || null;
+  };
+  const isHex = (v) => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v);
+  const hexRgb = (hex) => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+  /* Mezcla 30% con blanco (light) y 30% con negro (dark). */
+  function hexTones(hex){
+    if(!isHex(hex)) return null;
+    const [r, g, b] = hexRgb(hex);
+    const mix = (v, to) => Math.round(v + (to - v) * .3);
+    const toHex = (c) => '#' + c.map(v => v.toString(16).padStart(2, '0')).join('');
+    return { light: toHex([mix(r, 255), mix(g, 255), mix(b, 255)]), dark: toHex([mix(r, 0), mix(g, 0), mix(b, 0)]) };
+  }
+  /* Imagen: https y mismo host que Supabase. Devuelve `url("…")` o ''. */
+  function setImg(value){
+    if(typeof value !== 'string' || !/^https:\/\//i.test(value)) return '';
+    try {
+      if(new URL(value).hostname !== new URL(CONFIG.SUPABASE_URL).hostname) return '';
+    } catch { return ''; }
+    return `url("${value.replace(/["\\\n\r]/g, '')}")`;
+  }
+  function setSlice(v){
+    const n = typeof v === 'number' ? v : (typeof v === 'string' && v.trim() !== '' ? Number(v) : NaN);
+    return Number.isInteger(n) && n >= 0 && n <= 100 ? n : null;
+  }
+  function setDim(v){
+    const n = typeof v === 'number' ? v : (typeof v === 'string' && v.trim() !== '' ? Number(v) : NaN);
+    return Number.isFinite(n) && n >= 0 && n <= .6 ? n : null;
+  }
+  /* Mapa de variables válidas. Sin ningún campo válido devuelve {} (no inyecta el velo). */
+  function setVars(meta){
+    const out = {};
+    if(!meta || typeof meta !== 'object') return out;
+    const accent = isHex(meta.pill_color) ? meta.pill_color.toLowerCase() : '';
+    const tones = hexTones(meta.bar_color);
+    const pillImg = setImg(meta.button_image);
+    const cardImg = setImg(meta.card_image);
+    const dim = setDim(meta.bg_dim);
+    if(!accent && !tones && !pillImg && !cardImg && dim == null) return out;
+    if(accent){
+      const [r, g, b] = hexRgb(accent);
+      out['--pf-accent'] = accent;
+      out['--pf-accent-bg'] = `rgba(${r},${g},${b},.9)`;
+    }
+    if(tones){ out['--pf-bar-a'] = tones.light; out['--pf-bar-b'] = tones.dark; }
+    if(pillImg){
+      out['--pf-pill-img'] = pillImg;
+      const s = setSlice(meta.button_slice);
+      if(s != null) out['--pf-pill-slice'] = String(s);
+    }
+    if(cardImg){
+      out['--pf-card-img'] = cardImg;
+      const s = setSlice(meta.card_slice);
+      if(s != null) out['--pf-card-slice'] = String(s);
+    }
+    out['--pf-bg-dim'] = String(dim == null ? .15 : dim);
+    return out;
+  }
+  /* Setea las vars válidas y borra las demás, para que un retry no deje estilos viejos.
+     Devuelve true si aplicó al menos una variable. */
+  function applySetVars(el, meta){
+    if(!el || !el.style) return false;
+    const vars = setVars(meta);
+    SET_VARS.forEach(k => {
+      if(Object.prototype.hasOwnProperty.call(vars, k)) el.style.setProperty(k, vars[k]);
+      else el.style.removeProperty(k);
+    });
+    return Object.keys(vars).length > 0;
+  }
+  Object.assign(window, { SET_TYPE, isSet, setOf, hexTones, setVars, applySetVars });
 
   /* ---------- misiones ---------- */
   function questCard(q, compact){

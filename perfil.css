@@ -2,8 +2,22 @@
    Secciones a ancho completo: hero, estadísticas (4 categorías), colección y misiones.
    Fondo de página: hero-bg.jpg. Hero sin marco tallado (frame.png). */
 
-/* Fondo de página del perfil */
-body.page-perfil{--bg-img:url("assets/hero-bg.jpg")}
+/* Fondo de página del perfil. Los --pf-* son los defaults sin set equipado:
+   `site-core.js` los pisa en <body> con `applySetVars()` cuando hay un profile_set. */
+body.page-perfil{
+  --bg-img:url("assets/hero-bg.jpg");
+  --pf-accent:#22c55e;
+  --pf-accent-bg:rgba(20,83,45,.9);
+  --pf-bar-a:#6ad93a;
+  --pf-bar-b:#3f8a17;
+  --pf-bg-dim:.15;
+  --pf-pill-slice:12;
+  --pf-card-slice:14;
+}
+/* Fondo del set: gana por especificidad sobre el body de site.css (sin !important). */
+body.page-perfil.has-set{
+  background-image:linear-gradient(rgba(6,16,9,var(--pf-bg-dim,.15)),rgba(6,16,9,.88)),var(--bg-img,url("assets/hero-bg.jpg"))
+}
 
 .pf-page{
   display:grid;
@@ -74,9 +88,14 @@ body.page-perfil{--bg-img:url("assets/hero-bg.jpg")}
 .pf-hero-pill{
   display:inline-flex;align-items:center;
   padding:.35rem .75rem;border-radius:999px;
-  border:1px solid #22c55e;background:rgba(20,83,45,.9);
+  border:1px solid var(--pf-accent);background:var(--pf-accent-bg);
   color:#fff;font-weight:700;font-size:.92rem;line-height:1.2;
   text-shadow:0 1px 2px rgba(0,0,0,.45)
+}
+/* Con textura de botón el pill se dibuja como borde estirable. */
+body.page-perfil.has-pill-art .pf-hero-pill{
+  border:0;
+  border-image:var(--pf-pill-img) var(--pf-pill-slice) fill / 12px / 0 stretch
 }
 
 /* Rango y XP */
@@ -100,6 +119,10 @@ body.page-perfil{--bg-img:url("assets/hero-bg.jpg")}
   box-shadow:inset 0 3px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,0,0,.3);
   transition:width var(--dur-bar,480ms) steps(12,end)
 }
+/* Solo la barra del nivel toma los tonos del set; las de misiones siguen verdes. */
+.pf-rank-card .pf-xpbar i{
+  background:repeating-linear-gradient(90deg,var(--pf-bar-a) 0 8px,var(--pf-bar-b) 8px 16px)
+}
 .pf-xpbar em{
   position:absolute;inset:0;z-index:2;
   display:flex;align-items:center;justify-content:center;
@@ -118,6 +141,11 @@ body.page-perfil{--bg-img:url("assets/hero-bg.jpg")}
 }
 .pf-stat-card{
   background:#1b1713;border:1px solid #2c2520;border-radius:12px;padding:12px 12px 14px;min-width:0
+}
+/* Con textura de tarjeta, estadísticas y rango usan el marco estirable. */
+body.page-perfil.has-card-art .pf-stat-card,
+body.page-perfil.has-card-art .pf-rank-card{
+  border-image:var(--pf-card-img) var(--pf-card-slice) fill / 14px / 0 stretch
 }
 .pf-stat-title{
   font-size:1.1rem;color:#fbbf24;margin:0 0 12px;

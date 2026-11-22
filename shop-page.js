@@ -176,6 +176,22 @@
 @keyframes sp-buy-pop{0%{transform:scale(1)}35%{transform:scale(1.12)}100%{transform:scale(1)}}
 .wallet .bal.sp-pop,.sp-money b.sp-pop{animation:sp-buy-pop 420ms var(--ease-out)}
 
+/* sets de perfil en el probador (no carga perfil.css: sólo comparte las vars --pf-*) */
+.sp-swatch-set{position:relative;display:grid;place-items:center;width:100%;height:100%}
+.sp-swatch-set .swatch{position:absolute;inset:0;width:auto;height:auto;border-radius:6px}
+.sp-swatch-set b{position:relative;z-index:1;font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#fff;background:rgba(6,16,9,.72);border:1px solid var(--rim);border-radius:4px;padding:.02rem .35rem;text-shadow:var(--ol-soft)}
+.sp-eq-ic .sp-swatch-set b{display:none}
+.sp-setstage{display:grid;gap:.4rem;padding:.55rem;border-radius:8px;background-color:#241b12;background-size:cover;background-position:center;
+  background-image:linear-gradient(rgba(6,16,9,var(--pf-bg-dim,.15)),rgba(6,16,9,.88)),var(--bg-img,#241b12)}
+.sp-setrow{display:flex;flex-wrap:wrap;justify-content:center;gap:.35rem}
+.sp-setpill{display:inline-flex;align-items:center;padding:.3rem .65rem;border-radius:999px;border:1px solid var(--pf-accent,#22c55e);background:var(--pf-accent-bg,rgba(20,83,45,.9));
+  color:#fff;font-weight:700;font-size:.8rem;line-height:1.2;text-shadow:0 1px 2px rgba(0,0,0,.45)}
+.sp-setstage.has-pill-art .sp-setpill{border:0;border-image:var(--pf-pill-img) var(--pf-pill-slice,12) fill / 12px / 0 stretch}
+.sp-setstage.has-card-art .sp-mini{border-image:var(--pf-card-img) var(--pf-card-slice,14) fill / 14px / 0 stretch}
+.sp-setbar{position:relative;height:22px;border-radius:8px;background:#14110e;border:1px solid #3d2e1e;overflow:hidden}
+.sp-setbar i{position:absolute;inset:0 auto 0 0;width:0;background:repeating-linear-gradient(90deg,var(--pf-bar-a,#6ad93a) 0 8px,var(--pf-bar-b,#3f8a17) 8px 16px);
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,0,0,.3)}
+
 /* ---------- pantallas chicas ---------- */
 @media (max-width:760px){
   .sp-page{padding:.75rem .25rem 2rem}
@@ -221,10 +237,10 @@
 
   /* ---------- estado ---------- */
   const bgOn = !(window.FEATURES && window.FEATURES.fondos === false);   // fondos en pausa
-  const SLOTS = ['frame', 'name_effect', ...(bgOn ? ['background'] : []), 'badge'];
-  const clearTry = () => { ST.try = {frame: null, name_effect: null, background: null, badge: null}; };
+  const SLOTS = ['frame', 'name_effect', 'profile_set', ...(bgOn ? ['background'] : []), 'badge'];
+  const clearTry = () => { ST.try = {frame: null, name_effect: null, profile_set: null, background: null, badge: null}; };
   const ST = {type: 'all', q: '', sort: 'new', mine: false, afford: false, sel: null, busy: false,
-    try: {frame: null, name_effect: null, background: null, badge: null}, tryUser: null, view: 'profile', lvl: null, pause: false, adv: false,
+    try: {frame: null, name_effect: null, profile_set: null, background: null, badge: null}, tryUser: null, view: 'profile', lvl: null, pause: false, adv: false,
     drawer: false, drawerFrom: null, drawerReturn: null};
 
   root.classList.add('sp-page');
@@ -233,10 +249,10 @@
       <h1 id="shopTitle" class="shoptitle">Tienda<span class="sp-title-long"> de cosméticos</span></h1>
       <div id="shopWallet" class="sp-wallet-wrap"></div>
     </div>
-    <p class="sp-lead">Marcos, efectos de nombre e insignias para tu perfil y el ranking. Se pagan con XP y gastarla no baja tu nivel. <a href="/mi-perfil">Ver mi perfil</a>.</p>
+    <p class="sp-lead">Marcos, efectos de nombre, sets de perfil e insignias para tu perfil y el ranking. Se pagan con XP y gastarla no baja tu nivel. <a href="/mi-perfil">Ver mi perfil</a>.</p>
     <div class="sp-toolbar">
       <div class="sp-tabs" id="spTabs" role="group" aria-label="Categorías">
-        <button type="button" class="chip on" data-t="all" aria-pressed="true">Todos</button><button type="button" class="chip" data-t="frame" aria-pressed="false">Marcos</button><button type="button" class="chip" data-t="name_effect" aria-pressed="false">Nombres</button>${bgOn ? '<button type="button" class="chip" data-t="background" aria-pressed="false">Fondos</button>' : ''}<button type="button" class="chip" data-t="badge" aria-pressed="false">Insignias</button>
+        <button type="button" class="chip on" data-t="all" aria-pressed="true">Todos</button><button type="button" class="chip" data-t="frame" aria-pressed="false">Marcos</button><button type="button" class="chip" data-t="name_effect" aria-pressed="false">Nombres</button><button type="button" class="chip" data-t="profile_set" aria-pressed="false">Sets</button>${bgOn ? '<button type="button" class="chip" data-t="background" aria-pressed="false">Fondos</button>' : ''}<button type="button" class="chip" data-t="badge" aria-pressed="false">Insignias</button>
       </div>
       <div class="sp-tools">
         <label class="search sp-search"><span class="sr">Buscar objeto</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="spQ" type="search" placeholder="Buscar objeto…" autocomplete="off"></label>
@@ -263,7 +279,7 @@
   const own = c => !!wallet?.owned?.includes(c.id), eqd = c => !!wallet && (c.type === 'badge' ? wallet.equipped?.rank === c.id : wallet.equipped?.[c.type] === c.id);
   const isNew = c => c.meta?.new || (c.created_at && Date.now() - new Date(c.created_at) < 10 * 864e5);
   const RL = ['Común', 'Raro', 'Épico', 'Legendario'];
-  const TYPEL = {frame: 'Marco', name_effect: 'Nombre', background: 'Fondo', badge: 'Insignia'};
+  const TYPEL = {frame: 'Marco', name_effect: 'Nombre', profile_set: 'Set de perfil', background: 'Fondo', badge: 'Insignia'};
   const tiers = () => { const cs = cat().map(c => c.cost).sort((a, b) => a - b), q = p => cs[Math.min(cs.length - 1, Math.floor(cs.length * p))] ?? 0; return [q(.4), q(.7), q(.9)]; };
   const rar = (c, t) => c.cost >= t[2] && t[2] > t[0] ? 3 : c.cost >= t[1] && t[1] > t[0] ? 2 : c.cost > t[0] ? 1 : 0;
   const bgSt = c => c.url ? `background-image:url('${esc(c.url)}');background-size:cover;background-position:center bottom;image-rendering:pixelated` : '';
@@ -273,6 +289,7 @@
   const tile = (c, u) => c.type === 'frame' ? avatarF({...u, frame_id: c.id}, 64)
     : c.type === 'name_effect' ? `<span class="sp-tile-name" style="font-size:1.45rem;font-family:var(--display);font-weight:700">${nameHtml({...u, name_id: c.id})}</span>`
     : c.type === 'badge' ? (() => { const rk = window.RankEngine && window.RankEngine.byId ? window.RankEngine.byId(c.rank_id) : null; return rk ? window.RankEngine.sprite(rk.key, 64) : (c.asset_url ? `<img src="${esc(c.asset_url)}" width="64" height="64" style="object-fit:contain;image-rendering:pixelated" alt="">` : '<span style="font-size:2rem">🏅</span>'); })()
+    : c.type === 'profile_set' ? `<div class="sp-swatch-set"><div class="swatch" style="${bgSt(c)}"></div><b>Set</b></div>`
     : `<div class="swatch ${c.css}" style="${bgSt(c)}"></div>`;
 
   function primary(c) {
@@ -332,7 +349,7 @@
   }
 
   // ---- probador ----
-  const TL = {frame: 'Marco', name_effect: 'Nombre', background: 'Fondo', badge: 'Insignia'};
+  const TL = {frame: 'Marco', name_effect: 'Nombre', profile_set: 'Set de perfil', background: 'Fondo', badge: 'Insignia'};
   const lvOf = xp => Math.floor(Math.pow(Math.max(Number(xp) || 0, 0) / 100, 1 / 1.5));
   const baseU = () => ST.tryUser || me();
   const baseLv = () => ST.tryUser ? (Number(ST.tryUser.level) || 0) : wallet ? lvOf(wallet.xp) : 5;
@@ -350,7 +367,13 @@
     if (ST.view === 'rank') return `<div class="sp-pod" aria-label="Vista previa del podio">${avatarF(u, 72)}<span class="nm" style="font-family:var(--display);font-size:1.2rem">${nameHtml(u)}</span><span class="cost">${nf(xp)} XP</span></div>
       <div class="row" style="padding:.4rem .2rem"><span class="rk">1</span>${avatarF(u, 40)}<span class="info"><b>${nameHtml(u)}<span class="lvl">Nv. ${l}</span></b><small class="rk2">${sprite(rKey, 14)}<span>${esc(title)} · ahora mismo</span></small></span><span class="total">${nf(xp)} XP</span></div>`;
     const bg = bgOn ? COS.get(pickT('background')) : null, cls = bg ? bg.css + (bg.url ? ' pb-img' + (bg.meta?.border ? ' pb-own' : '') : '') : '', st = bg?.url ? ` style="--pbimg:url('${esc(bg.url)}');--pbdim:${bg.meta?.dim ?? .15}"` : '';
-    return `<div class="card sp-mini ${cls}"${st}><div class="mh">${avatarF(u, 64)}<div><h2>${nameHtml(u)}</h2><p>@${esc(u.username)} · Nv. ${l}</p></div></div><div class="rankrow">${sprite(rKey, 28)}<b>${esc(title)}</b></div><div class="pair"><div><span>XP total</span><b>${nf(xp)}</b></div><div><span>Puesto en XP</span><b>#1</b></div></div></div>`;
+    const card = `<div class="card sp-mini ${cls}"${st}><div class="mh">${avatarF(u, 64)}<div><h2>${nameHtml(u)}</h2><p>@${esc(u.username)} · Nv. ${l}</p></div></div><div class="rankrow">${sprite(rKey, 28)}<b>${esc(title)}</b></div><div class="pair"><div><span>XP total</span><b>${nf(xp)}</b></div><div><span>Puesto en XP</span><b>#1</b></div></div></div>`;
+    const set = setOf({equipped: {profile_set: pickT('profile_set')}});
+    if (!set) return card;
+    const sv = setVars(set.meta), img = set.url ? `url("${set.url}")` : '';
+    const setStyle = [...Object.entries(sv), ...(img ? [['--bg-img', img]] : [])].map(([k, v]) => `${k}:${v}`).join(';');
+    const setCls = `sp-setstage has-set${sv['--pf-pill-img'] ? ' has-pill-art' : ''}${sv['--pf-card-img'] ? ' has-card-art' : ''}`;
+    return `<div class="${setCls}"${setStyle ? ` style="${esc(setStyle)}"` : ''}>${card}<div class="sp-setrow"><span class="sp-setpill">Nv. 5</span><span class="sp-setpill">12 presentes</span><span class="sp-setpill">3 de racha</span></div><div class="sp-setbar" role="progressbar" aria-label="Progreso de XP" aria-valuemin="0" aria-valuemax="100" aria-valuenow="42"><i style="width:42%"></i></div></div>`;
   }
 
   function renderDrawer() {
