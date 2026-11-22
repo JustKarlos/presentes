@@ -186,8 +186,12 @@
 .sp-setrow{display:flex;flex-wrap:wrap;justify-content:center;gap:.35rem}
 .sp-setpill{display:inline-flex;align-items:center;padding:.3rem .65rem;border-radius:999px;border:1px solid var(--pf-accent,#22c55e);background:var(--pf-accent-bg,rgba(20,83,45,.9));
   color:#fff;font-weight:700;font-size:.8rem;line-height:1.2;text-shadow:0 1px 2px rgba(0,0,0,.45)}
-.sp-setstage.has-pill-art .sp-setpill{border:0;border-image:var(--pf-pill-img) var(--pf-pill-slice,12) fill / 12px / 0 stretch}
-.sp-setstage.has-card-art .sp-mini{border-image:var(--pf-card-img) var(--pf-card-slice,14) fill / 14px / 0 stretch}
+.sp-setstage.has-pill-art .sp-setpill{border:1px solid rgba(255,255,255,.2);background-color:#1a1510;
+  background-image:linear-gradient(rgba(6,16,9,var(--pf-bg-dim,.15)),rgba(6,16,9,.35)),var(--pf-pill-img);
+  background-size:100% 100%;background-position:center;border-radius:999px}
+.sp-setstage.has-card-art .sp-mini{border:1px solid rgba(255,255,255,.14);background-color:#18130f;
+  background-image:linear-gradient(rgba(6,16,9,var(--pf-bg-dim,.15)),rgba(6,16,9,.55)),var(--pf-card-img);
+  background-size:100% 100%;background-position:center}
 .sp-setbar{position:relative;height:22px;border-radius:8px;background:#14110e;border:1px solid #3d2e1e;overflow:hidden}
 .sp-setbar i{position:absolute;inset:0 auto 0 0;width:0;background:repeating-linear-gradient(90deg,var(--pf-bar-a,#6ad93a) 0 8px,var(--pf-bar-b,#3f8a17) 8px 16px);
   box-shadow:inset 0 3px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,0,0,.3)}

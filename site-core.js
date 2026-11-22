@@ -210,16 +210,8 @@
       out['--pf-accent-bg'] = `rgba(${r},${g},${b},.9)`;
     }
     if(tones){ out['--pf-bar-a'] = tones.light; out['--pf-bar-b'] = tones.dark; }
-    if(pillImg){
-      out['--pf-pill-img'] = pillImg;
-      const s = setSlice(meta.button_slice);
-      if(s != null) out['--pf-pill-slice'] = String(s);
-    }
-    if(cardImg){
-      out['--pf-card-img'] = cardImg;
-      const s = setSlice(meta.card_slice);
-      if(s != null) out['--pf-card-slice'] = String(s);
-    }
+    if(pillImg) out['--pf-pill-img'] = pillImg;
+    if(cardImg) out['--pf-card-img'] = cardImg;
     out['--pf-bg-dim'] = String(dim == null ? .15 : dim);
     return out;
   }

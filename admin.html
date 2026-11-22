@@ -41,6 +41,28 @@ button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}but
 .rgrid{display:grid;grid-template-columns:repeat(10,28px);gap:1px;background:#0a0c0a;border:2px solid var(--rim);width:max-content;touch-action:none;user-select:none}
 .rgrid i{display:block;width:28px;height:28px;background:repeating-conic-gradient(#2a2d2a 0 25%,#212421 0 50%) 0 0/14px 14px;cursor:crosshair}
 .rsw{width:30px;height:30px;border:2px solid var(--rim);border-radius:6px;padding:0;position:relative}.rsw[aria-pressed=true]{outline:3px solid var(--gold)}
+/* Preview del set: mismo tratamiento visual que /@usuario, con CSS propio de admin. */
+.spreview{--pv-accent:#c9a227;--pv-accent-bg:rgba(20,83,45,.9);--pv-bar-a:#c9f58a;--pv-bar-b:#5f9b2a;--pv-dim:.15;--pv-pill-img:none;--pv-card-img:none;--pv-bg:url("assets/hero-bg.jpg");
+  min-height:210px;border:2px solid var(--rim);border-top:3px solid var(--pv-accent);border-radius:10px;padding:.7rem;margin-bottom:.6rem;overflow:hidden;
+  background-color:#241b12;background-size:cover;background-position:center;
+  background-image:linear-gradient(rgba(6,16,9,var(--pv-dim)),rgba(6,16,9,.88)),var(--pv-bg)}
+.sprev-title{font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:1.05rem;color:#fff;text-shadow:1px 1px 0 #000;margin-bottom:.4rem}
+.sprev-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
+.sprev-card{border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:.45rem .55rem;min-width:0;
+  background-color:#18130f;
+  background-image:linear-gradient(rgba(6,16,9,var(--pv-dim)),rgba(6,16,9,.55)),var(--pv-card-img);
+  background-size:100% 100%;background-position:center}
+.sprev-card h3{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:.85rem;color:#fbbf24;margin-bottom:.3rem}
+.sprev-card div{display:flex;justify-content:space-between;gap:.3rem;font-size:.72rem;color:#a8a29e}
+.sprev-card b{color:#fff;font-variant-numeric:tabular-nums}
+.sprev-pills{display:flex;flex-wrap:wrap;justify-content:center;gap:.35rem;margin:.55rem 0 .4rem}
+.sprev-pills span{border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:.2rem .55rem;
+  font-size:.72rem;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);
+  background-color:#1a1510;
+  background-image:linear-gradient(rgba(6,16,9,var(--pv-dim)),rgba(6,16,9,.35)),var(--pv-pill-img);
+  background-size:100% 100%;background-position:center}
+.sprev-bar{height:14px;border-radius:6px;background:#14110e;border:1px solid #3d2e1e;overflow:hidden}
+.sprev-bar i{display:block;height:100%;width:42%;background:repeating-linear-gradient(90deg,var(--pv-bar-a) 0 6px,var(--pv-bar-b) 6px 12px)}
 </style></head><body><main>
 <script src="paint-engine.js"></script>
 <script src="rank-engine.js"></script>
@@ -133,7 +155,7 @@ button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}but
   </form></div></div>
 <div id="tabSets" hidden><div class="cols">
   <div class="panel"><h2>Sets de perfil</h2>
-    <p class="pnote">El set guarda el fondo en <code>cosmetics/backgrounds/</code>; la textura del botón y el marco de la tarjeta se usan como bordes estirables.</p>
+    <p class="pnote">El set guarda el fondo en <code>cosmetics/backgrounds/</code>; las texturas de pills y cards se usan de fondo con bordes redondeados.</p>
     <div id="setList" class="grid" style="grid-template-columns:1fr"></div></div>
   <form id="sf" class="panel">
     <h2 id="sFt">Nuevo set</h2>
@@ -145,12 +167,20 @@ button.ghost{background:transparent;color:var(--tan);border-color:var(--rim)}but
     <input id="sBg" type="hidden">
     <label>Velo oscuro: <span id="sDimV">0.15</span><input id="sDim" type="range" min="0" max="0.6" step="0.05" value="0.15"></label>
     <div class="row"><label>Color de pills<span class="cf"><input id="sPill" type="color" value="#c9a227" aria-label="Color de pills"></span></label><label>Color de la barra<span class="cf"><input id="sBar" type="color" value="#6ad93a" aria-label="Color de la barra"></span></label></div>
-    <label>Textura de botón (opcional, vacío = conservar la actual)<input id="sBtnFile" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label>
+    <div class="sec">Vista previa</div>
+    <div id="sPrev" class="spreview" role="group" aria-label="Vista previa del set">
+      <div class="sprev-title">Estadísticas</div>
+      <div class="sprev-grid">
+        <article class="sprev-card"><h3>Presentes y rachas</h3><div><span>Presentes totales</span><b>147</b></div><div><span>Puesto en presentes</span><b>#2</b></div></article>
+        <article class="sprev-card"><h3>Chat y comunidad</h3><div><span>Mensajes totales</span><b>8.240</b></div><div><span>Puesto en el chat</span><b>#1</b></div></article>
+      </div>
+      <div class="sprev-pills"><span>Nv. 5</span><span>12 presentes</span><span>3 de racha</span></div>
+      <div class="sprev-bar"><i></i></div>
+    </div>
+    <label>Textura de pills (opcional, vacío = conservar la actual)<input id="sBtnFile" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label>
     <input id="sBtn" type="hidden">
-    <label>Slice del botón (0–100)<input id="sBtnSlice" type="number" min="0" max="100" value="24"></label>
-    <label>Marco de tarjeta (opcional, vacío = conservar el actual)<input id="sCardFile" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label>
+    <label>Textura de cards (opcional, vacío = conservar el actual)<input id="sCardFile" type="file" accept="image/png,image/webp,image/jpeg,image/gif"></label>
     <input id="sCard" type="hidden">
-    <label>Slice del marco (0–100)<input id="sCardSlice" type="number" min="0" max="100" value="28"></label>
     <label class="chk"><input id="sActive" type="checkbox" checked> Activo en la tienda</label>
     <label class="chk"><input id="sNew" type="checkbox"> Marcar como “Nuevo”</label>
     <div class="acts"><button type="submit">Guardar</button><button type="button" class="ghost" id="sReset">Nuevo</button><button type="button" class="del" id="sDel" hidden>Eliminar</button></div>
@@ -529,9 +559,43 @@ const fileOf = (id) => $(id).files[0] || null;
 const sets = () => ITEMS.filter(c => c.type === 'profile_set');
 const hexOr = (v, def) => HEX.test(v || '') ? v : def;
 
+/* Preview en vivo del set, sin subir nada: usa la imagen elegida como object URL.
+   Se crea un blob por File, no por render, para no reiniciar los GIF al mover el velo. */
+let pvUrls = {};
+function pvImg(fileId, hiddenId){
+  const f = fileOf(fileId), prev = pvUrls[hiddenId];
+  if(f){
+    if(prev && prev.file !== f){ URL.revokeObjectURL(prev.url); delete pvUrls[hiddenId]; }
+    if(!pvUrls[hiddenId]) pvUrls[hiddenId] = {file:f, url:URL.createObjectURL(f)};
+    return `url("${pvUrls[hiddenId].url}")`;
+  }
+  if(prev){ URL.revokeObjectURL(prev.url); delete pvUrls[hiddenId]; }
+  const v = $(hiddenId).value;
+  return v ? `url("${v}")` : 'none';
+}
+function releasePv(){ for(const k in pvUrls){ URL.revokeObjectURL(pvUrls[k].url); delete pvUrls[k]; } }
+window.addEventListener('pagehide', releasePv);
+const rgbOf = (h) => [1,3,5].map(i => parseInt(h.slice(i, i + 2), 16));
+const tone = (h, target, f) => '#' + rgbOf(h).map((c, i) => Math.round(c + (target[i] - c) * f).toString(16).padStart(2, '0')).join('');
+function renderSetPreview(){
+  const p = $('sPrev'); if(!p) return;
+  const accent = hexOr($('sPill').value, '#c9a227'), bar = hexOr($('sBar').value, '#6ad93a');
+  const [r, g, b] = rgbOf(accent), bg = pvImg('sBgFile', 'sBg');
+  p.style.setProperty('--pv-accent', accent);
+  p.style.setProperty('--pv-accent-bg', `rgba(${r},${g},${b},.9)`);
+  p.style.setProperty('--pv-bar-a', tone(bar, [255,255,255], .3));
+  p.style.setProperty('--pv-bar-b', tone(bar, [0,0,0], .3));
+  p.style.setProperty('--pv-dim', String(parseFloat($('sDim').value) || 0));
+  p.style.setProperty('--pv-bg', bg === 'none' ? 'url("assets/hero-bg.jpg")' : bg);
+  p.style.setProperty('--pv-pill-img', pvImg('sBtnFile', 'sBtn'));
+  p.style.setProperty('--pv-card-img', pvImg('sCardFile', 'sCard'));
+}
+['sBgFile','sBtnFile','sCardFile'].forEach(id => $(id).addEventListener('change', renderSetPreview));
+['sDim','sPill','sBar'].forEach(id => $(id).addEventListener('input', renderSetPreview));
+
 function renderSets() {
   $('setList').innerHTML = sets().map(c => `<div class="it ${c.active ? '' : 'off'} ${cur && cur.id === c.id ? 'sel' : ''}"><div class="th" style="${c.asset_url ? `background-image:url('${esc(c.asset_url)}')` : ''}">${c.asset_url ? '' : 'Sin fondo'}</div>
-    <b title="${esc(c.name)}">${esc(c.name)}</b><small>${Number(c.cost).toLocaleString('es-AR')} XP · velo ${Number(c.meta?.bg_dim ?? .15)}${c.meta?.new ? ' · nuevo' : ''}${c.meta?.button_image ? ' · botón' : ''}${c.meta?.card_image ? ' · tarjeta' : ''}</small>
+    <b title="${esc(c.name)}">${esc(c.name)}</b><small>${Number(c.cost).toLocaleString('es-AR')} XP · velo ${Number(c.meta?.bg_dim ?? .15)}${c.meta?.new ? ' · nuevo' : ''}${c.meta?.button_image ? ' · pills' : ''}${c.meta?.card_image ? ' · cards' : ''}</small>
     <div class="bar"><label class="chk" style="margin:0"><input type="checkbox" data-stg="${esc(c.id)}" ${c.active ? 'checked' : ''}> Activo</label><button type="button" data-sed="${esc(c.id)}">Editar</button></div></div>`).join('') || '<p style="color:var(--tan)">Todavía no hay sets.</p>';
 }
 function fillSet(c) {
@@ -541,10 +605,11 @@ function fillSet(c) {
   $('sSort').value = c?.sort ?? Math.max(100, ...ITEMS.map(i => (i.sort || 0) + 1));
   $('sBg').value = c?.asset_url || ''; $('sBtn').value = c?.meta?.button_image || ''; $('sCard').value = c?.meta?.card_image || '';
   $('sDim').value = c?.meta?.bg_dim ?? .15; $('sPill').value = hexOr(c?.meta?.pill_color, '#c9a227'); $('sBar').value = hexOr(c?.meta?.bar_color, '#6ad93a');
-  $('sBtnSlice').value = c?.meta?.button_slice ?? 24; $('sCardSlice').value = c?.meta?.card_slice ?? 28;
   $('sActive').checked = c ? c.active : true; $('sNew').checked = !!c?.meta?.new; $('sDel').hidden = !c;
+  releasePv();
   ['sBgFile', 'sBtnFile', 'sCardFile'].forEach(i => $(i).value = '');
   $('sDimV').textContent = $('sDim').value;
+  renderSetPreview();
   renderSets();
 }
 
@@ -553,20 +618,19 @@ $('sf').addEventListener('submit', async (e) => {
   const name = $('sName').value.trim(); if (!name) return toast('Falta el nombre');
   const pill = $('sPill').value, bar = $('sBar').value;
   if (!HEX.test(pill) || !HEX.test(bar)) return toast('Los colores tienen que ser #rrggbb');
-  const dim = parseFloat($('sDim').value), bs = parseInt($('sBtnSlice').value, 10), cs = parseInt($('sCardSlice').value, 10);
+  const dim = parseFloat($('sDim').value);
   if (!(dim >= 0 && dim <= .6)) return toast('El velo tiene que ir de 0 a 0,6');
-  if (!(bs >= 0 && bs <= 100) || !(cs >= 0 && cs <= 100)) return toast('Los slices tienen que ir de 0 a 100');
   const fBg = fileOf('sBgFile'), fBtn = fileOf('sBtnFile'), fCard = fileOf('sCardFile');
   for (const f of [fBg, fBtn, fCard]) if (f && f.size > MAX) return toast('El archivo «' + f.name + '» supera los 4 MB');
   if (!$('sBg').value && !fBg) return toast('Falta la imagen de fondo');
   const base = slug(name) || 'set';
   let bg = $('sBg').value, btn = $('sBtn').value, card = $('sCard').value;
   if (fBg) { const r = await upload(fBg, 'background', base + '-fondo'); if (!r.ok) return toast(r.reason || 'No se pudo subir el fondo'); bg = r.url; }
-  if (fBtn) { const r = await upload(fBtn, 'background', base + '-boton'); if (!r.ok) return toast(r.reason || 'No se pudo subir la textura del botón'); btn = r.url; }
-  if (fCard) { const r = await upload(fCard, 'background', base + '-tarjeta'); if (!r.ok) return toast(r.reason || 'No se pudo subir el marco de la tarjeta'); card = r.url; }
+  if (fBtn) { const r = await upload(fBtn, 'background', base + '-pills'); if (!r.ok) return toast(r.reason || 'No se pudo subir la textura de pills'); btn = r.url; }
+  if (fCard) { const r = await upload(fCard, 'background', base + '-cards'); if (!r.ok) return toast(r.reason || 'No se pudo subir la textura de cards'); card = r.url; }
   if (!bg) return toast('Falta la imagen de fondo');
   const id = $('sId').value || base, old = cur || ITEMS.find(i => i.id === id);
-  const meta = {set: true, pill_color: pill.toLowerCase(), bar_color: bar.toLowerCase(), bg_dim: dim, button_image: btn || null, button_slice: bs, card_image: card || null, card_slice: cs, new: $('sNew').checked, collection: old?.meta?.collection || ''};
+  const meta = {set: true, pill_color: pill.toLowerCase(), bar_color: bar.toLowerCase(), bg_dim: dim, button_image: btn || null, card_image: card || null, new: $('sNew').checked, collection: old?.meta?.collection || ''};
   const r = await api('/upsert', {json: {id, type: 'profile_set', name, description: $('sDesc').value, cost: Math.max(0, +$('sCost').value || 0), css_class: '', asset_url: bg, sort: +$('sSort').value || 0, active: $('sActive').checked, meta}});
   if (!r.ok) return toast(r.reason || 'Error al guardar');
   toast('Guardado ✔'); await load(); renderSets(); fillSet(r.item);
