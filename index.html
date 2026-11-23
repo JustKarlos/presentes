@@ -131,6 +131,10 @@
       <ul id="feed"></ul>
     </aside>
   </div>
+  <section class="panel chat-mirror" aria-labelledby="chatMirrorTitle">
+    <h2 id="chatMirrorTitle"><span class="live"></span>Chat en vivo</h2>
+    <ol id="chatMirrorList" class="chat-mirror-list" aria-live="polite"></ol>
+  </section>
   <section class="about" aria-labelledby="aboutTitle">
     <h2 id="aboutTitle">¿Cómo funciona?</h2>
     <details open><summary>¿Cómo sumo un presente?</summary><p>Escribe <code>!presente</code> en el chat del canal mientras está en directo. Cada presente suma 1 punto en el ranking y 100 XP, y puedes registrar uno por hora.</p></details>
@@ -345,6 +349,21 @@ setInterval(() => { loadSummary(); loadBoard(); loadFeed(); if(!$('questView').h
 
 loadCosmetics().finally(() => { loadSummary(); loadBoard(); loadFeed(); });
 RankEngine.init(db, () => { try { render(); renderFeed(); } catch {} });
+</script>
+<script src="chat-mirror.js"></script>
+<script>
+/* El espejo del chat usa el mismo cliente público y la anon key de site-core.js. */
+const post7tv = (query, variables) => fetch('https://7tv.io/v3/gql', {
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({ query, variables }),
+}).then(r => r.json());
+ChatMirror.attachChatMirror({
+  db: window.db,
+  el: document.getElementById('chatMirrorList'),
+  deps: ChatMirror.depsPorDefecto(),
+  fetch7tv: ChatMirror.makeFetch7tv(post7tv),
+});
 </script>
 </body>
 </html>
